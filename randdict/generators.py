@@ -45,7 +45,6 @@ class Const:
         Setting the seed on a 'Const' object has no effect.
         This method only exists to provide a consistent interface.
         """
-        pass
 
     def next(self):
         """
@@ -69,7 +68,6 @@ class Empty:
         Setting the seed on an 'Empty' object has no effect.
         This method only exists to provide a consistent interface.
         """
-        pass
 
 
 class Sequential:
@@ -102,7 +100,6 @@ class Sequential:
         Setting the seed on a 'Sequential' object has no effect.
         This method only exists to provide a consistent interface.
         """
-        pass
 
     def next(self):
         """
