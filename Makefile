@@ -1,10 +1,9 @@
 MODULE = randdict
 
-all: test lint
+all: test
 
 test:
 	py.test -sv --cov=$(MODULE) --cov-report=term-missing  .
-	cd bin/ && bash test.sh
 
 unit-tests:
 	make -C tests/unit_tests/
