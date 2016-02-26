@@ -1,0 +1,6 @@
+# Description of conda environment for this project.
+name: randdict
+dependencies:
+  - python
+  - pytest
+  - pytest-cov
