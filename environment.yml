@@ -2,5 +2,7 @@
 name: randdict
 dependencies:
   - python
+  - dateutil
   - pytest
   - pytest-cov
+  - pytest
