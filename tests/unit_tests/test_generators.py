@@ -2,7 +2,8 @@ import dateutil.parser
 import pytest
 import re
 from .context import randdict
-from randdict.generators import Const, DigitString, Empty, HashedID, Latitude, Longitude, PickFrom, RandIntString, RandRange, Sequential, Timestamp
+from randdict.generators import Const, DigitString, Empty, HashedID, Latitude, Longitude, \
+    PickFrom, RandIntString, RandRange, Sequential, Timestamp, TimestampError
 from randdict.utils import MockRandomGenerator
 
 # Number of repeats when checking random behaviour in tests.
@@ -320,6 +321,10 @@ class TestTimestamp:
         """
         ts = Timestamp(start='1988-01-05 12:45', end='2015-03-02 11:49')
         assert ts.dt == 856911840
+
+    def test_timestamp_raises_error_if_end_time_is_before_start_time(self):
+        with pytest.raises(TimestampError):
+            Timestamp(start='2016-12-24', end='2014-10-03 09:45')
 
 
 class TestPickFrom:

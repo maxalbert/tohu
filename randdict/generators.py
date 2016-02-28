@@ -331,6 +331,14 @@ class Longitude:
         self.randgen.seed(seed)
 
 
+class TimestampError(Exception):
+    """
+    Custom exception raised to indicate Timestamp errors
+    (for example when the end time of the timestamp interval
+    is before the start time).
+    """
+
+
 class Timestamp:
     """
     Random generator which when called returns random timestamps in a
@@ -359,6 +367,11 @@ class Timestamp:
         self.dt = int((self.end - self.start).total_seconds())
         self.fmt = fmt
         self.uppercase = uppercase
+
+        if self.dt < 0:
+            raise TimestampError(
+                "Start time must be before end time. Got: start_time='{}', end_time='{}'."
+                "".format(self.start, self.end))
 
         self.randgen = randgen_offsets or RandIntGen(0, self.dt)
 
