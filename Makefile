@@ -14,6 +14,10 @@ acceptance-tests:
 update-conda-environment:
 	conda env update -f environment.yml
 
+yapf:
+	@echo "Reformatting .py files using yapf"
+	find . -iname "*.py" -exec yapf --style=./setup.cfg -i {} \;
+
 clean:
 	rm -rf $(MODULE)/__pycache__
 	rm -rf tests/__pycache__
