@@ -22,7 +22,7 @@ class TestRandDict:
 
         randdict = RandDict(
             foobar=Const(42),
-            quux=Sequential(name='hello', digits=3),
+            quux=Sequential(prefix='hello', digits=3),
             date=timestamp_generator)
 
         d1 = randdict.next()

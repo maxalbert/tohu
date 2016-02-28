@@ -72,28 +72,28 @@ class Empty:
 
 class Sequential:
     """
-    Generator which returns a sequence of strings of the form '<name>XXXX',
-    where <name> is a customisable string and XXXX represents a sequentially
+    Generator which returns a sequence of strings of the form '<prefix>XXXX',
+    where <prefix> is a customisable string and XXXX represents a sequentially
     increasing counter.
 
     Example:
 
-    >>> seq = Sequential(name='Foobar')
+    >>> seq = Sequential(prefix='Foobar', digits=3)
     >>> seq.next()
-    Foobar0001
+    Foobar001
     >>> seq.next()
-    Foobar0002
+    Foobar002
     >>> seq.next()
-    Foobar0003
+    Foobar003
 
     """
-    def __init__(self, name, digits=4):
+    def __init__(self, prefix, digits=4):
         """
-        Initialise generator with the given
+        Initialise generator with the given prefix.
         """
-        self.name = name
+        self.prefix = prefix
         self.cnt = count(start=1)
-        self.fmt_str = self.name + '{{:0{digits}}}'.format(digits=digits)
+        self.fmt_str = self.prefix + '{{:0{digits}}}'.format(digits=digits)
 
     def seed(self, seed):
         """
