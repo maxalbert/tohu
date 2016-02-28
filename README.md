@@ -42,4 +42,4 @@ and scientific computing.
 Copyright:
 ----------
 
-See [LICENSE](LICENSE).
+See [LICENSE](./LICENSE)
