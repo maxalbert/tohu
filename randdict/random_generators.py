@@ -1,11 +1,22 @@
+# -*- coding: utf-8 -*-
+
+"""
+Custom random number generators to produce intergers or
+floating point numbers in a given interval.
+
+The reason these exist is (i) to be able to set a custom
+seed on each new random number generator; (ii) to provide
+a convenient interface for the classes in `generators.py`.
+"""
+
 from random import Random
 
 
 # Define a global random number generator which is used
 # to generate seeds for the individual random number
-# generators in the various classes defined below.
-# This makes the process of defining entities with random
-# fields completely reproducible if desired.
+# generators in the various classes defined in `randdict`.
+# This makes the process of defining dictionaries with
+# random fields completely reproducible if desired.
 _SEED_GENERATOR = Random()
 
 
