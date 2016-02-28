@@ -37,3 +37,9 @@ installation which just provides the `conda` command. Alternatively, you can
 install the full [Anaconda distribution](https://www.continuum.io/downloads)
 which comes pre-packaged with lots of Python modules useful for data analysis
 and scientific computing.
+
+
+Copyright:
+----------
+
+See [LICENSE](LICENSE).
