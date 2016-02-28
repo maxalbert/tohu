@@ -1,2 +1,2 @@
-randdict: Create random dictionaries (for testing and synthetic data generation)
-================================================================================
+randdict: Create random dictionaries in a controllable way
+==========================================================
