@@ -2,6 +2,7 @@ class RandDict:
     """
     Random dictionary generator.
     """
+
     def __init__(self, **itemgens):
         """
         TODO: Write me!!

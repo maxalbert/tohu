@@ -129,7 +129,6 @@ class TestRandRange:
             RandRange(0, 1, 2)
 
 
-
 class TestRandIntString:
     @pytest.mark.parametrize('maxval', [1, 4, 9, 12])
     def test_rand_int_string_generates_strings_representing_random_integers_up_to_maxval(self, maxval):
@@ -346,8 +345,7 @@ class TestPickFrom:
         TODO: Write me!
         """
         randgen_indices = MockRandomGenerator(values=[0, 3, 3, 2, 0, 1, 4])
-        pick_from = PickFrom(values=['foo', 42, True, 12.345, 'hello'],
-                             randgen_indices=randgen_indices)
+        pick_from = PickFrom(values=['foo', 42, True, 12.345, 'hello'], randgen_indices=randgen_indices)
 
         assert pick_from.next() == 'foo'
         assert pick_from.next() == 12.345
@@ -407,13 +405,14 @@ class TestDigitString:
         randgen_chars = MockRandomGenerator(
             values=['a', 'c', 'h', 'g', 'r',
                     'z', 'k', 'k',
-                    'y', 't', 'g', 'p', 'x', 'e', 'w', 'g'])
+                    'y', 't', 'g', 'p', 'x', 'e', 'w', 'g'])  # yapf: disable
 
         digitstr = DigitString(
-            minlength=3, maxlength=8,
+            minlength=3,
+            maxlength=8,
             rand_char_gen=randgen_chars,
             rand_length_gen=randgen_lengths,
-        )
+        )  # yapf: disable
 
         assert digitstr.next() == 'achgr'
         assert digitstr.next() == 'zkk'

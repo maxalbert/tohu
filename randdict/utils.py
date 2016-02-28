@@ -9,6 +9,7 @@ class MockRandomGenerator:
     sequence whenever its next() method is called.
 
     """
+
     def __init__(self, values):
         """
         Initialise random generator with given values.

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
 Generator classes to produce random elements with specific properties.
 
@@ -24,6 +23,7 @@ class Const:
     """
     Generator which always returns the same fixed value.
     """
+
     def __init__(self, value):
         self.value = value
 
@@ -44,6 +44,7 @@ class Empty:
     """
     Generator which always returns the empty string.
     """
+
     def next(self):
         """
         Return the empty string.
@@ -74,6 +75,7 @@ class Sequential:
     Foobar003
 
     """
+
     def __init__(self, prefix, digits=4):
         """
         Initialise generator with the given prefix.
@@ -109,6 +111,7 @@ class RandRange:
     a random integer k satisfying minval <= k <= maxval.
 
     """
+
     def __init__(self, *args, seed=None):
         """
         Initialise random number generator.
@@ -153,6 +156,7 @@ class RandIntString:
     integers between 0 and maxval (both inclusive).
 
     """
+
     def __init__(self, *args, seed=None):
         """
         Initialise random number generator.
@@ -197,6 +201,7 @@ class Latitude:
     between -90 and +90 representing a latitude.
 
     """
+
     def __init__(self, *, randgen=None):
         """
         Initialise latitude generator.
@@ -227,6 +232,7 @@ class Longitude:
     between -180 and +180 representing a longitude.
 
     """
+
     def __init__(self, *, randgen=None):
         """
         Initialise longitude generator.
@@ -265,6 +271,7 @@ class Timestamp:
     given range.
 
     """
+
     def __init__(self, start, end=None, *, fmt='%Y-%m-%d %H:%M:%S', uppercase=False, randgen_offsets=None):
         """
         Initialise timestamp generator.
@@ -289,9 +296,8 @@ class Timestamp:
         self.uppercase = uppercase
 
         if self.dt < 0:
-            raise TimestampError(
-                "Start time must be before end time. Got: start_time='{}', end_time='{}'."
-                "".format(self.start, self.end))
+            raise TimestampError("Start time must be before end time. Got: start_time='{}', end_time='{}'."
+                                 "".format(self.start, self.end))
 
         self.randgen = randgen_offsets or RandIntGen(0, self.dt)
 
@@ -317,6 +323,7 @@ class PickFrom:
     list of choices.
 
     """
+
     def __init__(self, values, *, randgen_indices=None):
         """
         Initialise generator.
@@ -353,8 +360,8 @@ class CharString:
     within a specified range.
 
     """
-    def __init__(self, *, chars, length=None, minlength=None, maxlength=None,
-                 rand_length_gen=None, rand_char_gen=None):
+
+    def __init__(self, *, chars, length=None, minlength=None, maxlength=None, rand_length_gen=None, rand_char_gen=None):
         """
         Initialise character string generator.
 
@@ -388,9 +395,7 @@ class CharString:
         """
         if length is not None:
             if (minlength is not None or maxlength is not None):
-                raise ValueError(
-                    "Argument `length` must not be given simultaneously with "
-                    " `minlength` or `maxlength`.")
+                raise ValueError("Argument `length` must not be given simultaneously with " " `minlength` or `maxlength`.")
             self.minlength = length
             self.maxlength = length
         else:
@@ -430,6 +435,7 @@ class DigitString(CharString):
     of random digits and having length within a specified range.
 
     """
+
     def __init__(self, **kwargs):
         """
         Initialise generator. All keyword arguments are passed on to
@@ -444,6 +450,7 @@ class HashedID(CharString):
     Generator which when called returns a random hex string representing a hashed ID.
 
     """
+
     def __init__(self, **kwargs):
         """
         Initialise generator. All keyword arguments are passed on to

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
 Custom random number generators to produce intergers or
 floating point numbers in a given interval.
@@ -10,7 +9,6 @@ a convenient interface for the classes in `generators.py`.
 """
 
 from random import Random
-
 
 # Define a global random number generator which is used
 # to generate seeds for the individual random number
@@ -62,14 +60,12 @@ class RandGenBase:
         return self.randfunc(self.a, self.b)
 
 
-
 class RandIntGen(RandGenBase):
     """
     Random number generator whose `next()` method produces
     a random integer k satisfying a <= k <= b.
     """
     random_generator_method = 'randint'
-
 
 
 class RandFloatGen(RandGenBase):
