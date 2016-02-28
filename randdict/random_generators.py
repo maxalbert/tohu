@@ -28,70 +28,53 @@ def new_seed():
     return _SEED_GENERATOR.randint(0, 1e18)
 
 
-
-class RandIntGen:
+class RandGenBase:
     """
-    Random number generator which when called returns
+    Base class for RandIntGen and RandFloatGen below.
+    """
+    random_generator_method = None  # needs to be set in derived classes!
+
+    def __init__(self, a, b, seed=None):
+        """
+        Initialise random number generator.
+
+        Args:
+            a: Lower bound (inclusive) for the sampled values.
+            b: Upper bound (inclusive) for the sampled values.
+
+        """
+        self.randgen = Random()
+        self.randfunc = getattr(self.randgen, self.random_generator_method)
+        self.seed(seed or new_seed())
+        self.a = a
+        self.b = b
+
+    def seed(self, seed):
+        """
+        Initialize random number generator with given seed.
+        """
+        self.randgen.seed(seed)
+
+    def next(self):
+        """
+        Return random number between `a` and `b` (both inclusive).
+        """
+        return self.randfunc(self.a, self.b)
+
+
+
+class RandIntGen(RandGenBase):
+    """
+    Random number generator whose `next()` method produces
     a random integer k satisfying a <= k <= b.
-
     """
-    def __init__(self, a, b, seed=None):
-        """
-        Initialise random number generator.
-
-        Args:
-            a (int): Lower bound (inclusive) for the sampled values.
-            b (int): Upper bound (inclusive) for the sampled values.
-
-        """
-        self.randgen = Random()
-        self.seed(seed or new_seed())
-        self.a = a
-        self.b = b
-
-    def next(self):
-        """
-        Return random integer between `a` and `b` (both inclusive).
-        """
-        return self.randgen.randint(self.a, self.b)
-
-    # [DUPLICATE] seed #7
-    def seed(self, seed):
-        """
-        Initialize random number generator with given seed.
-        """
-        self.randgen.seed(seed)
+    random_generator_method = 'randint'
 
 
-class RandFloatGen:
+
+class RandFloatGen(RandGenBase):
     """
-    Random number generator which when called returns
+    Random number generator whose `next()` method produces
     a random float in the interval [a, b].
-
     """
-    def __init__(self, a, b, seed=None):
-        """
-        Initialise random number generator.
-
-        Args:
-            a (float): Left endpoint of the sampling interval.
-            b (float): Right endpoint of the sampling interval.
-
-        """
-        self.randgen = Random()
-        self.seed(seed or new_seed())
-        self.a = a
-        self.b = b
-
-    # [DUPLICATE] seed #4
-    def seed(self, seed):
-        """
-        Initialize random number generator with given seed.
-        """
-        self.randgen.seed(seed)
-
-    def next(self):
-        """
-        Return random float in the interval [a, b].
-        """
-        return self.randgen.uniform(self.a, self.b)
+    random_generator_method = 'uniform'
