@@ -1,4 +1,5 @@
 MODULE = randdict
+CONDA_ENV_NAME ?= randdict
 
 all: test
 
@@ -11,8 +12,14 @@ unit-tests:
 acceptance-tests:
 	make -C tests/acceptance_tests/
 
+create-conda-environment:
+	conda env create --name $(CONDA_ENV_NAME) -f environment.yml
+
 update-conda-environment:
-	conda env update -f environment.yml
+	conda env update --name $(CONDA_ENV_NAME) -f environment.yml
+
+remove-conda-environment:
+	conda remove --name $(CONDA_ENV_NAME) --all
 
 yapf:
 	@echo "Reformatting .py files using yapf"
@@ -24,5 +31,5 @@ clean:
 	rm -rf tests/unit_tests/__pycache__
 	rm -rf tests/acceptance_tests/__pycache__
 
-.PHONY: all test unit-tests acceptance-tests update-conda-environment clean
+.PHONY: all test unit-tests acceptance-tests create-conda-environment update-conda-environment remove-conda-environment clean
 
