@@ -1,2 +1,2 @@
 include versioneer.py
-include randdict/_version.py
+include tohu/_version.py

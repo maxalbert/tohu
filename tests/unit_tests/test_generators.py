@@ -1,10 +1,10 @@
 import dateutil.parser
 import pytest
 import re
-from .context import randdict
-from randdict.generators import Const, DigitString, Empty, HashedID, Latitude, Longitude, \
+from .context import tohu
+from tohu.generators import Const, DigitString, Empty, HashedID, Latitude, Longitude, \
     PickFrom, RandIntString, RandRange, Sequential, Timestamp, TimestampError
-from randdict.utils import MockRandomGenerator
+from tohu.utils import MockRandomGenerator
 
 # Number of repeats when checking random behaviour in tests.
 NUM_REPEATS = 100

@@ -1,5 +1,5 @@
-MODULE = randdict
-CONDA_ENV_NAME ?= randdict
+MODULE = tohu
+CONDA_ENV_NAME ?= tohu
 
 all: test
 

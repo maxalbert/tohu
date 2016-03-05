@@ -1,5 +1,5 @@
 # Description of conda environment for this project.
-name: randdict
+name: tohu
 dependencies:
   - python
   - dateutil

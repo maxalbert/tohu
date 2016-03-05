@@ -3,9 +3,10 @@
 Tests for the RandDict class.
 """
 
-from randdict import RandDict
-from randdict.generators import Const, Sequential, Timestamp
-from randdict.utils import MockRandomGenerator
+from .context import tohu
+from tohu import RandDict
+from tohu.generators import Const, Sequential, Timestamp
+from tohu.utils import MockRandomGenerator
 
 
 class TestRandDict:
