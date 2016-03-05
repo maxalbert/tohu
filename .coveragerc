@@ -1,0 +1,2 @@
+[run]
+omit = tohu/_version.py
