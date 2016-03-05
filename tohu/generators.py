@@ -361,7 +361,7 @@ class CharString:
 
     """
 
-    def __init__(self, *, chars, length=None, minlength=None, maxlength=None, rand_length_gen=None, rand_char_gen=None):
+    def __init__(self, *, chars, length=None, minlength=None, maxlength=None, randgen_lengths=None, randgen_chars=None):
         """
         Initialise character string generator.
 
@@ -371,17 +371,17 @@ class CharString:
                               simultaneously with minlength/maxlength)
             minlength (int):  minimum length of generated strings
             maxlength (int):  maximum length of generated strings
-            rand_length_gen:  custom random number generator (used to determine
-                              the lengths of generated strings)
-            rand_char_gen:    custom random number generator (used to determine
-                              characters in the generated strings)
+            randgen_lengths:  custom random number generator which determines
+                              the lengths of generated strings
+            randgen_chars:    custom random number generator which determines
+                              the characters in the generated strings
 
         """
         self._set_min_and_max_length(length, minlength, maxlength)
 
         self.chars = chars
-        self.rcg = rand_char_gen or PickFrom(self.chars)
-        self.rlg = rand_length_gen or RandIntGen(self.minlength, self.maxlength)
+        self.rcg = randgen_chars or PickFrom(self.chars)
+        self.rlg = randgen_lengths or RandIntGen(self.minlength, self.maxlength)
 
     def _set_min_and_max_length(self, length, minlength, maxlength):
         """

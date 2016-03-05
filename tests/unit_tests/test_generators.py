@@ -410,8 +410,8 @@ class TestDigitString:
         digitstr = DigitString(
             minlength=3,
             maxlength=8,
-            rand_char_gen=randgen_chars,
-            rand_length_gen=randgen_lengths,
+            randgen_chars=randgen_chars,
+            randgen_lengths=randgen_lengths,
         )  # yapf: disable
 
         assert digitstr.next() == 'achgr'
