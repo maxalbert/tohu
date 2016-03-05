@@ -16,7 +16,7 @@ import dateutil.parser
 from itertools import count
 from random import Random
 
-from .random_generators import new_seed, RandFloatGen, RandIntGen
+from .random_generators import new_seed, RandFloat, RandInt
 
 
 class Const:
@@ -210,7 +210,7 @@ class Latitude:
 
             randgen: Custom random number generator (useful for testing).
         """
-        self.randgen = randgen or RandFloatGen(-90., 90.)
+        self.randgen = randgen or RandFloat(-90., 90.)
 
     def next(self):
         """
@@ -241,7 +241,7 @@ class Longitude:
 
             randgen: Custom random number generator (useful for testing).
         """
-        self.randgen = randgen or RandFloatGen(-180., 180.)
+        self.randgen = randgen or RandFloat(-180., 180.)
 
     def next(self):
         """
@@ -299,7 +299,7 @@ class Timestamp:
             raise TimestampError("Start time must be before end time. Got: start_time='{}', end_time='{}'."
                                  "".format(self.start, self.end))
 
-        self.randgen = randgen_offsets or RandIntGen(0, self.dt)
+        self.randgen = randgen_offsets or RandInt(0, self.dt)
 
     def next(self):
         """
@@ -336,7 +336,7 @@ class PickFrom:
 
         """
         self.values = values
-        self.randgen = randgen_indices or RandIntGen(0, len(self.values) - 1)
+        self.randgen = randgen_indices or RandInt(0, len(self.values) - 1)
 
     def next(self):
         """
@@ -381,7 +381,7 @@ class CharString:
 
         self.chars = chars
         self.rcg = randgen_chars or PickFrom(self.chars)
-        self.rlg = randgen_lengths or RandIntGen(self.minlength, self.maxlength)
+        self.rlg = randgen_lengths or RandInt(self.minlength, self.maxlength)
 
     def _set_min_and_max_length(self, length, minlength, maxlength):
         """

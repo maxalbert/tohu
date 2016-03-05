@@ -28,7 +28,7 @@ def new_seed():
 
 class RandGenBase:
     """
-    Base class for RandIntGen and RandFloatGen below.
+    Base class for RandInt and RandFloat below.
     """
     random_generator_method = None  # needs to be set in derived classes!
 
@@ -60,7 +60,7 @@ class RandGenBase:
         return self.randfunc(self.a, self.b)
 
 
-class RandIntGen(RandGenBase):
+class RandInt(RandGenBase):
     """
     Random number generator whose `next()` method produces
     a random integer k satisfying a <= k <= b.
@@ -68,7 +68,7 @@ class RandIntGen(RandGenBase):
     random_generator_method = 'randint'
 
 
-class RandFloatGen(RandGenBase):
+class RandFloat(RandGenBase):
     """
     Random number generator whose `next()` method produces
     a random float in the interval [a, b].
