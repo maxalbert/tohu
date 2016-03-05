@@ -279,7 +279,7 @@ class Timestamp:
         Args:
             start (date string):  start time
             end   (date string):  end time (default: current time)
-            fmt (str):            formatting string for output (same format as accepted by `strftime`)
+            fmt (str):            formatting string for output (same format as accepted by `datetime.strftime`)
             uppercase (bool):     if True, months are formatted with all uppercase letters (default: False)
             randgen_offsets:      custom random number generator to produce offsets from start time (in seconds)
         """
