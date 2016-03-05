@@ -9,9 +9,9 @@ class RandDict:
         """
         self._itemgens = itemgens
 
-    def next(self):
+    def __next__(self):
         """
         Return next instance of a random dictionary.
         """
-        d = {key: value.next() for key, value in self._itemgens.items()}
+        d = {key: next(value) for key, value in self._itemgens.items()}
         return d

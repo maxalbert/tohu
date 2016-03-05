@@ -53,7 +53,10 @@ class RandGenBase:
         """
         self.randgen.seed(seed)
 
-    def next(self):
+    def __iter__(self):
+        return self
+
+    def __next__(self):
         """
         Return random number between `a` and `b` (both inclusive).
         """

@@ -19,7 +19,16 @@ from random import Random
 from .random_generators import new_seed, RandFloat, RandInt
 
 
-class Constant:
+class BaseIterator:
+    """
+    Base class for all iterators in tohu.
+    """
+
+    def __iter__(self):
+        return self
+
+
+class Constant(BaseIterator):
     """
     Generator which always returns the same fixed value.
     """
@@ -33,19 +42,19 @@ class Constant:
         This method only exists to provide a consistent interface.
         """
 
-    def next(self):
+    def __next__(self):
         """
         Return the fixed value provided during initialisation.
         """
         return self.value
 
 
-class Empty:
+class Empty(BaseIterator):
     """
     Generator which always returns the empty string.
     """
 
-    def next(self):
+    def __next__(self):
         """
         Return the empty string.
         """
@@ -58,7 +67,7 @@ class Empty:
         """
 
 
-class Sequential:
+class Sequential(BaseIterator):
     """
     Generator which returns a sequence of strings of the form '<prefix>XXXX',
     where <prefix> is a customisable string and XXXX represents a sequentially
@@ -67,11 +76,11 @@ class Sequential:
     Example:
 
     >>> seq = Sequential(prefix='Foobar', digits=3)
-    >>> seq.next()
+    >>> next(seq)
     Foobar001
-    >>> seq.next()
+    >>> next(seq)
     Foobar002
-    >>> seq.next()
+    >>> next(seq)
     Foobar003
 
     """
@@ -90,7 +99,7 @@ class Sequential:
         This method only exists to provide a consistent interface.
         """
 
-    def next(self):
+    def __next__(self):
         """
         Return next element in the sequence.
         """
@@ -105,7 +114,7 @@ class Sequential:
         return self
 
 
-class RandRange:
+class RandRange(BaseIterator):
     """
     Random number generator which when called returns
     a random integer k satisfying minval <= k <= maxval.
@@ -143,14 +152,14 @@ class RandRange:
         """
         self.randgen.seed(seed)
 
-    def next(self):
+    def __next__(self):
         """
         Return random integer between `minval` (inclusive) and `maxval` (exclusive).
         """
         return self.randgen.randrange(self.minval, self.maxval)
 
 
-class RandIntString:
+class RandIntString(BaseIterator):
     """
     Random generator which when returns strings representing random
     integers between 0 and maxval (both inclusive).
@@ -188,14 +197,14 @@ class RandIntString:
         """
         self.randgen.seed(seed)
 
-    def next(self):
+    def __next__(self):
         """
         Return string representing random integer between `minval` and `maxval` (both inclusive).
         """
         return str(self.randgen.randint(self.minval, self.maxval))
 
 
-class Latitude:
+class Latitude(BaseIterator):
     """
     Random number generator which when called returns random floats
     between -90 and +90 representing a latitude.
@@ -212,11 +221,11 @@ class Latitude:
         """
         self.randgen = randgen or RandFloat(-90., 90.)
 
-    def next(self):
+    def __next__(self):
         """
         Return random latitude.
         """
-        return str(self.randgen.next())
+        return str(next(self.randgen))
 
     # [DUPLICATE] seed #3
     def seed(self, seed):
@@ -243,11 +252,11 @@ class Longitude:
         """
         self.randgen = randgen or RandFloat(-180., 180.)
 
-    def next(self):
+    def __next__(self):
         """
         Return random longitude.
         """
-        return str(self.randgen.next())
+        return str(next(self.randgen))
 
     # [DUPLICATE] seed #5
     def seed(self, seed):
@@ -265,7 +274,7 @@ class TimestampError(Exception):
     """
 
 
-class Timestamp:
+class Timestamp(BaseIterator):
     """
     Random generator which when called returns random timestamps in a
     given range.
@@ -301,11 +310,11 @@ class Timestamp:
 
         self.randgen = randgen_offsets or RandInt(0, self.dt)
 
-    def next(self):
+    def __next__(self):
         """
         Return string representing a random timestamp between `start` and `end`.
         """
-        t = self.start + dt.timedelta(seconds=self.randgen.next())
+        t = self.start + dt.timedelta(seconds=next(self.randgen))
         s = t.strftime(self.fmt)
         return s.upper() if self.uppercase else s
 
@@ -317,7 +326,7 @@ class Timestamp:
         self.randgen.seed(seed)
 
 
-class PickFrom:
+class PickFrom(BaseIterator):
     """
     Generator which when called returns random elements from a given
     list of choices.
@@ -338,11 +347,11 @@ class PickFrom:
         self.values = values
         self.randgen = randgen_indices or RandInt(0, len(self.values) - 1)
 
-    def next(self):
+    def __next__(self):
         """
         Return random element from the list of values provided during initialisation.
         """
-        idx = self.randgen.next()
+        idx = next(self.randgen)
         return self.values[idx]
 
     # [DUPLICATE] seed #8
@@ -418,14 +427,14 @@ class CharString:
         self.rcg.seed(length_seed)
         self.rlg.seed(char_seed)
 
-    def next(self):
+    def __next__(self):
         """
         Return string of random length containing elements randomly picked
         from the list of characters provided during initialisation.
 
         """
-        N = self.rlg.next()
-        chars = [self.rcg.next() for _ in range(N)]
+        N = next(self.rlg)
+        chars = [next(self.rcg) for _ in range(N)]
         return ''.join(chars)
 
 

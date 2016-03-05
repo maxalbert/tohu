@@ -17,7 +17,7 @@ class MockRandomGenerator:
         """
         self.values = (x for x in values)
 
-    def next(self):
+    def __next__(self):
         """
         Return next value in sequence.
 

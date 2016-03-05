@@ -14,12 +14,12 @@ class TestConstant:
     @pytest.mark.parametrize('value', ['foo', 'bar', -1, True, 33.412])
     def test_const_always_returns_the_same_value(self, value):
         """
-        Check that calling `Constant.next()` a bunch of times always returns the same value.
+        Check that calling `Constant` a bunch of times always returns the same value.
         """
         c = Constant(value)
 
         for _ in range(NUM_REPEATS):
-            assert c.next() == value
+            assert next(c) == value
 
 
 class TestEmpty:
@@ -31,7 +31,7 @@ class TestEmpty:
         """
         e = Empty()
         for _ in range(NUM_REPEATS):
-            assert e.next() == ""
+            assert next(e) == ""
 
 
 class TestSequential:
@@ -40,12 +40,12 @@ class TestSequential:
         Test that `Sequential` uses the `name` argument as the output prefix.
         """
         seq_foo = Sequential('Foo')
-        assert seq_foo.next() == 'Foo0001'
-        assert seq_foo.next() == 'Foo0002'
+        assert next(seq_foo) == 'Foo0001'
+        assert next(seq_foo) == 'Foo0002'
 
         seq_quux = Sequential('Quux')
-        assert seq_quux.next() == 'Quux0001'
-        assert seq_quux.next() == 'Quux0002'
+        assert next(seq_quux) == 'Quux0001'
+        assert next(seq_quux) == 'Quux0002'
 
     def test_sequential_honours_digits_argument(self):
         """
@@ -53,16 +53,16 @@ class TestSequential:
         of digits in the output.
         """
         seq_foo = Sequential('Foo', digits=2)
-        assert seq_foo.next() == 'Foo01'
-        assert seq_foo.next() == 'Foo02'
-        assert seq_foo.next() == 'Foo03'
-        assert seq_foo.next() == 'Foo04'
+        assert next(seq_foo) == 'Foo01'
+        assert next(seq_foo) == 'Foo02'
+        assert next(seq_foo) == 'Foo03'
+        assert next(seq_foo) == 'Foo04'
 
         seq_bar = Sequential('Bar', digits=5)
-        assert seq_bar.next() == 'Bar00001'
-        assert seq_bar.next() == 'Bar00002'
-        assert seq_bar.next() == 'Bar00003'
-        assert seq_bar.next() == 'Bar00004'
+        assert next(seq_bar) == 'Bar00001'
+        assert next(seq_bar) == 'Bar00002'
+        assert next(seq_bar) == 'Bar00003'
+        assert next(seq_bar) == 'Bar00004'
 
     def test_sequential_can_be_called_and_returns_itself(self):
         """
@@ -91,7 +91,7 @@ class TestRandRange:
         randgen = RandRange(maxval)
 
         for _ in range(NUM_REPEATS):
-            value = randgen.next()
+            value = next(randgen)
             assert isinstance(value, int)
             assert 0 <= value < maxval
 
@@ -105,7 +105,7 @@ class TestRandRange:
         randgen = RandRange(minval, maxval)
 
         for _ in range(NUM_REPEATS):
-            value = randgen.next()
+            value = next(randgen)
             assert isinstance(value, int)
             assert minval <= value < maxval
 
@@ -113,13 +113,13 @@ class TestRandRange:
         """
         Check that calling seed() leads to reproducible output.
         """
-        randrange = RandRange(0, 100000)
+        randgen = RandRange(0, 100000)
 
         for _ in range(NUM_REPEATS):
-            randrange.seed(12)
-            assert randrange.next() == 62202
-            assert randrange.next() == 35257
-            assert randrange.next() == 86176
+            randgen.seed(12)
+            assert next(randgen) == 62202
+            assert next(randgen) == 35257
+            assert next(randgen) == 86176
 
     def test_calling_rand_range_with_more_than_two_arguments_raises_error(self):
         """
@@ -140,7 +140,7 @@ class TestRandIntString:
         randgen = RandIntString(maxval)
 
         for _ in range(NUM_REPEATS):
-            value = randgen.next()
+            value = next(randgen)
             assert isinstance(value, str)
             assert 0 <= int(value) <= maxval
 
@@ -155,7 +155,7 @@ class TestRandIntString:
         randgen = RandIntString(minval, maxval)
 
         for _ in range(NUM_REPEATS):
-            value = randgen.next()
+            value = next(randgen)
             assert isinstance(value, str)
             assert minval <= int(value) <= maxval
 
@@ -167,9 +167,9 @@ class TestRandIntString:
 
         for _ in range(NUM_REPEATS):
             randintstr.seed(27)
-            assert randintstr.next() == '84999'
-            assert randintstr.next() == '62899'
-            assert randintstr.next() == '91929'
+            assert next(randintstr) == '84999'
+            assert next(randintstr) == '62899'
+            assert next(randintstr) == '91929'
 
     def test_calling_rand_int_string_with_more_than_two_arguments_raises_error(self):
         """
@@ -182,12 +182,12 @@ class TestRandIntString:
 class TestLatitude:
     def test_latitude_generates_random_floats_in_correct_range(self):
         """
-        Check that Latitude.next() returns strings represneting random floats between -90 and +90.
+        Check that Latitude returns strings representing random floats between -90 and +90.
         """
         lat = Latitude()
 
         for _ in range(NUM_REPEATS):
-            value = lat.next()
+            value = next(lat)
             assert isinstance(value, str)
             assert -90.0 <= float(value) <= 90.0
 
@@ -195,11 +195,11 @@ class TestLatitude:
         randgen = MockRandomGenerator(values=['40.123', '0.134', '-80.333', '12.993', '72.44'])
         lat = Latitude(randgen=randgen)
 
-        assert lat.next() == '40.123'
-        assert lat.next() == '0.134'
-        assert lat.next() == '-80.333'
-        assert lat.next() == '12.993'
-        assert lat.next() == '72.44'
+        assert next(lat) == '40.123'
+        assert next(lat) == '0.134'
+        assert next(lat) == '-80.333'
+        assert next(lat) == '12.993'
+        assert next(lat) == '72.44'
 
     def test_setting_seed_leads_to_reproducible_output(self):
         """
@@ -209,20 +209,20 @@ class TestLatitude:
 
         for _ in range(NUM_REPEATS):
             lat.seed(88)
-            assert lat.next() == '-18.45200214333765'
-            assert lat.next() == '-55.887917429913216'
-            assert lat.next() == '72.43907759559562'
+            assert next(lat) == '-18.45200214333765'
+            assert next(lat) == '-55.887917429913216'
+            assert next(lat) == '72.43907759559562'
 
 
 class TestLongitude:
     def test_longitude_generates_random_floats_in_correct_range(self):
         """
-        Check that Longitude.next() returns strings representing random floats between -180 and +180.
+        Check that Longitude returns strings representing random floats between -180 and +180.
         """
         lon = Longitude()
 
         for _ in range(NUM_REPEATS):
-            value = lon.next()
+            value = next(lon)
             assert isinstance(value, str)
             assert -180.0 <= float(value) <= 180.0
 
@@ -230,11 +230,11 @@ class TestLongitude:
         randgen = MockRandomGenerator(values=['20.44', '-179.1', '0.33', '20.17', '100.7'])
         lon = Longitude(randgen=randgen)
 
-        assert lon.next() == '20.44'
-        assert lon.next() == '-179.1'
-        assert lon.next() == '0.33'
-        assert lon.next() == '20.17'
-        assert lon.next() == '100.7'
+        assert next(lon) == '20.44'
+        assert next(lon) == '-179.1'
+        assert next(lon) == '0.33'
+        assert next(lon) == '20.17'
+        assert next(lon) == '100.7'
 
     def test_setting_seed_leads_to_reproducible_output(self):
         """
@@ -244,15 +244,15 @@ class TestLongitude:
 
         for _ in range(NUM_REPEATS):
             lon.seed(133)
-            assert lon.next() == '-2.2202458410340853'
-            assert lon.next() == '-6.352591246081488'
-            assert lon.next() == '96.82296202788018'
+            assert next(lon) == '-2.2202458410340853'
+            assert next(lon) == '-6.352591246081488'
+            assert next(lon) == '96.82296202788018'
 
 
 class TestTimestamp:
     def test_timestamp_generates_random_timestamps_in_the_correct_range(self):
         """
-        Check that Timestamp.next() returns strings representing
+        Check that Timestamp returns strings representing
         random timestamps in the correct date range.
         """
         start = '2016-04-12 13:44'
@@ -263,7 +263,7 @@ class TestTimestamp:
         ts = Timestamp(start=start, end=end)
 
         for _ in range(NUM_REPEATS):
-            date = dateutil.parser.parse(ts.next())
+            date = dateutil.parser.parse(next(ts))
             assert start_date <= date <= end_date
 
     def test_timestamp_accepts_custom_random_number_generator(self):
@@ -273,11 +273,11 @@ class TestTimestamp:
         randgen_offsets = MockRandomGenerator(values=[130, 45, 2000, 1639937, 0])
         ts = Timestamp(start='2016-04-12 13:44', end=None, randgen_offsets=randgen_offsets)
 
-        assert ts.next() == '2016-04-12 13:46:10'
-        assert ts.next() == '2016-04-12 13:44:45'
-        assert ts.next() == '2016-04-12 14:17:20'
-        assert ts.next() == '2016-05-01 13:16:17'
-        assert ts.next() == '2016-04-12 13:44:00'
+        assert next(ts) == '2016-04-12 13:46:10'
+        assert next(ts) == '2016-04-12 13:44:45'
+        assert next(ts) == '2016-04-12 14:17:20'
+        assert next(ts) == '2016-05-01 13:16:17'
+        assert next(ts) == '2016-04-12 13:44:00'
 
     def test_setting_seed_leads_to_reproducible_output(self):
         """
@@ -287,9 +287,9 @@ class TestTimestamp:
 
         for _ in range(NUM_REPEATS):
             ts.seed(8892)
-            assert ts.next() == '2016-04-12 16:05:38'
-            assert ts.next() == '2016-04-12 14:43:17'
-            assert ts.next() == '2016-04-12 16:03:26'
+            assert next(ts) == '2016-04-12 16:05:38'
+            assert next(ts) == '2016-04-12 14:43:17'
+            assert next(ts) == '2016-04-12 16:03:26'
 
     def test_can_customize_output_format(self):
         """
@@ -302,17 +302,17 @@ class TestTimestamp:
         ts2 = Timestamp(start='2016-04-12 13:44', randgen_offsets=randgen2, fmt='%d-%b-%Y')
         ts3 = Timestamp(start='2016-04-12 13:44', randgen_offsets=randgen3, fmt='%Y-%b-%d', uppercase=True)
 
-        assert ts1.next() == '04/12/16 13.46'
-        assert ts1.next() == '04/12/16 13.44'
-        assert ts1.next() == '04/12/16 14.17'
+        assert next(ts1) == '04/12/16 13.46'
+        assert next(ts1) == '04/12/16 13.44'
+        assert next(ts1) == '04/12/16 14.17'
 
-        assert ts2.next() == '12-Apr-2016'
-        assert ts2.next() == '12-Apr-2016'
-        assert ts2.next() == '12-Apr-2016'
+        assert next(ts2) == '12-Apr-2016'
+        assert next(ts2) == '12-Apr-2016'
+        assert next(ts2) == '12-Apr-2016'
 
-        assert ts3.next() == '2016-APR-12'
-        assert ts3.next() == '2016-APR-12'
-        assert ts3.next() == '2016-APR-12'
+        assert next(ts3) == '2016-APR-12'
+        assert next(ts3) == '2016-APR-12'
+        assert next(ts3) == '2016-APR-12'
 
     def test_timestamp_has_correct_total_number_of_seconds_between_start_and_end(self):
         """
@@ -329,7 +329,7 @@ class TestTimestamp:
 class TestPickFrom:
     def test_pick_from_picks_random_elements_from_a_list_of_options(self):
         """
-        Check that PickFrom.next() returns elements chosen from a given
+        Check that PickFrom returns elements chosen from a given
         list of options.
         """
         values = ['foo', 42, True, 12.345]
@@ -337,7 +337,7 @@ class TestPickFrom:
         pick_from = PickFrom(values=values)
 
         for _ in range(NUM_REPEATS):
-            val = pick_from.next()
+            val = next(pick_from)
             assert val in values
 
     def test_pick_from_accepts_custom_random_number_generator(self):
@@ -347,13 +347,13 @@ class TestPickFrom:
         randgen_indices = MockRandomGenerator(values=[0, 3, 3, 2, 0, 1, 4])
         pick_from = PickFrom(values=['foo', 42, True, 12.345, 'hello'], randgen_indices=randgen_indices)
 
-        assert pick_from.next() == 'foo'
-        assert pick_from.next() == 12.345
-        assert pick_from.next() == 12.345
-        assert pick_from.next() is True
-        assert pick_from.next() == 'foo'
-        assert pick_from.next() == 42
-        assert pick_from.next() == 'hello'
+        assert next(pick_from) == 'foo'
+        assert next(pick_from) == 12.345
+        assert next(pick_from) == 12.345
+        assert next(pick_from) is True
+        assert next(pick_from) == 'foo'
+        assert next(pick_from) == 42
+        assert next(pick_from) == 'hello'
 
     def test_setting_seed_leads_to_reproducible_output(self):
         """
@@ -363,13 +363,13 @@ class TestPickFrom:
 
         for _ in range(NUM_REPEATS):
             pick_from.seed(7330)
-            assert pick_from.next() is True
-            assert pick_from.next() == 'hello'
-            assert pick_from.next() == 12.345
-            assert pick_from.next() == 'foo'
-            assert pick_from.next() is True
-            assert pick_from.next() is True
-            assert pick_from.next() == 42
+            assert next(pick_from) is True
+            assert next(pick_from) == 'hello'
+            assert next(pick_from) == 12.345
+            assert next(pick_from) == 'foo'
+            assert next(pick_from) is True
+            assert next(pick_from) is True
+            assert next(pick_from) == 42
 
 
 class TestDigitString:
@@ -377,16 +377,16 @@ class TestDigitString:
 
     def assert_produces_digit_strings(self, digitstr, minlength, maxlength):
         """
-        Call `digitstr.next()` a bunch of times and check that the result is
+        Call `Digitstring` a bunch of times and check that the result is
         a digit string whose length is between `minlength` and `maxlength`.
         """
         for _ in range(NUM_REPEATS):
-            s = digitstr.next()
+            s = next(digitstr)
             assert self.digitpattern.match(s) and (minlength <= len(s) <= maxlength)
 
     def test_digit_string_generates_string_of_expected_length(self):
         """
-        Check that DigitString.next() returns random digit strings
+        Check that `DigitString` returns random digit strings
         of the specified length.
         """
         digitstr1 = DigitString(length=6)
@@ -414,9 +414,9 @@ class TestDigitString:
             randgen_lengths=randgen_lengths,
         )  # yapf: disable
 
-        assert digitstr.next() == 'achgr'
-        assert digitstr.next() == 'zkk'
-        assert digitstr.next() == 'ytgpxewg'
+        assert next(digitstr) == 'achgr'
+        assert next(digitstr) == 'zkk'
+        assert next(digitstr) == 'ytgpxewg'
 
     def test_can_initialise_digit_string_with_maxlength_argument_only(self):
         """
@@ -454,10 +454,10 @@ class TestDigitString:
 
         for _ in range(NUM_REPEATS):
             digitstr.seed(4444)
-            assert digitstr.next() == '16'
-            assert digitstr.next() == '646'
-            assert digitstr.next() == '223801'
-            assert digitstr.next() == '491373'
+            assert next(digitstr) == '16'
+            assert next(digitstr) == '646'
+            assert next(digitstr) == '223801'
+            assert next(digitstr) == '491373'
 
 
 class TestHashDigest:
@@ -469,7 +469,7 @@ class TestHashDigest:
 
         for _ in range(NUM_REPEATS):
             h.seed(5555)
-            assert h.next() == 'B58C7647AB'
-            assert h.next() == '0BC3A343BA'
-            assert h.next() == '47C3E28610'
-            assert h.next() == 'D2A32DE319'
+            assert next(h) == 'B58C7647AB'
+            assert next(h) == '0BC3A343BA'
+            assert next(h) == '47C3E28610'
+            assert next(h) == 'D2A32DE319'

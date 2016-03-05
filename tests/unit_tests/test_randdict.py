@@ -3,6 +3,7 @@
 Tests for the RandDict class.
 """
 
+import pytest
 from .context import tohu
 from tohu import RandDict
 from tohu.generators import Constant, Sequential, Timestamp
@@ -23,9 +24,9 @@ class TestRandDict:
 
         randdict = RandDict(foobar=Constant(42), quux=Sequential(prefix='hello', digits=3), date=timestamp_generator)
 
-        d1 = randdict.next()
-        d2 = randdict.next()
-        d3 = randdict.next()
+        d1 = next(randdict)
+        d2 = next(randdict)
+        d3 = next(randdict)
 
         assert d1 == {'foobar': 42, 'quux': 'hello001', 'date': '2016-04-12 13:46:10'}
         assert d2 == {'foobar': 42, 'quux': 'hello002', 'date': '2016-04-12 13:44:45'}
