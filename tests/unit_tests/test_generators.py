@@ -2,7 +2,7 @@ import dateutil.parser
 import pytest
 import re
 from .context import tohu
-from tohu.generators import Const, DigitString, Empty, HashedID, Latitude, Longitude, \
+from tohu.generators import Constant, DigitString, Empty, HashDigest, Latitude, Longitude, \
     PickFrom, RandIntString, RandRange, Sequential, Timestamp, TimestampError
 from tohu.utils import MockRandomGenerator
 
@@ -10,13 +10,13 @@ from tohu.utils import MockRandomGenerator
 NUM_REPEATS = 100
 
 
-class TestConst:
+class TestConstant:
     @pytest.mark.parametrize('value', ['foo', 'bar', -1, True, 33.412])
     def test_const_always_returns_the_same_value(self, value):
         """
-        Check that calling `Const.next()` a bunch of times always returns the same value.
+        Check that calling `Constant.next()` a bunch of times always returns the same value.
         """
-        c = Const(value)
+        c = Constant(value)
 
         for _ in range(NUM_REPEATS):
             assert c.next() == value
@@ -460,12 +460,12 @@ class TestDigitString:
             assert digitstr.next() == '491373'
 
 
-class TestHashedID:
+class TestHashDigest:
     def test_setting_seed_leads_to_reproducible_output(self):
         """
         Check that calling seed() leads to reproducible output.
         """
-        h = HashedID(length=10)
+        h = HashDigest(length=10)
 
         for _ in range(NUM_REPEATS):
             h.seed(5555)

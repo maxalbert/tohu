@@ -19,7 +19,7 @@ from random import Random
 from .random_generators import new_seed, RandFloat, RandInt
 
 
-class Const:
+class Constant:
     """
     Generator which always returns the same fixed value.
     """
@@ -29,7 +29,7 @@ class Const:
 
     def seed(self, seed):
         """
-        Setting the seed on a 'Const' object has no effect.
+        Setting the seed on a 'Constant' object has no effect.
         This method only exists to provide a consistent interface.
         """
 
@@ -445,9 +445,9 @@ class DigitString(CharString):
         super().__init__(chars='0123456789', **kwargs)
 
 
-class HashedID(CharString):
+class HashDigest(CharString):
     """
-    Generator which when called returns a random hex string representing a hashed ID.
+    Generator which when called returns a random hex string representing a hash digest value.
 
     """
 
