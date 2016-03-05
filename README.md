@@ -1,5 +1,5 @@
-tohu: Create random dictionaries in a controllable way
-======================================================
+tohu: Create random data in a controllable way
+==============================================
 
 
 Quick start
