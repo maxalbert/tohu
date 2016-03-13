@@ -2,9 +2,10 @@
 name: tohu
 dependencies:
   - python
-  - dateutil
+  - mako
   - pytest
   - pytest-cov
   - pytest
+  - python-dateutil
   - pip:
       - yapf
