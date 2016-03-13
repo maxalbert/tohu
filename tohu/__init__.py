@@ -1,5 +1,4 @@
-from .randdict import RandDict
-from . import generators
+from .generators import *
 
 from ._version import get_versions
 __version__ = get_versions()['version']

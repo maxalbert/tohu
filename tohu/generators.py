@@ -1,269 +1,248 @@
 # -*- coding: utf-8 -*-
 """
-Generator classes to produce random elements with specific properties.
-
-Note that all non-trivial generators in this module allow passing
-custom random number generators, which is useful for testing purposes.
-If a custom random number generator is provided then it is the
-caller's responsibility to ensure that it generates random elements
-with the correct constraints (for example, integers in the expected
-range).
-
+Generator classes to produce random data with specific properties.
 """
 
 import datetime as dt
-import dateutil.parser
+import dateutil
+import re
+import textwrap
+from collections import namedtuple
 from itertools import count
+from mako.template import Template
 from random import Random
 
-from .random_generators import new_seed, RandFloat, RandInt
+__all__ = ['Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
+           'HashDigest', 'Geolocation', 'Timestamp', 'CustomGenerator']
 
 
-class BaseIterator:
+# Note: It would be better to make this an abstract base class
+#    (to enforce the interface in subclasses) rather than
+#    raising NotImplementedError for methods that are not
+#    provided by subclasses, but somehow this interferes with
+#    the metaclass CustomGeneratorMeta below.
+#
+class BaseGenerator:
     """
-    Base class for all iterators in tohu.
+    Base class for all of tohu's random generators.
     """
 
     def __iter__(self):
         return self
 
+    def __next__(self):
+        raise NotImplementedError("Class {} does not implement method '__next__'.".format(self.__class__.__name__))
 
-class Constant(BaseIterator):
-    """
-    Generator which always returns the same fixed value.
-    """
+    def reset(self, seed):
+        raise NotImplementedError("Class {} does not implement method 'reset'.".format(self.__class__.__name__))
 
+    def generate(self, N, seed=None):
+        """
+        Return sequence of `N` elements.
+
+        If `seed` is not None, the generator is reset
+        using this seed before generating the elements.
+        """
+        if seed is not None:
+            self.reset(seed)
+        return [next(self) for _ in range(N)]
+
+    def _spawn(self):
+        """
+        This method needs to be implemented by derived classes.
+        It should return a new object of the same type as `self`
+        which has the same attributes but is otherwise independent.
+        """
+        raise NotImplementedError("Class {} does not implement method '_spawn'.".format(self.__class__.__name__))
+
+
+class Constant(BaseGenerator):
+    """
+    Generator which produces a constant sequence (repeating the same element indefinitely).
+    """
     def __init__(self, value):
         self.value = value
 
-    def seed(self, seed):
-        """
-        Setting the seed on a 'Constant' object has no effect.
-        This method only exists to provide a consistent interface.
-        """
+    def _spawn(self):
+        return Constant(self.value)
+
+    def reset(self, seed=None):
+        pass
 
     def __next__(self):
-        """
-        Return the fixed value provided during initialisation.
-        """
         return self.value
 
 
-class Empty(BaseIterator):
+class Integer(BaseGenerator):
     """
-    Generator which always returns the empty string.
+    Generator which produces random integers k in the range lo <= k <= hi.
     """
+
+    def __init__(self, lo, hi, *, seed=None):
+        self.lo = lo
+        self.hi = hi
+        self.randgen = Random()
+        self.reset(seed)
+
+    def _spawn(self):
+        return Integer(self.lo, self.hi)
+
+    def reset(self, seed):
+        self.randgen.seed(seed)
 
     def __next__(self):
-        """
-        Return the empty string.
-        """
-        return ""
-
-    def seed(self, seed):
-        """
-        Setting the seed on an 'Empty' object has no effect.
-        This method only exists to provide a consistent interface.
-        """
+        return self.randgen.randint(self.lo, self.hi)
 
 
-class Sequential(BaseIterator):
+class Float(BaseGenerator):
     """
-    Generator which returns a sequence of strings of the form '<prefix>XXXX',
-    where <prefix> is a customisable string and XXXX represents a sequentially
-    increasing counter.
-
-    Example:
-
-    >>> seq = Sequential(prefix='Foobar', digits=3)
-    >>> next(seq)
-    Foobar001
-    >>> next(seq)
-    Foobar002
-    >>> next(seq)
-    Foobar003
-
+    Generator which produces random floating point numbers x in the range lo <= x <= hi.
     """
 
-    def __init__(self, prefix, digits=4):
-        """
-        Initialise generator with the given prefix.
-        """
+    def __init__(self, lo, hi, *, seed=None):
+        self.lo = lo
+        self.hi = hi
+        self.randgen = Random()
+        self.reset(seed)
+
+    def _spawn(self):
+        return Float(self.lo, self.hi)
+
+    def reset(self, seed):
+        self.randgen.seed(seed)
+
+    def __next__(self):
+        return self.randgen.uniform(self.lo, self.hi)
+
+
+class Sequential(BaseGenerator):
+    """
+    Generator which produces a sequence of strings
+    of the form:
+
+        "PREFIX001"
+        "PREFIX002"
+        "PREFIX003"
+        ...
+
+    Both the prefix and the number of digits can
+    be modified by the user.
+    """
+
+    def __init__(self, *, prefix, digits):
         self.prefix = prefix
-        self.cnt = count(start=1)
+        self.digits = digits
         self.fmt_str = self.prefix + '{{:0{digits}}}'.format(digits=digits)
+        self.reset()
 
-    def seed(self, seed):
+    def _spawn(self):
+        return Sequential(prefix=self.prefix, digits=self.digits)
+
+    def reset(self, seed=None):
         """
-        Setting the seed on a 'Sequential' object has no effect.
-        This method only exists to provide a consistent interface.
+        Note that this method supports the `seed` argument (for consistency with other generators),
+        but its value is ignored - the generator is simply reset to its initial value.
         """
+        self.cnt = count(start=1)
 
     def __next__(self):
-        """
-        Return next element in the sequence.
-        """
         return self.fmt_str.format(next(self.cnt))
 
-    def __call__(self, *args, **kwargs):
-        """
-        Return the object itself. This is useful so that we can use
-        objects of type `Sequential` to mock other types of generators
-        in our tests.
-        """
-        return self
 
-
-class RandRange(BaseIterator):
+class ChooseFrom(BaseGenerator):
     """
-    Random number generator which when called returns
-    a random integer k satisfying minval <= k <= maxval.
-
+    Generator which produces a sequence of items taken from given a given set of elements.
     """
-
-    def __init__(self, *args, seed=None):
+    def __init__(self, values, *, seed=None):
         """
-        Initialise random number generator.
-
-        RandRange(maxval)         -> RandRange object
-        RandRange(minval, maxval) -> RandRange object
+        Initialise generator.
 
         Args:
-            minval (int): Lower bound (inclusive) for the sampled values.
-            maxval (int): Upper bound (exclusive) for the sampled values.
-
+            values (list):    List of options from which to choose elements.
         """
-        if len(args) == 1:
-            minval, maxval = 0, args[0]
-        elif len(args) == 2:
-            minval, maxval = args
-        else:
-            raise ValueError("RandRange can only accept <= 2 arguments.")
-
-        self.randgen = Random()
-        self.seed(seed or new_seed())
-        self.minval = minval
-        self.maxval = maxval
-
-    # [DUPLICATE] seed #1
-    def seed(self, seed):
-        """
-        Initialize random number generator with given seed.
-        """
-        self.randgen.seed(seed)
+        self.values = values
+        self.idxgen = Integer(lo=1, hi=len(self.values)-1)
+        self.reset(seed)
 
     def __next__(self):
         """
-        Return random integer between `minval` (inclusive) and `maxval` (exclusive).
+        Return random element from the list of values provided during initialisation.
         """
-        return self.randgen.randrange(self.minval, self.maxval)
+        idx = next(self.idxgen)
+        return self.values[idx]
+
+    def _spawn(self):
+        return ChooseFrom(values=self.values)
+
+    def reset(self, seed):
+        self.idxgen.reset(seed)
 
 
-class RandIntString(BaseIterator):
+class CharString(BaseGenerator):
     """
-    Random generator which when returns strings representing random
-    integers between 0 and maxval (both inclusive).
-
+    Generator which produces a sequence of character strings.
     """
 
-    def __init__(self, *args, seed=None):
-        """
-        Initialise random number generator.
-
-        RandIntString(maxval)         -> RandIntString object
-        RandIntString(minval, maxval) -> RandIntString object
-
-        Args:
-            minval (int): Lower bound (inclusive) for the sampled values.
-            maxval (int): Upper bound (exclusive) for the sampled values.
-
-        """
-        if len(args) == 1:
-            self.minval = 0
-            self.maxval = args[0]
-        elif len(args) == 2:
-            self.minval = args[0]
-            self.maxval = args[1]
-        else:
-            raise ValueError("RandIntString can only accept <= 2 arguments.")
-
-        self.randgen = Random()
-        self.seed(seed or new_seed())
-
-    # [DUPLICATE] seed #2
-    def seed(self, seed):
-        """
-        Initialize random number generator with given seed.
-        """
-        self.randgen.seed(seed)
+    def __init__(self, *, length, chars, seed=None):
+        self.length = length
+        self.chars = chars
+        self.chargen = ChooseFrom(self.chars)
+        self.reset(seed)
 
     def __next__(self):
-        """
-        Return string representing random integer between `minval` and `maxval` (both inclusive).
-        """
-        return str(self.randgen.randint(self.minval, self.maxval))
+        chars = [next(self.chargen) for _ in range(self.length)]
+        return ''.join(chars)
+
+    def reset(self, seed):
+        self.chargen.reset(seed)
 
 
-class Latitude(BaseIterator):
+class DigitString(CharString):
     """
-    Random number generator which when called returns random floats
-    between -90 and +90 representing a latitude.
-
+    Generator which produces a sequence of strings containing only digits.
     """
 
-    def __init__(self, *, randgen=None):
-        """
-        Initialise latitude generator.
+    def __init__(self, *, length, seed=None):
+        chars = "0123456789"
+        self.length= length
+        super().__init__(length=length, chars=chars, seed=seed)
 
-        Args:
+    def _spawn(self):
+        return DigitString(length=self.length)
 
-            randgen: Custom random number generator (useful for testing).
-        """
-        self.randgen = randgen or RandFloat(-90., 90.)
+
+class HashDigest(CharString):
+    """
+    Generator which produces a sequence of hex strings representing hash digest values.
+    """
+
+    def __init__(self, *, length, seed=None):
+        chars = "0123456789ABCDEF"
+        self.length = length
+        super().__init__(length=length, chars=chars, seed=seed)
+
+    def _spawn(self):
+        return HashDigest(length=self.length)
+
+
+class Geolocation(BaseGenerator):
+    """
+    Generator which produces a sequence of (lon, lat) coordinates.
+    """
+
+    def __init__(self):
+        self.lon_gen = Float(-180, 180)
+        self.lat_gen = Float(-90, 90)
+
+    def _spawn(self):
+        return Geolocation()
 
     def __next__(self):
-        """
-        Return random latitude.
-        """
-        return str(next(self.randgen))
+        return (next(self.lon_gen), next(self.lat_gen))
 
-    # [DUPLICATE] seed #3
-    def seed(self, seed):
-        """
-        Initialize random number generator with given seed.
-        """
-        self.randgen.seed(seed)
-
-
-class Longitude:
-    """
-    Random number generator which when called returns random floats
-    between -180 and +180 representing a longitude.
-
-    """
-
-    def __init__(self, *, randgen=None):
-        """
-        Initialise longitude generator.
-
-        Args:
-
-            randgen: Custom random number generator (useful for testing).
-        """
-        self.randgen = randgen or RandFloat(-180., 180.)
-
-    def __next__(self):
-        """
-        Return random longitude.
-        """
-        return str(next(self.randgen))
-
-    # [DUPLICATE] seed #5
-    def seed(self, seed):
-        """
-        Initialize random number generator with given seed.
-        """
-        self.randgen.seed(seed)
+    def reset(self, seed):
+        self.lon_gen.reset(seed)
+        self.lat_gen.reset(seed)
 
 
 class TimestampError(Exception):
@@ -274,32 +253,50 @@ class TimestampError(Exception):
     """
 
 
-class Timestamp(BaseIterator):
+class Timestamp(BaseGenerator):
     """
-    Random generator which when called returns random timestamps in a
-    given range.
-
+    Generator which produces a timestamp.
     """
 
-    def __init__(self, start, end=None, *, fmt='%Y-%m-%d %H:%M:%S', uppercase=False, randgen_offsets=None):
+    def __init__(self, *, start=None, end=None, date=None, fmt='%Y-%m-%d %H:%M:%S', uppercase=False):
         """
         Initialise timestamp generator.
 
+        Note that `start` and `end` are both inclusive. They can either
+        be full timestamps such as 'YYYY-MM-DD HH:MM:SS', or date strings
+        such as 'YYYY-MM-DD'. Note that in the latter case `end` is
+        interpreted as as `YYYY-MM-DD 23:59:59`, i.e. the day is counted
+        in full.
+
         Args:
             start (date string):  start time
-            end   (date string):  end time (default: current time)
+            end   (date string):  end time
+            date (str):           string of the form YYYY-MM-DD. This is an alternative (and mutually exclusive)
+                                  to specifying `start` and `end`.
             fmt (str):            formatting string for output (same format as accepted by `datetime.strftime`)
             uppercase (bool):     if True, months are formatted with all uppercase letters (default: False)
-            randgen_offsets:      custom random number generator to produce offsets from start time (in seconds)
         """
-        # TODO: remove these assert statements and allow start/end to
-        # be either datetime objects or strings (which are parsed to
-        # create datetime objects).
-        assert isinstance(start, str)
-        assert isinstance(end, str) or end is None
+        if (date is not None):
+            if not (start is None and end is None):
+                raise TimestampError("Argument `date` is mutually exclusive with `start` and `end`.")
 
-        self.start = dateutil.parser.parse(start)
-        self.end = dt.datetime.now() if end is None else dateutil.parser.parse(end)
+            self.start = dt.datetime.strptime(date, '%Y-%m-%d')
+            self.end = self.start + dt.timedelta(days=1)
+        else:
+            if (start is None or end is None):
+                raise TimestampError("Either `date` or both `start` and `end` must be provided.")
+
+            try:
+                self.start = dt.datetime.strptime(start, '%Y-%m-%d')
+            except ValueError:
+                self.start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+
+            try:
+                self.end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                end_date = dt.datetime.strptime(end, '%Y-%m-%d')
+                self.end = dt.datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
+
         self.dt = int((self.end - self.start).total_seconds())
         self.fmt = fmt
         self.uppercase = uppercase
@@ -308,162 +305,126 @@ class Timestamp(BaseIterator):
             raise TimestampError("Start time must be before end time. Got: start_time='{}', end_time='{}'."
                                  "".format(self.start, self.end))
 
-        self.randgen = randgen_offsets or RandInt(0, self.dt)
+        self.offsetgen = Integer(0, self.dt)
+
+    def _spawn(self):
+        return Timestamp(start=self.start.strftime('%Y-%m-%d %H:%M:%S'),
+                         end=self.end.strftime('%Y-%m-%d %H:%M:%S'),
+                         fmt=self.fmt,
+                         uppercase=self.uppercase)
 
     def __next__(self):
-        """
-        Return string representing a random timestamp between `start` and `end`.
-        """
-        t = self.start + dt.timedelta(seconds=next(self.randgen))
-        s = t.strftime(self.fmt)
-        return s.upper() if self.uppercase else s
+        return (self.start + dt.timedelta(seconds=next(self.offsetgen))).strftime(self.fmt)
 
-    # [DUPLICATE] seed #6
-    def seed(self, seed):
-        """
-        Initialize random number generator with given seed.
-        """
-        self.randgen.seed(seed)
+    def reset(self, seed):
+        self.offsetgen.reset(seed)
 
 
-class PickFrom(BaseIterator):
+class CustomGeneratorMeta(type):
+
+    def __new__(metacls, name, bases, clsdict):
+        gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, name, bases, clsdict)
+        orig_init = gen_cls.__init__
+
+        def gen_init(self, *args, **kwargs):
+            seed = None
+            if 'seed' in kwargs:
+                seed = kwargs.pop('seed')
+
+            orig_init(self, *args, **kwargs)
+            dict1 = self.__class__.__dict__
+            dict2 = self.__dict__
+            self._attrgens = {name: obj._spawn() for name, obj in dict1.items() if isinstance(obj, BaseGenerator)}
+            self._attrgens.update({name: obj._spawn() for name, obj in dict2.items() if isinstance(obj, BaseGenerator)})
+
+            obj_cls_name = re.match('^(.*)Generator$', name).group(1)
+            obj_fields = [name for name in self._attrgens.keys()]
+            self.obj_cls = namedtuple(obj_cls_name, obj_fields)
+
+            def pprint_obj(self):
+                s = Template(textwrap.dedent("""
+                    <${cls_name}:
+                    % for fld in fieldnames:
+                        ${fld}: ${getattr(obj, fld)}
+                    % endfor
+                    >
+                    """)).render(cls_name=obj_cls_name, fieldnames=obj_fields, obj=self)
+                print(s)
+
+            # Determine how items produced by this generator should be formatted.
+            if not hasattr(self, 'FORMAT_STR'):
+                self.FORMAT_STR = "${START_DELIMITER}" + "${SEPARATOR}".join(
+                    [("${" + fld + "}") for fld in obj_fields]) + "${END_DELIMITER}"
+
+            def format_obj(obj, sep=',', start='', end='\n'):
+                kwargs = obj._asdict()
+                kwargs.update(SEPARATOR=sep, START_DELIMITER=start, END_DELIMITER=end)
+                return Template(self.FORMAT_STR).render(**kwargs)
+
+            self.obj_cls.pprint = pprint_obj
+            self.obj_cls.format = format_obj
+
+            if seed is not None:
+                self.reset(seed)
+
+        def gen_cls_next(self):
+            attrs = {name: next(obj) for name, obj in self._attrgens.items()}
+            return self.obj_cls(**attrs)
+
+        def gen_reset(self, seed):
+            for g in self._attrgens.values():
+                g.reset(seed)
+
+        def gen_spawn(self):
+            return self.__class__()
+
+        def gen_export(self, filename, *, N, mode='w', seed=None, sep=',', start='', end='\n', header=None):
+            """
+            Produce `N` elements and write them to the file `f`.
+
+            Arguments:
+                filename:  Name of the output file.
+                N:         Number of records to write.
+                mode:      How to open the file ('w' = write, 'a' = append)
+                seed:      If given, reset generator with this seed.
+                sep:       Separator between fields in each line.
+                start:     Added to the beginning of each output line.
+                end:       Added at the and of each output line.
+                header:    Header line printed at the very beginning (remember to add a newline at the end).
+            """
+            assert mode in ['w', 'a', 'write', 'append'], "Argument 'mode' must be either 'w'/'write' or 'a'/'append'."
+            assert header is None or isinstance(header, str), "Argument 'header' must be a string."
+
+            if seed is not None:
+                self.reset(seed)
+
+            with open(filename, mode=mode[0]) as f:
+                if header is not None:
+                    f.write(header)
+
+                for _ in range(N):
+                    r = next(self)
+                    f.write(r.format(sep=sep, start=start, end=end))
+
+        gen_cls.__init__ = gen_init
+        gen_cls.__next__ = gen_cls_next
+        gen_cls.reset = gen_reset
+        gen_cls._spawn = gen_spawn
+        gen_cls.export = gen_export
+
+        return gen_cls
+
+
+class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
     """
-    Generator which when called returns random elements from a given
-    list of choices.
+    The only purpose of this class is to make defining
+    custom generators easier for the user by writing:
 
+        class FooGenerator(CustomGenerator):
+            # ...
+
+    instead of the more clumsy:
+
+        class FooGenerator(metaclass=CustomGeneratorMeta):
+            # ...
     """
-
-    def __init__(self, values, *, randgen_indices=None):
-        """
-        Initialise generator.
-
-        Args:
-            values (list):    List of options from which to pick elements.
-            randgen_indices:  Custom random number generator which determines the
-                              indices of chosen elements; should produce integers
-                              between 0 (inclusive) and len(values) (exclusive).
-
-        """
-        self.values = values
-        self.randgen = randgen_indices or RandInt(0, len(self.values) - 1)
-
-    def __next__(self):
-        """
-        Return random element from the list of values provided during initialisation.
-        """
-        idx = next(self.randgen)
-        return self.values[idx]
-
-    # [DUPLICATE] seed #8
-    def seed(self, seed):
-        """
-        Initialize random number generator with given seed.
-        """
-        self.randgen.seed(seed)
-
-
-class CharString:
-    """
-    Generator which when called returns strings containing elements
-    randomly picked from a set of characters and which have length
-    within a specified range.
-
-    """
-
-    def __init__(self, *, chars, length=None, minlength=None, maxlength=None, randgen_lengths=None, randgen_chars=None):
-        """
-        Initialise character string generator.
-
-        Args:
-            chars (list):     list of allowed characters
-            length (int):     length of the generated strings (must not be specified
-                              simultaneously with minlength/maxlength)
-            minlength (int):  minimum length of generated strings
-            maxlength (int):  maximum length of generated strings
-            randgen_lengths:  custom random number generator which determines
-                              the lengths of generated strings
-            randgen_chars:    custom random number generator which determines
-                              the characters in the generated strings
-
-        """
-        self._set_min_and_max_length(length, minlength, maxlength)
-
-        self.chars = chars
-        self.rcg = randgen_chars or PickFrom(self.chars)
-        self.rlg = randgen_lengths or RandInt(self.minlength, self.maxlength)
-
-    def _set_min_and_max_length(self, length, minlength, maxlength):
-        """
-        Set min/max length for output strings produced by this generator.
-
-        If `length` is given, it is used as the fixed output length.
-        Otherwise `minlength` and `maxlength` are used.
-
-        Raises ValueError if incompatible arguments are provided.
-
-        """
-        if length is not None:
-            if (minlength is not None or maxlength is not None):
-                raise ValueError("Argument `length` must not be given simultaneously with " " `minlength` or `maxlength`.")
-            self.minlength = length
-            self.maxlength = length
-        else:
-            if minlength is None:
-                minlength = 1
-            if maxlength is None:
-                raise ValueError("Please specify either `length` or `maxlength`.")
-
-            self.minlength = minlength
-            self.maxlength = maxlength
-
-    # [DUPLICATE] seed #9
-    def seed(self, seed):
-        """
-        Initialize random number generator with given seed.
-        """
-        r = Random(seed)
-        length_seed = r.randint(0, 1e18)
-        char_seed = r.randint(0, 1e18)
-        self.rcg.seed(length_seed)
-        self.rlg.seed(char_seed)
-
-    def __next__(self):
-        """
-        Return string of random length containing elements randomly picked
-        from the list of characters provided during initialisation.
-
-        """
-        N = next(self.rlg)
-        chars = [next(self.rcg) for _ in range(N)]
-        return ''.join(chars)
-
-
-class DigitString(CharString):
-    """
-    Generator which when called returns strings containing a sequence
-    of random digits and having length within a specified range.
-
-    """
-
-    def __init__(self, **kwargs):
-        """
-        Initialise generator. All keyword arguments are passed on to
-        `CharString`'s initialiser.
-
-        """
-        super().__init__(chars='0123456789', **kwargs)
-
-
-class HashDigest(CharString):
-    """
-    Generator which when called returns a random hex string representing a hash digest value.
-
-    """
-
-    def __init__(self, **kwargs):
-        """
-        Initialise generator. All keyword arguments are passed on to
-        `CharString`'s initialiser.
-
-        """
-        super().__init__(chars='1234567890ABCDEF', **kwargs)
