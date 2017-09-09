@@ -1,11 +1,12 @@
 # Description of conda environment for this project.
 name: tohu
 dependencies:
-  - python
+  - python=3.6
   - mako
   - pytest
   - pytest-cov
   - pytest
   - python-dateutil
   - pip:
+      - nbval
       - yapf

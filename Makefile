@@ -1,7 +1,7 @@
 MODULE = tohu
 CONDA_ENV_NAME ?= tohu
 
-all:
+all: test
 
 create-conda-environment:
 	conda env create --name $(CONDA_ENV_NAME) -f environment.yml
@@ -12,4 +12,9 @@ update-conda-environment:
 remove-conda-environment:
 	conda remove --name $(CONDA_ENV_NAME) --all
 
-.PHONY: all create-conda-environment update-conda-environment remove-conda-environmens
+test: test-notebooks
+
+test-notebooks:
+	py.test --nbval notebooks/
+
+.PHONY: all create-conda-environment update-conda-environment remove-conda-environment test test-notebooks
