@@ -7,8 +7,7 @@ Quick start
 
 (i) Create a new conda environment called `tohu` containing all necessary prerequisites.
 
-Note: If a conda environment with this name already exists it will update the packages
-and even the Python version in it, so make sure this is ok before you run this command.
+Note: If a conda environment with this name already exists it will update the packages and even the Python version in it, so make sure this is ok before you run this command.
 
 ```
 $ make update-conda-environment
@@ -20,7 +19,13 @@ $ make update-conda-environment
 $ source activate tohu
 ```
 
-(iii) Run the test suite to make sure everything works correctly:
+(iii) Install tohu into new conda environment:
+
+```
+$ pip install .
+```
+
+(iv) Run the test suite to make sure everything works correctly:
 
 ```
 $ make test
