@@ -32,5 +32,9 @@ setup(
     ],
     packages=find_packages(),
     install_requires=['mako', 'python-dateutil'],
+    extras_require={
+        'dev': ['ipython', 'jupyter'],
+        'test': ['pytest', 'nbval'],
+    },
     cmdclass=versioneer.get_cmdclass(),
     )
