@@ -325,7 +325,7 @@ class Timestamp(BaseGenerator):
         self.offsetgen.reset(seed)
 
 
-def _get_tohu_generator_attributes(custom_generator):
+def _create_attribute_generators(custom_generator):
     """
     Scan `custom_generator` for any attributes (both class-level and instance-level))
     which derive from `tohu.generators.BaseGenerator` and return a dictionary
@@ -339,9 +339,15 @@ def _get_tohu_generator_attributes(custom_generator):
     return attrgens
 
 
+def _create_namedtuple_class(cg_name, attrgens):
+    item_cls_name = re.match('^(.*)Generator$', cg_name).group(1)
+    item_fields = [name for name in attrgens.keys()]
+    return namedtuple(item_cls_name, item_fields)
+
+
 class CustomGeneratorMeta(type):
-    def __new__(metacls, name, bases, clsdict):
-        gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, name, bases, clsdict)
+    def __new__(metacls, cg_name, bases, clsdict):
+        gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
         orig_init = gen_cls.__init__
 
         def gen_init(self, *args, **kwargs):
@@ -351,13 +357,10 @@ class CustomGeneratorMeta(type):
 
             orig_init(self, *args, **kwargs)
 
-            self._attrgens = _get_tohu_generator_attributes(self)
+            self._attrgens = _create_attribute_generators(self)
+            self.obj_cls = _create_namedtuple_class(cg_name, self._attrgens)
 
-            obj_cls_name = re.match('^(.*)Generator$', name).group(1)
-            obj_fields = [name for name in self._attrgens.keys()]
-            self.obj_cls = namedtuple(obj_cls_name, obj_fields)
-
-            def pprint_obj(self):
+            def pprint_obj(obj):
                 s = Template(
                     textwrap.dedent("""
                         <${cls_name}:
@@ -366,14 +369,14 @@ class CustomGeneratorMeta(type):
                         % endfor
                         >
                         """)).render(
-                        cls_name=obj_cls_name, fieldnames=obj_fields, obj=self)
+                        cls_name=obj_cls_name, fieldnames=self.obj_cls._fields, obj=obj)
                 print(s)
 
             # Determine how items produced by this generator should be formatted.
             if not hasattr(self, 'FORMAT_STR'):
                 self.FORMAT_STR = (
                     "${START_DELIMITER}" +
-                    "${SEPARATOR}".join([("${" + fld + "}") for fld in obj_fields]) +
+                    "${SEPARATOR}".join([("${" + fld + "}") for fld in self.obj_cls._fields]) +
                     "${END_DELIMITER}")  # yapf: disable
 
             def format_obj(obj, sep=',', start='', end='\n'):
