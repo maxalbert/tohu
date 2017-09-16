@@ -7,7 +7,6 @@ dependencies:
   - mako
   - pytest
   - pytest-cov
-  - pytest
   - python-dateutil
   - pip:
       - nbval
