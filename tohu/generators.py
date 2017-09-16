@@ -339,8 +339,19 @@ def _create_attribute_generators(custom_generator):
     return attrgens
 
 
-def _create_namedtuple_class(cg_name, attrgens):
-    item_cls_name = re.match('^(.*)Generator$', cg_name).group(1)
+def _get_item_class_name(cg_name):
+    """
+    Return the item name corresponding to the custom generator name `cg_name`.
+    This is the "..." part before "...Generator".
+
+    Examples:
+        FoobarGenerator -> Foobar
+        QuuxGenerator -> Quux
+    """
+    return re.match('^(.*)Generator$', cg_name).group(1)
+
+
+def _create_namedtuple_class(item_cls_name, attrgens):
     item_fields = [name for name in attrgens.keys()]
     return namedtuple(item_cls_name, item_fields)
 
@@ -358,25 +369,26 @@ class CustomGeneratorMeta(type):
             orig_init(self, *args, **kwargs)
 
             self._attrgens = _create_attribute_generators(self)
-            self.obj_cls = _create_namedtuple_class(cg_name, self._attrgens)
+            item_cls_name = _get_item_class_name(cg_name)
+            self.item_cls = _create_namedtuple_class(item_cls_name, self._attrgens)
 
-            def pprint_obj(obj):
+            def pprint_item(item):
                 s = Template(
                     textwrap.dedent("""
                         <${cls_name}:
                         % for fld in fieldnames:
-                            ${fld}: ${getattr(obj, fld)}
+                            ${fld}: ${getattr(item, fld)}
                         % endfor
                         >
                         """)).render(
-                        cls_name=obj_cls_name, fieldnames=self.obj_cls._fields, obj=obj)
+                        cls_name=item_cls_name, fieldnames=self.item_cls._fields, item=item)
                 print(s)
 
             # Determine how items produced by this generator should be formatted.
             if not hasattr(self, 'FORMAT_STR'):
                 self.FORMAT_STR = (
                     "${START_DELIMITER}" +
-                    "${SEPARATOR}".join([("${" + fld + "}") for fld in self.obj_cls._fields]) +
+                    "${SEPARATOR}".join([("${" + fld + "}") for fld in self.item_cls._fields]) +
                     "${END_DELIMITER}")  # yapf: disable
 
             def format_obj(obj, sep=',', start='', end='\n'):
@@ -384,15 +396,15 @@ class CustomGeneratorMeta(type):
                 kwargs.update(SEPARATOR=sep, START_DELIMITER=start, END_DELIMITER=end)
                 return Template(self.FORMAT_STR).render(**kwargs)
 
-            self.obj_cls.pprint = pprint_obj
-            self.obj_cls.format = format_obj
+            self.item_cls.pprint = pprint_item
+            self.item_cls.format = format_obj
 
             if seed is not None:
                 self.reset(seed)
 
         def gen_cls_next(self):
             attrs = {name: next(obj) for name, obj in self._attrgens.items()}
-            return self.obj_cls(**attrs)
+            return self.item_cls(**attrs)
 
         def gen_reset(self, seed):
             for g in self._attrgens.values():
