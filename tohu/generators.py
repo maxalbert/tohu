@@ -11,6 +11,7 @@ from collections import namedtuple
 from itertools import count
 from mako.template import Template
 from random import Random
+from tqdm import tqdm
 
 __all__ = [
     'Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString', 'HashDigest', 'Geolocation',
@@ -422,16 +423,17 @@ class CustomGeneratorMeta(type):
         def gen_spawn(self):
             return self.__class__()
 
-        def gen_export(self, filename, *, N, mode='w', seed=None, header=None):
+        def gen_export(self, filename, *, N, mode='w', seed=None, header=None, progressbar=True):
             """
             Produce `N` elements and write them to the file `f`.
 
             Arguments:
-                filename:  Name of the output file.
-                N:         Number of records to write.
-                mode:      How to open the file ('w' = write, 'a' = append)
-                seed:      If given, reset generator with this seed.
-                header:    Header line printed at the very beginning (remember to add a newline at the end).
+                filename:     Name of the output file.
+                N:            Number of records to write.
+                mode:         How to open the file ('w' = write, 'a' = append)
+                seed:         If given, reset generator with this seed.
+                header:       Header line printed at the very beginning (remember to add a newline at the end).
+                progressbar:  Whether to display a progress bar while exporting data.
             """
             assert mode in ['w', 'a', 'write', 'append'], "Argument 'mode' must be either 'w'/'write' or 'a'/'append'."
             assert header is None or isinstance(header, str), "Argument 'header' must be a string."
@@ -443,7 +445,10 @@ class CustomGeneratorMeta(type):
                 if header is not None:
                     f.write(header)
 
-                for _ in range(N):
+                counter = range(N)
+                if progressbar:
+                    counter = tqdm(counter)
+                for _ in counter:
                     r = next(self)
                     f.write(format(r))
 
