@@ -325,6 +325,20 @@ class Timestamp(BaseGenerator):
         self.offsetgen.reset(seed)
 
 
+def _get_tohu_generator_attributes(custom_generator):
+    """
+    Scan `custom_generator` for any attributes (both class-level and instance-level))
+    which derive from `tohu.generators.BaseGenerator` and return a dictionary
+    of the form {attr_name: fresh_generator} containing a freshly spawned
+    generator for each of these attributes.
+    """
+    dict1 = custom_generator.__class__.__dict__
+    dict2 = custom_generator.__dict__
+    attrgens = {attr_name: obj._spawn() for attr_name, obj in dict1.items() if isinstance(obj, BaseGenerator)}
+    attrgens.update({attr_name: obj._spawn() for attr_name, obj in dict2.items() if isinstance(obj, BaseGenerator)})
+    return attrgens
+
+
 class CustomGeneratorMeta(type):
     def __new__(metacls, name, bases, clsdict):
         gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, name, bases, clsdict)
@@ -336,10 +350,8 @@ class CustomGeneratorMeta(type):
                 seed = kwargs.pop('seed')
 
             orig_init(self, *args, **kwargs)
-            dict1 = self.__class__.__dict__
-            dict2 = self.__dict__
-            self._attrgens = {name: obj._spawn() for name, obj in dict1.items() if isinstance(obj, BaseGenerator)}
-            self._attrgens.update({name: obj._spawn() for name, obj in dict2.items() if isinstance(obj, BaseGenerator)})
+
+            self._attrgens = _get_tohu_generator_attributes(self)
 
             obj_cls_name = re.match('^(.*)Generator$', name).group(1)
             obj_fields = [name for name in self._attrgens.keys()]
