@@ -12,8 +12,10 @@ from itertools import count
 from mako.template import Template
 from random import Random
 
-__all__ = ['Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
-           'HashDigest', 'Geolocation', 'Timestamp', 'CustomGenerator']
+__all__ = [
+    'Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString', 'HashDigest', 'Geolocation',
+    'Timestamp', 'CustomGenerator'
+]
 
 
 # Note: It would be better to make this an abstract base class
@@ -60,6 +62,7 @@ class Constant(BaseGenerator):
     """
     Generator which produces a constant sequence (repeating the same element indefinitely).
     """
+
     def __init__(self, value):
         self.value = value
 
@@ -153,6 +156,7 @@ class ChooseFrom(BaseGenerator):
     """
     Generator which produces a sequence of items taken from given a given set of elements.
     """
+
     def __init__(self, values, *, seed=None):
         """
         Initialise generator.
@@ -161,7 +165,7 @@ class ChooseFrom(BaseGenerator):
             values (list):    List of options from which to choose elements.
         """
         self.values = values
-        self.idxgen = Integer(lo=1, hi=len(self.values)-1)
+        self.idxgen = Integer(lo=1, hi=(len(self.values) - 1))
         self.reset(seed)
 
     def __next__(self):
@@ -204,7 +208,7 @@ class DigitString(CharString):
 
     def __init__(self, *, length, seed=None):
         chars = "0123456789"
-        self.length= length
+        self.length = length
         super().__init__(length=length, chars=chars, seed=seed)
 
     def _spawn(self):
@@ -308,10 +312,11 @@ class Timestamp(BaseGenerator):
         self.offsetgen = Integer(0, self.dt)
 
     def _spawn(self):
-        return Timestamp(start=self.start.strftime('%Y-%m-%d %H:%M:%S'),
-                         end=self.end.strftime('%Y-%m-%d %H:%M:%S'),
-                         fmt=self.fmt,
-                         uppercase=self.uppercase)
+        return Timestamp(
+            start=self.start.strftime('%Y-%m-%d %H:%M:%S'),
+            end=self.end.strftime('%Y-%m-%d %H:%M:%S'),
+            fmt=self.fmt,
+            uppercase=self.uppercase)
 
     def __next__(self):
         return (self.start + dt.timedelta(seconds=next(self.offsetgen))).strftime(self.fmt)
@@ -321,7 +326,6 @@ class Timestamp(BaseGenerator):
 
 
 class CustomGeneratorMeta(type):
-
     def __new__(metacls, name, bases, clsdict):
         gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, name, bases, clsdict)
         orig_init = gen_cls.__init__
@@ -342,19 +346,23 @@ class CustomGeneratorMeta(type):
             self.obj_cls = namedtuple(obj_cls_name, obj_fields)
 
             def pprint_obj(self):
-                s = Template(textwrap.dedent("""
-                    <${cls_name}:
-                    % for fld in fieldnames:
-                        ${fld}: ${getattr(obj, fld)}
-                    % endfor
-                    >
-                    """)).render(cls_name=obj_cls_name, fieldnames=obj_fields, obj=self)
+                s = Template(
+                    textwrap.dedent("""
+                        <${cls_name}:
+                        % for fld in fieldnames:
+                            ${fld}: ${getattr(obj, fld)}
+                        % endfor
+                        >
+                        """)).render(
+                        cls_name=obj_cls_name, fieldnames=obj_fields, obj=self)
                 print(s)
 
             # Determine how items produced by this generator should be formatted.
             if not hasattr(self, 'FORMAT_STR'):
-                self.FORMAT_STR = "${START_DELIMITER}" + "${SEPARATOR}".join(
-                    [("${" + fld + "}") for fld in obj_fields]) + "${END_DELIMITER}"
+                self.FORMAT_STR = (
+                    "${START_DELIMITER}" +
+                    "${SEPARATOR}".join([("${" + fld + "}") for fld in obj_fields]) +
+                    "${END_DELIMITER}")  # yapf: disable
 
             def format_obj(obj, sep=',', start='', end='\n'):
                 kwargs = obj._asdict()
