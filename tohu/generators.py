@@ -385,22 +385,31 @@ class CustomGeneratorMeta(type):
                 print(s)
 
             # Determine how items produced by this generator should be formatted.
-            if not hasattr(self, 'FORMAT_STR'):
-                self.FORMAT_STR = (
-                    "${START_DELIMITER}" +
-                    "${SEPARATOR}".join([("${" + fld + "}") for fld in self.item_cls._fields]) +
-                    "${END_DELIMITER}")  # yapf: disable
+            if not 'FORMAT_STR' in clsdict:
+                clsdict['FORMAT_STR'] = ",".join([("${" + fld + "}") for fld in self.item_cls._fields]) + '\n'
+                #print("[DDD] Case 1: {} ({})".format(clsdict['FORMAT_STR'], self))
+            else:
+                # FIXME: This line seems to be called *twice* for every CustomGenerator!!!
+                #print("[DDD] Case 2: {} ){})".format(clsdict['FORMAT_STR'], self))
+                pass
 
-            def format_obj(obj, sep=',', start='', end='\n'):
-                kwargs = obj._asdict()
-                kwargs.update(SEPARATOR=sep, START_DELIMITER=start, END_DELIMITER=end)
-                return Template(self.FORMAT_STR).render(**kwargs)
+            self.FORMAT_STR = clsdict['FORMAT_STR']
 
+            def format_obj(obj, fmt):
+                return self._formatter.render(**obj._asdict())
+
+            self.item_cls.__format__ = format_obj
             self.item_cls.pprint = pprint_item
             self.item_cls.format = format_obj
 
             if seed is not None:
                 self.reset(seed)
+
+        def gen_get_format_str(self):
+            return self._format_str
+        def gen_set_format_str(self, format_str):
+            self._format_str = format_str
+            self._formatter = Template(self._format_str)
 
         def gen_cls_next(self):
             attrs = {name: next(obj) for name, obj in self._attrgens.items()}
@@ -413,7 +422,7 @@ class CustomGeneratorMeta(type):
         def gen_spawn(self):
             return self.__class__()
 
-        def gen_export(self, filename, *, N, mode='w', seed=None, sep=',', start='', end='\n', header=None):
+        def gen_export(self, filename, *, N, mode='w', seed=None, header=None):
             """
             Produce `N` elements and write them to the file `f`.
 
@@ -422,9 +431,6 @@ class CustomGeneratorMeta(type):
                 N:         Number of records to write.
                 mode:      How to open the file ('w' = write, 'a' = append)
                 seed:      If given, reset generator with this seed.
-                sep:       Separator between fields in each line.
-                start:     Added to the beginning of each output line.
-                end:       Added at the and of each output line.
                 header:    Header line printed at the very beginning (remember to add a newline at the end).
             """
             assert mode in ['w', 'a', 'write', 'append'], "Argument 'mode' must be either 'w'/'write' or 'a'/'append'."
@@ -439,13 +445,14 @@ class CustomGeneratorMeta(type):
 
                 for _ in range(N):
                     r = next(self)
-                    f.write(r.format(sep=sep, start=start, end=end))
+                    f.write(format(r))
 
         gen_cls.__init__ = gen_init
         gen_cls.__next__ = gen_cls_next
         gen_cls.reset = gen_reset
         gen_cls._spawn = gen_spawn
         gen_cls.export = gen_export
+        gen_cls.FORMAT_STR = property(gen_get_format_str, gen_set_format_str)
 
         return gen_cls
 
