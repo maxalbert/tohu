@@ -41,7 +41,7 @@ class BaseGenerator:
     def reset(self, seed):
         raise NotImplementedError("Class {} does not implement method 'reset'.".format(self.__class__.__name__))
 
-    def generate(self, N, seed=None):
+    def generate(self, N, *, seed=None, progressbar=False):
         """
         Return sequence of `N` elements.
 
@@ -50,7 +50,10 @@ class BaseGenerator:
         """
         if seed is not None:
             self.reset(seed)
-        yield from islice(self, N)
+        items = islice(self, N)
+        if progressbar:
+            items = tqdm(items, total=N)
+        yield from items
 
     def _spawn(self):
         """
@@ -553,5 +556,5 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
             # ...
     """
 
-    def generate(self, N, seed=None):
-        return ItemCollection(super().generate(N, seed=seed), N)
+    def generate(self, N, *, seed=None, progressbar=False):
+        return ItemCollection(super().generate(N, seed=seed, progressbar=progressbar), N)
