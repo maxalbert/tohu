@@ -7,6 +7,7 @@ import datetime as dt
 import dateutil
 import pandas as pd
 import re
+import sys
 import textwrap
 from collections import namedtuple
 from itertools import count, islice
@@ -413,6 +414,34 @@ class ItemCollection:
         return pd.DataFrame([pd.Series(item._asdict()) for item in self.items])
 
 
+class SeedGenerator:
+    """
+    This class is used in custom generators to create a collection of
+    seeds when reset() is called, so that each of the constituent
+    generators can be re-initialised with a different seed in a
+    reproducible way.
+
+    Note: This is almost identical to the `Integer` class above, but
+    we need a version which does *not* inherit from `BaseGenerator`,
+    otherwise the automatic namedtuple creation in `CustomGeneratorMeta`
+    gets confused.
+    """
+
+    def __init__(self):
+        self.r = Random()
+        self.minval = 0
+        self.maxval = sys.maxsize
+
+    def seed(self, value):
+        self.r.seed(value)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.r.randint(self.minval, self.maxval)
+
+
 class CustomGeneratorMeta(type):
     def __new__(metacls, cg_name, bases, clsdict):
         gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
@@ -428,6 +457,8 @@ class CustomGeneratorMeta(type):
             self._attrgens = _create_attribute_generators(self)
             item_cls_name = _get_item_class_name(cg_name)
             self.item_cls = _create_namedtuple_class(item_cls_name, self._attrgens)
+
+            self._seed_generator = SeedGenerator()
 
             def pprint_item(item):
                 s = Template(
@@ -473,8 +504,13 @@ class CustomGeneratorMeta(type):
             return self.item_cls(**attrs)
 
         def gen_reset(self, seed):
-            for g in self._attrgens.values():
-                g.reset(seed)
+            # Reset the seed generator
+            self._seed_generator.seed(seed)
+
+            # Reset each constituent generator with a new seed
+            # produced by the seed generator.
+            for g, x in zip(self._attrgens.values(), self._seed_generator):
+                g.reset(x)
 
         def gen_spawn(self):
             return self.__class__()
