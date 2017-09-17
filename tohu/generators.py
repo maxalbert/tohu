@@ -393,7 +393,11 @@ class ItemCollection:
             if header is not None:
                 f.write(header)
 
-            for _, x in zip(tqdm(range(self.N)), self.items):
+            rng = range(self.N)
+            if progressbar:
+                rng = tqdm(rng)
+
+            for _, x in zip(rng, self.items):
                 f.write(format(x))
 
     def to_df(self):
