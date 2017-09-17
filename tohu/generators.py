@@ -369,11 +369,11 @@ class ItemCollection:
             Number of items in the collection. This needs to be specified explicitly
             because `items` is typically an iterator.
         """
-        self.items = items
+        self.items = list(items)
         self.N = N
 
     def __iter__(self):
-        yield from islice(self.items, None)
+        yield from self.items
 
     def write(self, filename, *, mode='w', header=None, progressbar=True):
         """
