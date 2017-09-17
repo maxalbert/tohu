@@ -372,6 +372,15 @@ class ItemCollection:
         self.items = list(items)
         self.N = N
 
+    def __repr__(self):
+        return "<ItemCollection of length {}>".format(len(self))
+
+    def __len__(self):
+        return self.N
+
+    def __getitem__(self, i):
+        return self.items[i]
+
     def __iter__(self):
         yield from self.items
 
