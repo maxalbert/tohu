@@ -9,7 +9,7 @@ import pandas as pd
 import re
 import textwrap
 from collections import namedtuple
-from itertools import count
+from itertools import count, islice
 from mako.template import Template
 from random import Random
 from tqdm import tqdm
@@ -49,7 +49,7 @@ class BaseGenerator:
         """
         if seed is not None:
             self.reset(seed)
-        return [next(self) for _ in range(N)]
+        yield from islice(self, N)
 
     def _spawn(self):
         """
@@ -359,14 +359,42 @@ def _create_namedtuple_class(item_cls_name, attrgens):
 
 
 class ItemCollection:
-    def __init__(self, items):
+    def __init__(self, items, N):
+        """
+        Parameters:
+        -----------
+        items: iterable
+            Sequence of items in the collection.
+        N: int
+            Number of items in the collection. This needs to be specified explicitly
+            because `items` is typically an iterator.
+        """
         self.items = items
+        self.N = N
 
     def __iter__(self):
-        yield from self.items
+        yield from islice(self.items, None)
 
-    def write(self, filename):
-        raise NotImplementedError("TODO: Write items to file.")
+    def write(self, filename, *, mode='w', header=None, progressbar=True):
+        """
+        Export items to a file.
+
+        Arguments:
+            filename:     Name of the output file.
+            mode:         How to open the file ('w' = write, 'a' = append)
+            seed:         If given, reset generator with this seed.
+            header:       Header line printed at the very beginning (remember to add a newline at the end).
+            progressbar:  Whether to display a progress bar while exporting data.
+        """
+        assert mode in ['w', 'a', 'write', 'append'], "Argument 'mode' must be either 'w'/'write' or 'a'/'append'."
+        assert header is None or isinstance(header, str), "Argument 'header' must be a string."
+
+        with open(filename, mode=mode[0]) as f:
+            if header is not None:
+                f.write(header)
+
+            for _, x in zip(tqdm(range(self.N)), self.items):
+                f.write(format(x))
 
     def to_df(self):
         return pd.DataFrame([pd.Series(item._asdict()) for item in self.items])
@@ -450,22 +478,8 @@ class CustomGeneratorMeta(type):
                 header:       Header line printed at the very beginning (remember to add a newline at the end).
                 progressbar:  Whether to display a progress bar while exporting data.
             """
-            assert mode in ['w', 'a', 'write', 'append'], "Argument 'mode' must be either 'w'/'write' or 'a'/'append'."
-            assert header is None or isinstance(header, str), "Argument 'header' must be a string."
-
-            if seed is not None:
-                self.reset(seed)
-
-            with open(filename, mode=mode[0]) as f:
-                if header is not None:
-                    f.write(header)
-
-                counter = range(N)
-                if progressbar:
-                    counter = tqdm(counter)
-                for _ in counter:
-                    r = next(self)
-                    f.write(format(r))
+            item_collection = ItemCollection(self.generate(N, seed=seed), N)
+            item_collection.write(filename, mode=mode, header=header, progressbar=progressbar)
 
         gen_cls.__init__ = gen_init
         gen_cls.__next__ = gen_cls_next
@@ -492,4 +506,4 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
     """
 
     def generate(self, N, seed=None):
-        return ItemCollection(super().generate(N, seed=seed))
+        return ItemCollection(super().generate(N, seed=seed), N)
