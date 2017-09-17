@@ -31,7 +31,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     packages=find_packages(),
-    install_requires=['mako', 'python-dateutil'],
+    install_requires=['mako', 'pandas', 'python-dateutil'],
     extras_require={
         'dev': ['ipython', 'jupyter'],
         'test': ['pytest', 'nbval'],

@@ -5,6 +5,7 @@ dependencies:
   - ipython
   - jupyter
   - mako
+  - pandas
   - pytest
   - pytest-cov
   - python-dateutil
