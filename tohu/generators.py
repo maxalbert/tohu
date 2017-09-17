@@ -392,7 +392,6 @@ class ItemCollection:
         Arguments:
             filename:     Name of the output file.
             mode:         How to open the file ('w' = write, 'a' = append)
-            seed:         If given, reset generator with this seed.
             header:       Header line printed at the very beginning (remember to add a newline at the end).
             progressbar:  Whether to display a progress bar while exporting data.
         """
