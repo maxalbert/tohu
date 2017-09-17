@@ -5,6 +5,7 @@ Generator classes to produce random data with specific properties.
 
 import datetime as dt
 import dateutil
+import pandas as pd
 import re
 import textwrap
 from collections import namedtuple
@@ -357,6 +358,20 @@ def _create_namedtuple_class(item_cls_name, attrgens):
     return namedtuple(item_cls_name, item_fields)
 
 
+class ItemCollection:
+    def __init__(self, items):
+        self.items = items
+
+    def __iter__(self):
+        yield from self.items
+
+    def write(self, filename):
+        raise NotImplementedError("TODO: Write items to file.")
+
+    def to_df(self):
+        return pd.DataFrame([pd.Series(item._asdict()) for item in self.items])
+
+
 class CustomGeneratorMeta(type):
     def __new__(metacls, cg_name, bases, clsdict):
         gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
@@ -475,3 +490,6 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         class FooGenerator(metaclass=CustomGeneratorMeta):
             # ...
     """
+
+    def generate(self, N, seed=None):
+        return ItemCollection(super().generate(N, seed=seed))
