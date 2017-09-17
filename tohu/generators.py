@@ -325,7 +325,8 @@ class Timestamp(BaseGenerator):
             uppercase=self.uppercase)
 
     def __next__(self):
-        return (self.start + dt.timedelta(seconds=next(self.offsetgen))).strftime(self.fmt)
+        s = (self.start + dt.timedelta(seconds=next(self.offsetgen))).strftime(self.fmt)
+        return s.upper() if self.uppercase else s
 
     def reset(self, seed):
         self.offsetgen.reset(seed)
