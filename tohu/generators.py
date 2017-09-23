@@ -15,8 +15,8 @@ from random import Random
 from tqdm import tqdm
 
 __all__ = [
-    'Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString', 'HashDigest', 'Geolocation',
-    'Timestamp', 'CustomGenerator'
+    'Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
+    'HashDigest', 'Geolocation', 'Timestamp',
 ]
 
 
@@ -416,145 +416,145 @@ class ItemCollection:
         return pd.DataFrame([pd.Series(item._asdict()) for item in self.items])
 
 
-class SeedGenerator:
-    """
-    This class is used in custom generators to create a collection of
-    seeds when reset() is called, so that each of the constituent
-    generators can be re-initialised with a different seed in a
-    reproducible way.
-
-    Note: This is almost identical to the `Integer` class above, but
-    we need a version which does *not* inherit from `BaseGenerator`,
-    otherwise the automatic namedtuple creation in `CustomGeneratorMeta`
-    gets confused.
-    """
-
-    def __init__(self):
-        self.r = Random()
-        self.minval = 0
-        self.maxval = sys.maxsize
-
-    def seed(self, value):
-        self.r.seed(value)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return self.r.randint(self.minval, self.maxval)
-
-
-class CustomGeneratorMeta(type):
-    def __new__(metacls, cg_name, bases, clsdict):
-        gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
-        orig_init = gen_cls.__init__
-
-        def gen_init(self, *args, **kwargs):
-            seed = None
-            if 'seed' in kwargs:
-                seed = kwargs.pop('seed')
-
-            orig_init(self, *args, **kwargs)
-
-            self._attrgens = _create_attribute_generators(self)
-            item_cls_name = _get_item_class_name(cg_name)
-            self.item_cls = _create_namedtuple_class(item_cls_name, self._attrgens)
-
-            self._seed_generator = SeedGenerator()
-
-            def pprint_item(item):
-                s = Template(
-                    textwrap.dedent("""
-                        <${cls_name}:
-                        % for fld in fieldnames:
-                            ${fld}: ${getattr(item, fld)}
-                        % endfor
-                        >
-                        """)).render(
-                        cls_name=item_cls_name, fieldnames=self.item_cls._fields, item=item)
-                print(s)
-
-            # Determine how items produced by this generator should be formatted.
-            if not 'FORMAT_STR' in clsdict:
-                clsdict['FORMAT_STR'] = ",".join([("${" + fld + "}") for fld in self.item_cls._fields]) + '\n'
-                #print("[DDD] Case 1: {} ({})".format(clsdict['FORMAT_STR'], self))
-            else:
-                # FIXME: This line seems to be called *twice* for every CustomGenerator!!!
-                #print("[DDD] Case 2: {} ){})".format(clsdict['FORMAT_STR'], self))
-                pass
-
-            self.FORMAT_STR = clsdict['FORMAT_STR']
-
-            def format_obj(obj, fmt):
-                return self._formatter.render(**obj._asdict())
-
-            self.item_cls.__format__ = format_obj
-            self.item_cls.pprint = pprint_item
-            self.item_cls.format = format_obj
-
-            if seed is not None:
-                self.reset(seed)
-
-        def gen_get_format_str(self):
-            return self._format_str
-        def gen_set_format_str(self, format_str):
-            self._format_str = format_str
-            self._formatter = Template(self._format_str)
-
-        def gen_cls_next(self):
-            attrs = {name: next(obj) for name, obj in self._attrgens.items()}
-            return self.item_cls(**attrs)
-
-        def gen_reset(self, seed):
-            # Reset the seed generator
-            self._seed_generator.seed(seed)
-
-            # Reset each constituent generator with a new seed
-            # produced by the seed generator.
-            for g, x in zip(self._attrgens.values(), self._seed_generator):
-                g.reset(x)
-
-        def gen_spawn(self):
-            return self.__class__()
-
-        def gen_export(self, filename, *, N, mode='w', seed=None, header=None, progressbar=True):
-            """
-            Produce `N` elements and write them to the file `f`.
-
-            Arguments:
-                filename:     Name of the output file.
-                N:            Number of records to write.
-                mode:         How to open the file ('w' = write, 'a' = append)
-                seed:         If given, reset generator with this seed.
-                header:       Header line printed at the very beginning (remember to add a newline at the end).
-                progressbar:  Whether to display a progress bar while exporting data.
-            """
-            item_collection = ItemCollection(self.generate(N, seed=seed), N)
-            item_collection.write(filename, mode=mode, header=header, progressbar=progressbar)
-
-        gen_cls.__init__ = gen_init
-        gen_cls.__next__ = gen_cls_next
-        gen_cls.reset = gen_reset
-        gen_cls._spawn = gen_spawn
-        gen_cls.export = gen_export
-        gen_cls.FORMAT_STR = property(gen_get_format_str, gen_set_format_str)
-
-        return gen_cls
-
-
-class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
-    """
-    The only purpose of this class is to make defining
-    custom generators easier for the user by writing:
-
-        class FooGenerator(CustomGenerator):
-            # ...
-
-    instead of the more clumsy:
-
-        class FooGenerator(metaclass=CustomGeneratorMeta):
-            # ...
-    """
-
-    def generate(self, N, *, seed=None, progressbar=False):
-        return ItemCollection(super().generate(N, seed=seed, progressbar=progressbar), N)
+# class SeedGenerator:
+#     """
+#     This class is used in custom generators to create a collection of
+#     seeds when reset() is called, so that each of the constituent
+#     generators can be re-initialised with a different seed in a
+#     reproducible way.
+#
+#     Note: This is almost identical to the `Integer` class above, but
+#     we need a version which does *not* inherit from `BaseGenerator`,
+#     otherwise the automatic namedtuple creation in `CustomGeneratorMeta`
+#     gets confused.
+#     """
+#
+#     def __init__(self):
+#         self.r = Random()
+#         self.minval = 0
+#         self.maxval = sys.maxsize
+#
+#     def seed(self, value):
+#         self.r.seed(value)
+#
+#     def __iter__(self):
+#         return self
+#
+#     def __next__(self):
+#         return self.r.randint(self.minval, self.maxval)
+#
+#
+# class CustomGeneratorMeta(type):
+#     def __new__(metacls, cg_name, bases, clsdict):
+#         gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
+#         orig_init = gen_cls.__init__
+#
+#         def gen_init(self, *args, **kwargs):
+#             seed = None
+#             if 'seed' in kwargs:
+#                 seed = kwargs.pop('seed')
+#
+#             orig_init(self, *args, **kwargs)
+#
+#             self._attrgens = _create_attribute_generators(self)
+#             item_cls_name = _get_item_class_name(cg_name)
+#             self.item_cls = _create_namedtuple_class(item_cls_name, self._attrgens)
+#
+#             self._seed_generator = SeedGenerator()
+#
+#             def pprint_item(item):
+#                 s = Template(
+#                     textwrap.dedent("""
+#                         <${cls_name}:
+#                         % for fld in fieldnames:
+#                             ${fld}: ${getattr(item, fld)}
+#                         % endfor
+#                         >
+#                         """)).render(
+#                         cls_name=item_cls_name, fieldnames=self.item_cls._fields, item=item)
+#                 print(s)
+#
+#             # Determine how items produced by this generator should be formatted.
+#             if not 'FORMAT_STR' in clsdict:
+#                 clsdict['FORMAT_STR'] = ",".join([("${" + fld + "}") for fld in self.item_cls._fields]) + '\n'
+#                 #print("[DDD] Case 1: {} ({})".format(clsdict['FORMAT_STR'], self))
+#             else:
+#                 # FIXME: This line seems to be called *twice* for every CustomGenerator!!!
+#                 #print("[DDD] Case 2: {} ){})".format(clsdict['FORMAT_STR'], self))
+#                 pass
+#
+#             self.FORMAT_STR = clsdict['FORMAT_STR']
+#
+#             def format_obj(obj, fmt):
+#                 return self._formatter.render(**obj._asdict())
+#
+#             self.item_cls.__format__ = format_obj
+#             self.item_cls.pprint = pprint_item
+#             self.item_cls.format = format_obj
+#
+#             if seed is not None:
+#                 self.reset(seed)
+#
+#         def gen_get_format_str(self):
+#             return self._format_str
+#         def gen_set_format_str(self, format_str):
+#             self._format_str = format_str
+#             self._formatter = Template(self._format_str)
+#
+#         def gen_cls_next(self):
+#             attrs = {name: next(obj) for name, obj in self._attrgens.items()}
+#             return self.item_cls(**attrs)
+#
+#         def gen_reset(self, seed):
+#             # Reset the seed generator
+#             self._seed_generator.seed(seed)
+#
+#             # Reset each constituent generator with a new seed
+#             # produced by the seed generator.
+#             for g, x in zip(self._attrgens.values(), self._seed_generator):
+#                 g.reset(x)
+#
+#         def gen_spawn(self):
+#             return self.__class__()
+#
+#         def gen_export(self, filename, *, N, mode='w', seed=None, header=None, progressbar=True):
+#             """
+#             Produce `N` elements and write them to the file `f`.
+#
+#             Arguments:
+#                 filename:     Name of the output file.
+#                 N:            Number of records to write.
+#                 mode:         How to open the file ('w' = write, 'a' = append)
+#                 seed:         If given, reset generator with this seed.
+#                 header:       Header line printed at the very beginning (remember to add a newline at the end).
+#                 progressbar:  Whether to display a progress bar while exporting data.
+#             """
+#             item_collection = ItemCollection(self.generate(N, seed=seed), N)
+#             item_collection.write(filename, mode=mode, header=header, progressbar=progressbar)
+#
+#         gen_cls.__init__ = gen_init
+#         gen_cls.__next__ = gen_cls_next
+#         gen_cls.reset = gen_reset
+#         gen_cls._spawn = gen_spawn
+#         gen_cls.export = gen_export
+#         gen_cls.FORMAT_STR = property(gen_get_format_str, gen_set_format_str)
+#
+#         return gen_cls
+#
+#
+# class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
+#     """
+#     The only purpose of this class is to make defining
+#     custom generators easier for the user by writing:
+#
+#         class FooGenerator(CustomGenerator):
+#             # ...
+#
+#     instead of the more clumsy:
+#
+#         class FooGenerator(metaclass=CustomGeneratorMeta):
+#             # ...
+#     """
+#
+#     def generate(self, N, *, seed=None, progressbar=False):
+#         return ItemCollection(super().generate(N, seed=seed, progressbar=progressbar), N)

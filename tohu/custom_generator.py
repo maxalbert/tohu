@@ -84,7 +84,7 @@ class CustomGeneratorMeta(type):
 
             clsdict = self.__class__.__dict__
             instdict = self.__dict__
-            self.field_gens = {name: gen for name, gen in dict(**clsdict, **instdict).items() if isinstance(gen, BaseGenerator)}
+            self.field_gens = {name: gen._spawn() for name, gen in dict(**clsdict, **instdict).items() if isinstance(gen, BaseGenerator)}
             clsname = get_item_class_name(self.__class__.__name__)
             self.item_cls = namedtuple(clsname, self.field_gens.keys())
             if self._format_dict is None:
