@@ -173,7 +173,6 @@ class TestCustomGenerator:
 
             def __init__(self, z_min, z_max):
                 self.y = Float(lo=z_min, hi=z_max)
-                super().__init__()
 
         g1 = QuuxGenerator(z_min=2.0, z_max=3.0)
         g2 = QuuxGenerator(z_min=5.0, z_max=6.0)

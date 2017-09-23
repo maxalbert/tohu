@@ -63,24 +63,39 @@ class SeedGenerator:
         return self.r.randint(self.minval, self.maxval)
 
 
-class CustomGenerator:
+class CustomGeneratorMeta(type):
+    def __new__(metacls, cg_name, bases, clsdict):
+        gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
+        orig_init = gen_cls.__init__
+
+        def gen_init(self, *args, **kwargs):
+            seed = kwargs.pop('seed', None)
+
+            # Call original __init__ function to make sure all generator attributes are defined
+            orig_init(self, *args, **kwargs)
+
+            clsdict = self.__class__.__dict__
+            instdict = self.__dict__
+            self.field_gens = {name: gen for name, gen in dict(**clsdict, **instdict).items() if isinstance(gen, BaseGenerator)}
+            clsname = get_item_class_name(self.__class__.__name__)
+            self.item_cls = namedtuple(clsname, self.field_gens.keys())
+            if self._format_dict is None:
+                self._format_dict = {name: "${" + name + "}" for name in self.field_gens}
+            if self._separator is None:
+                self._separator = ","
+            self._reinit_item_formatter()
+            self.seed_generator = SeedGenerator()
+
+            self.reset(seed)
+
+        gen_cls.__init__ = gen_init
+        return gen_cls
+
+
+class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
     _format_dict = None
     _separator = None
     _header = None
-
-    def __init__(self, seed=None):
-        clsname = get_item_class_name(self.__class__.__name__)
-        clsdict = self.__class__.__dict__
-        instdict = self.__dict__
-        self.field_gens = {name: gen for name, gen in dict(**clsdict, **instdict).items() if isinstance(gen, BaseGenerator)}
-        self.item_cls = namedtuple(clsname, self.field_gens.keys())
-        if self._format_dict is None:
-            self._format_dict = {name: "${" + name + "}" for name in self.field_gens}
-        if self._separator is None:
-            self._separator = ","
-        self._reinit_item_formatter()
-        self.seed_generator = SeedGenerator()
-        self.reset(seed)
 
     @property
     def FMT_FIELDS(self):
