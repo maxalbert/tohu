@@ -112,7 +112,7 @@ class TestCustomGenerator:
         """
         tmpfile = tmpdir.join("output.txt")
 
-        self.gen_quux.export(tmpfile.open('w'), N=3, seed=99999)
+        self.gen_quux.export(tmpfile.open('w'), N=3, header=True, seed=99999)
 
         expected_output = textwrap.dedent("""\
             #c,d,e
@@ -132,7 +132,7 @@ class TestCustomGenerator:
         self.gen_foo.FMT_FIELDS = {"Col 1": "a=${a}", "Col 2": "b has value: ${b}"}
         self.gen_foo.SEPARATOR = " | "
 
-        self.gen_foo.export(tmpfile.open('w'), N=3, seed=12345)
+        self.gen_foo.export(tmpfile.open('w'), N=3, header=True, seed=12345)
 
         expected_output = textwrap.dedent("""\
             #Col 1 | Col 2
@@ -143,7 +143,7 @@ class TestCustomGenerator:
 
         assert tmpfile.read() == expected_output
 
-    def test_export_to_file_with_custom_field_formatters_and_header(self, tmpdir):
+    def test_export_to_file_with_custom_field_formatters_and_header_attribute(self, tmpdir):
         """
         Test that the HEADER attribute supersedes the standard header derived from FMT_FIELDS.
         """
@@ -153,10 +153,30 @@ class TestCustomGenerator:
         self.gen_foo.SEPARATOR = " --- "
         self.gen_foo.HEADER = "# This is a custom header line"
 
-        self.gen_foo.export(tmpfile.open('w'), N=3, seed=12345)
+        self.gen_foo.export(tmpfile.open('w'), N=3, header=True, seed=12345)
 
         expected_output = textwrap.dedent("""\
             # This is a custom header line
+            a = 6649 --- b has value: foo_001
+            a = 7170 --- b has value: foo_002
+            a = 8552 --- b has value: foo_003
+            """)
+
+        assert tmpfile.read() == expected_output
+
+    def test_export_to_file_with_custom_field_formatters_and_header_argument(self, tmpdir):
+        """
+        Test that the HEADER attribute supersedes the standard header derived from FMT_FIELDS.
+        """
+        tmpfile = tmpdir.join("output.txt")
+
+        self.gen_foo.FMT_FIELDS = {"Col 1": "a = ${a}", "Col 2": "b has value: ${b}"}
+        self.gen_foo.SEPARATOR = " --- "
+
+        self.gen_foo.export(tmpfile.open('w'), N=3, header="# Another way to specify a custom header line", seed=12345)
+
+        expected_output = textwrap.dedent("""\
+            # Another way to specify a custom header line
             a = 6649 --- b has value: foo_001
             a = 7170 --- b has value: foo_002
             a = 8552 --- b has value: foo_003

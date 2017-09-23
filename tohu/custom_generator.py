@@ -3,10 +3,18 @@ import sys
 from collections import namedtuple
 from mako.template import Template
 from random import Random
+from tqdm import tqdm
 
 from tohu.generators import BaseGenerator
 
 __all__ = ["CustomGenerator"]
+
+
+def make_range(N, progressbar):
+    if progressbar:
+        return tqdm(range(N))
+    else:
+        return range(N)
 
 
 def get_item_class_name(generator_class_name):
@@ -145,9 +153,25 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
 
-    def export(self, f, *, N, seed=None):
+    def export(self, f, *, N, seed=None, mode='w', header=False, progressbar=True):
+        assert mode in ['w', 'a', 'write', 'append'], "Argument 'mode' must be either 'w'/'write' or 'a'/'append'."
+
+        file = open(f, mode) if isinstance(f, str) else f
+
         self.reset(seed)
 
-        f.write(self.HEADER)
-        for i in range(N):
-            f.write(format(next(self)))
+        if isinstance(header, str):
+            header = header + "\n"
+        elif header is True:
+            header = self.HEADER
+        else:
+            assert header is False
+
+        if mode == 'w' and header is not False:
+            file.write(header)
+
+        for i in make_range(N, progressbar):
+            file.write(format(next(self)))
+
+        if isinstance(f, str):
+            file.close()
