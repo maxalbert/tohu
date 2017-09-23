@@ -15,16 +15,16 @@ class TestCustomGenerator:
     def setup(self):
 
         class FoobarGenerator(CustomGenerator):
-            a = Integer(lo=1000, hi=2000)
+            a = Integer(lo=1000, hi=9000)
             b = Sequential(prefix="foo_", digits=3)
 
         class QuuxGenerator(CustomGenerator):
             c = Constant("Hello")
             d = Sequential(prefix="quux_", digits=2)
-            e = Integer(lo=3000, hi=4000)
+            e = Integer(lo=3000, hi=6000)
 
-        self.gen_foo = FoobarGenerator(seed=12345)
-        self.gen_quux = QuuxGenerator(seed=99999)
+        self.gen_foo = FoobarGenerator(seed=99999)
+        self.gen_quux = QuuxGenerator(seed=12345)
 
     def test_custom_generator_produces_objects_of_the_expected_class(self):
         """
@@ -50,11 +50,11 @@ class TestCustomGenerator:
         item3 = next(self.gen_quux)
         item4 = next(self.gen_quux)
 
-        assert item1 == (1426, "foo_001")
-        assert item2 == (1750, "foo_002")
+        assert item1 == (2184, "foo_001")
+        assert item2 == (8875, "foo_002")
 
-        assert item3 == ("Hello", "quux_01", 3123)
-        assert item4 == ("Hello", "quux_02", 3972)
+        assert item3 == ("Hello", "quux_01", 4001)
+        assert item4 == ("Hello", "quux_02", 5032)
 
     def test_formatting_items_returns_string_with_field_values(self):
         """
@@ -68,15 +68,15 @@ class TestCustomGenerator:
         item3 = next(self.gen_quux)
         item4 = next(self.gen_quux)
 
-        assert str(item1) == "Foobar(a=1426, b='foo_001')"
-        assert str(item2) == "Foobar(a=1750, b='foo_002')"
-        assert format(item1) == "1426,foo_001\n"
-        assert format(item2) == "1750,foo_002\n"
+        assert str(item1) == "Foobar(a=2184, b='foo_001')"
+        assert str(item2) == "Foobar(a=8875, b='foo_002')"
+        assert format(item1) == "2184,foo_001\n"
+        assert format(item2) == "8875,foo_002\n"
 
-        assert str(item3) == "Quux(c='Hello', d='quux_01', e=3123)"
-        assert str(item4) == "Quux(c='Hello', d='quux_02', e=3972)"
-        assert format(item3) == "Hello,quux_01,3123\n"
-        assert format(item4) == "Hello,quux_02,3972\n"
+        assert str(item3) == "Quux(c='Hello', d='quux_01', e=4001)"
+        assert str(item4) == "Quux(c='Hello', d='quux_02', e=5032)"
+        assert format(item3) == "Hello,quux_01,4001\n"
+        assert format(item4) == "Hello,quux_02,5032\n"
 
     def test_format_attribute_is_taken_into_account(self):
         """
@@ -95,16 +95,16 @@ class TestCustomGenerator:
         item4 = next(self.gen_quux)
 
         # String formatting is the same as before (not affected by the FMT_FIELDS attribute)
-        assert str(item1) == "Foobar(a=1426, b='foo_001')"
-        assert str(item2) == "Foobar(a=1750, b='foo_002')"
-        assert str(item3) == "Quux(c='Hello', d='quux_01', e=3123)"
-        assert str(item4) == "Quux(c='Hello', d='quux_02', e=3972)"
+        assert str(item1) == "Foobar(a=2184, b='foo_001')"
+        assert str(item2) == "Foobar(a=8875, b='foo_002')"
+        assert str(item3) == "Quux(c='Hello', d='quux_01', e=4001)"
+        assert str(item4) == "Quux(c='Hello', d='quux_02', e=5032)"
 
         # By contrast, format() uses the FMT_FIELDS and SEPARATOR attributes
         assert format(item1) == "b has value: foo_001\n"
         assert format(item2) == "b has value: foo_002\n"
-        assert format(item3) == "e=3123 | d has value: quux_01\n"
-        assert format(item4) == "e=3972 | d has value: quux_02\n"
+        assert format(item3) == "e=4001 | d has value: quux_01\n"
+        assert format(item4) == "e=5032 | d has value: quux_02\n"
 
     def test_export_to_file(self, tmpdir):
         """
@@ -116,9 +116,9 @@ class TestCustomGenerator:
 
         expected_output = textwrap.dedent("""\
             #c,d,e
-            Hello,quux_01,3123
-            Hello,quux_02,3972
-            Hello,quux_03,3316
+            Hello,quux_01,5973
+            Hello,quux_02,4139
+            Hello,quux_03,4350
             """)
 
         assert tmpfile.read() == expected_output
@@ -136,9 +136,9 @@ class TestCustomGenerator:
 
         expected_output = textwrap.dedent("""\
             #Col 1 | Col 2
-            a=1426 | b has value: foo_001
-            a=1750 | b has value: foo_002
-            a=1010 | b has value: foo_003
+            a=6649 | b has value: foo_001
+            a=7170 | b has value: foo_002
+            a=8552 | b has value: foo_003
             """)
 
         assert tmpfile.read() == expected_output
@@ -157,9 +157,9 @@ class TestCustomGenerator:
 
         expected_output = textwrap.dedent("""\
             # This is a custom header line
-            a = 1426 --- b has value: foo_001
-            a = 1750 --- b has value: foo_002
-            a = 1010 --- b has value: foo_003
+            a = 6649 --- b has value: foo_001
+            a = 7170 --- b has value: foo_002
+            a = 8552 --- b has value: foo_003
             """)
 
         assert tmpfile.read() == expected_output

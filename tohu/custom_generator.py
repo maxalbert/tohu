@@ -1,6 +1,9 @@
 import re
-from mako.template import Template
+import sys
 from collections import namedtuple
+from mako.template import Template
+from random import Random
+
 from tohu.generators import BaseGenerator
 
 __all__ = ["CustomGenerator"]
@@ -31,6 +34,35 @@ def make_formatter(fmt_templates, sep, end="\n"):
 
     return format_item
 
+
+class SeedGenerator:
+    """
+    This class is used in custom generators to create a collection of
+    seeds when reset() is called, so that each of the constituent
+    generators can be re-initialised with a different seed in a
+    reproducible way.
+
+    Note: This is almost identical to the `Integer` class above, but
+    we need a version which does *not* inherit from `BaseGenerator`,
+    otherwise the automatic namedtuple creation in `CustomGeneratorMeta`
+    gets confused.
+    """
+
+    def __init__(self):
+        self.r = Random()
+        self.minval = 0
+        self.maxval = sys.maxsize
+
+    def seed(self, value):
+        self.r.seed(value)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.r.randint(self.minval, self.maxval)
+
+
 class CustomGenerator:
     _format_dict = None
     _separator = None
@@ -46,6 +78,7 @@ class CustomGenerator:
         if self._separator is None:
             self._separator = ","
         self._reinit_item_formatter()
+        self.seed_generator = SeedGenerator()
         self.reset(seed)
 
     @property
@@ -84,9 +117,13 @@ class CustomGenerator:
         """
         Reset generator using the given seed (unless seed is None, in which case this is a no-op).
         """
-        if seed is not None:
-            for g in self.field_gens.values():
-                g.reset(seed)
+        # Reset the seed generator
+        self.seed_generator.seed(seed)
+
+        # Reset each constituent generator with a new seed
+        # produced by the seed generator.
+        for g, x in zip(self.field_gens.values(), self.seed_generator):
+            g.reset(x)
 
     def __next__(self):
         field_values = [next(g) for g in self.field_gens.values()]
