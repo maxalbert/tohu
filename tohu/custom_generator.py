@@ -1,4 +1,5 @@
 import re
+from mako.template import Template
 from collections import namedtuple
 from tohu.generators import BaseGenerator
 
@@ -18,30 +19,54 @@ def get_item_class_name(generator_class_name):
     return re.match('^(.*)Generator$', generator_class_name).group(1)
 
 
-def format_item(item, fmt):
+def make_formatter(fmt_templates, sep, end="\n"):
     """
-    Return a string containing a concatenation of all
-    field values of `item` (separated by commas and
-    ending in a newline).
-
-    Example:
-        >>> item
-        Foobar(a=42, b='foo_01', c=1.234)
-        >>> format(item)
-        '42,foo_01,1.234'
+    Return a function which, when given a namedtuple instance as an argument,
+    returns a string containing the concatenation of all its field values.
     """
-    return ",".join([format(x) for x in item]) + '\n'
+    template = Template(sep.join(fmt_templates.values()) + end)
 
+    def format_item(item, _):
+        return template.render(**item._asdict())
+
+    return format_item
 
 class CustomGenerator:
+    _format_dict = None
+    _separator = None
 
     def __init__(self, seed=None):
         clsname = get_item_class_name(self.__class__.__name__)
         clsdict = self.__class__.__dict__
         self.field_gens = {name: gen for name, gen in clsdict.items() if isinstance(gen, BaseGenerator)}
         self.item_cls = namedtuple(clsname, self.field_gens.keys())
-        self.item_cls.__format__ = format_item
+        if self._format_dict is None:
+            self._format_dict = {name: "${" + name + "}" for name in self.field_gens}
+        if self._separator is None:
+            self._separator = ","
+        self._reinit_item_formatter()
         self.reset(seed)
+
+    @property
+    def FMT_FIELDS(self):
+        return self._format_dict
+
+    @FMT_FIELDS.setter
+    def FMT_FIELDS(self, value):
+        self._format_dict = value
+        self._reinit_item_formatter()
+
+    @property
+    def SEPARATOR(self):
+        return self._separator
+
+    @SEPARATOR.setter
+    def SEPARATOR(self, value):
+        self._separator = value
+        self._reinit_item_formatter()
+
+    def _reinit_item_formatter(self):
+        self.item_cls.__format__ = make_formatter(fmt_templates=self._format_dict, sep=self._separator, end="\n")
 
     def reset(self, seed=None):
         if seed is not None:

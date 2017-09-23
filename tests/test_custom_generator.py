@@ -67,12 +67,40 @@ class TestCustomGenerator:
         item3 = next(self.gen_quux)
         item4 = next(self.gen_quux)
 
-        assert "Foobar(a=1426, b='foo_001')" == str(item1)
-        assert "Foobar(a=1750, b='foo_002')" == str(item2)
-        assert "1426,foo_001\n" == format(item1)
-        assert "1750,foo_002\n" == format(item2)
+        assert str(item1) == "Foobar(a=1426, b='foo_001')"
+        assert str(item2) == "Foobar(a=1750, b='foo_002')"
+        assert format(item1) == "1426,foo_001\n"
+        assert format(item2) == "1750,foo_002\n"
 
-        assert "Quux(c='Hello', d='quux_01', e=3123)" == str(item3)
-        assert "Quux(c='Hello', d='quux_02', e=3972)" == str(item4)
-        assert "Hello,quux_01,3123\n" == format(item3)
-        assert "Hello,quux_02,3972\n" == format(item4)
+        assert str(item3) == "Quux(c='Hello', d='quux_01', e=3123)"
+        assert str(item4) == "Quux(c='Hello', d='quux_02', e=3972)"
+        assert format(item3) == "Hello,quux_01,3123\n"
+        assert format(item4) == "Hello,quux_02,3972\n"
+
+    def test_format_attribute_is_taken_into_account(self):
+        """
+        Test that if the attributes FMT_FIELDS or SEPARATOR are defined,
+        these are taken into account when formatting items.
+        """
+
+        self.gen_foo.FMT_FIELDS = {"Field b": "b has value: ${b}"}
+
+        self.gen_quux.FMT_FIELDS = {"Field e": "e=${e}", "Field d": "d has value: ${d}"}  # note the reversed order
+        self.gen_quux.SEPARATOR = " | "
+
+        item1 = next(self.gen_foo)
+        item2 = next(self.gen_foo)
+        item3 = next(self.gen_quux)
+        item4 = next(self.gen_quux)
+
+        # String formatting is the same as before (not affected by the FMT_FIELDS attribute)
+        assert str(item1) == "Foobar(a=1426, b='foo_001')"
+        assert str(item2) == "Foobar(a=1750, b='foo_002')"
+        assert str(item3) == "Quux(c='Hello', d='quux_01', e=3123)"
+        assert str(item4) == "Quux(c='Hello', d='quux_02', e=3972)"
+
+        # By contrast, format() uses the FMT_FIELDS and SEPARATOR attributes
+        assert format(item1) == "b has value: foo_001\n"
+        assert format(item2) == "b has value: foo_002\n"
+        assert format(item3) == "e=3123 | d has value: quux_01\n"
+        assert format(item4) == "e=3972 | d has value: quux_02\n"
