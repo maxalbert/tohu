@@ -3,6 +3,7 @@ Tests for the CustomGenerator class.
 """
 
 import pytest
+import textwrap
 from .context import tohu
 
 from tohu.generators import Constant, Integer, Sequential
@@ -104,3 +105,61 @@ class TestCustomGenerator:
         assert format(item2) == "b has value: foo_002\n"
         assert format(item3) == "e=3123 | d has value: quux_01\n"
         assert format(item4) == "e=3972 | d has value: quux_02\n"
+
+    def test_export_to_file(self, tmpdir):
+        """
+        Test that generator allows exporting a sequence of items to a file.
+        """
+        tmpfile = tmpdir.join("output.txt")
+
+        self.gen_quux.export(tmpfile.open('w'), N=3, seed=99999)
+
+        expected_output = textwrap.dedent("""\
+            #c,d,e
+            Hello,quux_01,3123
+            Hello,quux_02,3972
+            Hello,quux_03,3316
+            """)
+
+        assert tmpfile.read() == expected_output
+
+    def test_export_to_file_with_custom_field_formatters(self, tmpdir):
+        """
+        Test that FMT_FIELDS is taken into account for column headers and formatting rows.
+        """
+        tmpfile = tmpdir.join("output.txt")
+
+        self.gen_foo.FMT_FIELDS = {"Col 1": "a=${a}", "Col 2": "b has value: ${b}"}
+        self.gen_foo.SEPARATOR = " | "
+
+        self.gen_foo.export(tmpfile.open('w'), N=3, seed=12345)
+
+        expected_output = textwrap.dedent("""\
+            #Col 1 | Col 2
+            a=1426 | b has value: foo_001
+            a=1750 | b has value: foo_002
+            a=1010 | b has value: foo_003
+            """)
+
+        assert tmpfile.read() == expected_output
+
+    def test_export_to_file_with_custom_field_formatters_and_header(self, tmpdir):
+        """
+        Test that the HEADER attribute supersedes the standard header derived from FMT_FIELDS.
+        """
+        tmpfile = tmpdir.join("output.txt")
+
+        self.gen_foo.FMT_FIELDS = {"Col 1": "a = ${a}", "Col 2": "b has value: ${b}"}
+        self.gen_foo.SEPARATOR = " --- "
+        self.gen_foo.HEADER = "# This is a custom header line"
+
+        self.gen_foo.export(tmpfile.open('w'), N=3, seed=12345)
+
+        expected_output = textwrap.dedent("""\
+            # This is a custom header line
+            a = 1426 --- b has value: foo_001
+            a = 1750 --- b has value: foo_002
+            a = 1010 --- b has value: foo_003
+            """)
+
+        assert tmpfile.read() == expected_output

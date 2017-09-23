@@ -34,6 +34,7 @@ def make_formatter(fmt_templates, sep, end="\n"):
 class CustomGenerator:
     _format_dict = None
     _separator = None
+    _header = None
 
     def __init__(self, seed=None):
         clsname = get_item_class_name(self.__class__.__name__)
@@ -65,10 +66,24 @@ class CustomGenerator:
         self._separator = value
         self._reinit_item_formatter()
 
+    @property
+    def HEADER(self):
+        if self._header is not None:
+            return self._header
+        else:
+            return "#" + self._separator.join(self._format_dict.keys()) + "\n"
+
+    @HEADER.setter
+    def HEADER(self, value):
+        self._header = value + "\n"
+
     def _reinit_item_formatter(self):
         self.item_cls.__format__ = make_formatter(fmt_templates=self._format_dict, sep=self._separator, end="\n")
 
     def reset(self, seed=None):
+        """
+        Reset generator using the given seed (unless seed is None, in which case this is a no-op).
+        """
         if seed is not None:
             for g in self.field_gens.values():
                 g.reset(seed)
@@ -76,3 +91,10 @@ class CustomGenerator:
     def __next__(self):
         field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
+
+    def export(self, f, *, N, seed=None):
+        self.reset(seed)
+
+        f.write(self.HEADER)
+        for i in range(N):
+            f.write(format(next(self)))
