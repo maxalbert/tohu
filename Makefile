@@ -12,9 +12,12 @@ update-conda-environment:
 remove-conda-environment:
 	conda remove --name $(CONDA_ENV_NAME) --all
 
-test: test-notebooks
+test: unit-tests
+
+unit-tests:
+	py.test tests/
 
 test-notebooks:
 	py.test --nbval notebooks/
 
-.PHONY: all create-conda-environment update-conda-environment remove-conda-environment test test-notebooks
+.PHONY: all create-conda-environment update-conda-environment remove-conda-environment test test-notebooks unit-tests
