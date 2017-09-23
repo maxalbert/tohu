@@ -15,7 +15,7 @@ remove-conda-environment:
 test: unit-tests
 
 unit-tests:
-	py.test tests/
+	py.test -svx tests/
 
 test-notebooks:
 	py.test --nbval notebooks/
