@@ -71,7 +71,8 @@ class CustomGenerator:
     def __init__(self, seed=None):
         clsname = get_item_class_name(self.__class__.__name__)
         clsdict = self.__class__.__dict__
-        self.field_gens = {name: gen for name, gen in clsdict.items() if isinstance(gen, BaseGenerator)}
+        instdict = self.__dict__
+        self.field_gens = {name: gen for name, gen in dict(**clsdict, **instdict).items() if isinstance(gen, BaseGenerator)}
         self.item_cls = namedtuple(clsname, self.field_gens.keys())
         if self._format_dict is None:
             self._format_dict = {name: "${" + name + "}" for name in self.field_gens}

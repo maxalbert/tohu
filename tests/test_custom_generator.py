@@ -6,7 +6,7 @@ import pytest
 import textwrap
 from .context import tohu
 
-from tohu.generators import Constant, Integer, Sequential
+from tohu.generators import Constant, Integer, Float, Sequential
 from tohu.custom_generator import CustomGenerator
 
 
@@ -163,3 +163,25 @@ class TestCustomGenerator:
             """)
 
         assert tmpfile.read() == expected_output
+
+    def test_fields_can_be_defined_in_init(self):
+        """
+        Test that fields can be defined in __init__() of custom generators.
+        """
+        class QuuxGenerator(CustomGenerator):
+            x = Integer(lo=400, hi=499)
+
+            def __init__(self, z_min, z_max):
+                self.y = Float(lo=z_min, hi=z_max)
+                super().__init__()
+
+        g1 = QuuxGenerator(z_min=2.0, z_max=3.0)
+        g2 = QuuxGenerator(z_min=5.0, z_max=6.0)
+        g1.reset(seed=12345)
+        g2.reset(seed=12345)
+
+        item1 = next(g1)
+        item2 = next(g2)
+
+        assert str(item1) == "Quux(x=488, y=2.032576355272894)"
+        assert str(item2) == "Quux(x=496, y=5.032576355272894)"
