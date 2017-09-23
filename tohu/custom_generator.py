@@ -18,6 +18,21 @@ def get_item_class_name(generator_class_name):
     return re.match('^(.*)Generator$', generator_class_name).group(1)
 
 
+def format_item(item, fmt):
+    """
+    Return a string containing a concatenation of all
+    field values of `item` (separated by commas and
+    ending in a newline).
+
+    Example:
+        >>> item
+        Foobar(a=42, b='foo_01', c=1.234)
+        >>> format(item)
+        '42,foo_01,1.234'
+    """
+    return ",".join([format(x) for x in item]) + '\n'
+
+
 class CustomGenerator:
 
     def __init__(self, seed=None):
@@ -25,6 +40,7 @@ class CustomGenerator:
         clsdict = self.__class__.__dict__
         self.field_gens = {name: gen for name, gen in clsdict.items() if isinstance(gen, BaseGenerator)}
         self.item_cls = namedtuple(clsname, self.field_gens.keys())
+        self.item_cls.__format__ = format_item
         self.reset(seed)
 
     def reset(self, seed=None):
