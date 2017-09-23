@@ -8,7 +8,6 @@ dependencies:
   - pandas
   - pytest
   - pytest-cov
-  - python-dateutil
   - pip:
       - nbval
       - yapf

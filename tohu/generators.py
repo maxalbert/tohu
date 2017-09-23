@@ -4,7 +4,6 @@ Generator classes to produce random data with specific properties.
 """
 
 import datetime as dt
-import dateutil
 import pandas as pd
 import re
 import sys
