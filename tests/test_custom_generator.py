@@ -77,24 +77,24 @@ class TestCustomGenerator:
         assert str(item1) == "Quux(x=488, y=2.032576355272894)"
         assert str(item2) == "Quux(x=496, y=5.032576355272894)"
 
-    # def test_formatting_items_returns_string_with_field_values(self):
-    #     """
-    #     Test that formatting items produced by {Foobar|Quux}Generator
-    #     results in strings that are concatenations of their field values.
-    #     """
-    #
-    #     item1 = next(self.gen_foo)
-    #     item2 = next(self.gen_foo)
-    #
-    #     item3 = next(self.gen_quux)
-    #     item4 = next(self.gen_quux)
-    #
-    #     assert str(item1) == "Foobar(a=2184, b='foo_001')"
-    #     assert str(item2) == "Foobar(a=8875, b='foo_002')"
-    #     assert format(item1) == "2184,foo_001\n"
-    #     assert format(item2) == "8875,foo_002\n"
-    #
-    #     assert str(item3) == "Quux(c='Hello', d='quux_01', e=4001)"
-    #     assert str(item4) == "Quux(c='Hello', d='quux_02', e=5032)"
-    #     assert format(item3) == "Hello,quux_01,4001\n"
-    #     assert format(item4) == "Hello,quux_02,5032\n"
+    def test_formatting_items_returns_string_with_field_values(self):
+        """
+        Test that formatting items produced by {Foobar|Quux}Generator
+        results in strings that are concatenations of their field values.
+        """
+
+        item1 = next(self.gen_foo)
+        item2 = next(self.gen_foo)
+
+        item3 = next(self.gen_quux)
+        item4 = next(self.gen_quux)
+
+        assert str(item1) == "Foobar(a=2184, b='foo_001')"
+        assert str(item2) == "Foobar(a=8875, b='foo_002')"
+        assert format(item1) == "2184,foo_001"
+        assert format(item2) == "8875,foo_002"
+
+        assert str(item3) == "Quux(c='Hello', d='quux_01', e=4001)"
+        assert str(item4) == "Quux(c='Hello', d='quux_02', e=5032)"
+        assert format(item3) == "Hello,quux_01,4001"
+        assert format(item4) == "Hello,quux_02,5032"

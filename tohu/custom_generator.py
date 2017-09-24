@@ -1,11 +1,10 @@
 import re
 import sys
 from collections import namedtuple
-from mako.template import Template
 from random import Random
-from tqdm import tqdm
 
 from tohu.generators import BaseGenerator
+from tohu.formatters import CSVFormatter
 
 __all__ = ["CustomGenerator"]
 
@@ -67,6 +66,11 @@ class CustomGeneratorMeta(type):
             self.field_gens = {name: gen._spawn() for name, gen in dict(**clsdict, **instdict).items() if isinstance(gen, BaseGenerator)}
             clsname = get_item_class_name(self.__class__.__name__)
             self.item_cls = namedtuple(clsname, self.field_gens.keys())
+
+            fmt_dict = {name: "${" + name + "}" for name in self.field_gens.keys()}
+            self.csvformatter = CSVFormatter(fmt_dict)
+
+            self.item_cls.__format__ = lambda item, fmt: self.csvformatter.format_item(item)
             self.seed_generator = SeedGenerator()
             self.reset(seed)
 
