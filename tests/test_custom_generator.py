@@ -56,137 +56,9 @@ class TestCustomGenerator:
         assert item3 == ("Hello", "quux_01", 4001)
         assert item4 == ("Hello", "quux_02", 5032)
 
-    def test_formatting_items_returns_string_with_field_values(self):
+    def test_fields_can_be_defined_at_classlevel_and_in_init(self):
         """
-        Test that formatting items produced by {Foobar|Quux}Generator
-        results in strings that are concatenations of their field values.
-        """
-
-        item1 = next(self.gen_foo)
-        item2 = next(self.gen_foo)
-
-        item3 = next(self.gen_quux)
-        item4 = next(self.gen_quux)
-
-        assert str(item1) == "Foobar(a=2184, b='foo_001')"
-        assert str(item2) == "Foobar(a=8875, b='foo_002')"
-        assert format(item1) == "2184,foo_001\n"
-        assert format(item2) == "8875,foo_002\n"
-
-        assert str(item3) == "Quux(c='Hello', d='quux_01', e=4001)"
-        assert str(item4) == "Quux(c='Hello', d='quux_02', e=5032)"
-        assert format(item3) == "Hello,quux_01,4001\n"
-        assert format(item4) == "Hello,quux_02,5032\n"
-
-    def test_format_attribute_is_taken_into_account(self):
-        """
-        Test that if the attributes FMT_FIELDS or SEPARATOR are defined,
-        these are taken into account when formatting items.
-        """
-
-        self.gen_foo.FMT_FIELDS = {"Field b": "b has value: ${b}"}
-
-        self.gen_quux.FMT_FIELDS = {"Field e": "e=${e}", "Field d": "d has value: ${d}"}  # note the reversed order
-        self.gen_quux.SEPARATOR = " | "
-
-        item1 = next(self.gen_foo)
-        item2 = next(self.gen_foo)
-        item3 = next(self.gen_quux)
-        item4 = next(self.gen_quux)
-
-        # String formatting is the same as before (not affected by the FMT_FIELDS attribute)
-        assert str(item1) == "Foobar(a=2184, b='foo_001')"
-        assert str(item2) == "Foobar(a=8875, b='foo_002')"
-        assert str(item3) == "Quux(c='Hello', d='quux_01', e=4001)"
-        assert str(item4) == "Quux(c='Hello', d='quux_02', e=5032)"
-
-        # By contrast, format() uses the FMT_FIELDS and SEPARATOR attributes
-        assert format(item1) == "b has value: foo_001\n"
-        assert format(item2) == "b has value: foo_002\n"
-        assert format(item3) == "e=4001 | d has value: quux_01\n"
-        assert format(item4) == "e=5032 | d has value: quux_02\n"
-
-    def test_export_to_file(self, tmpdir):
-        """
-        Test that generator allows exporting a sequence of items to a file.
-        """
-        tmpfile = tmpdir.join("output.txt")
-
-        self.gen_quux.export(tmpfile.open('w'), N=3, header=True, seed=99999)
-
-        expected_output = textwrap.dedent("""\
-            #c,d,e
-            Hello,quux_01,5973
-            Hello,quux_02,4139
-            Hello,quux_03,4350
-            """)
-
-        assert tmpfile.read() == expected_output
-
-    def test_export_to_file_with_custom_field_formatters(self, tmpdir):
-        """
-        Test that FMT_FIELDS is taken into account for column headers and formatting rows.
-        """
-        tmpfile = tmpdir.join("output.txt")
-
-        self.gen_foo.FMT_FIELDS = {"Col 1": "a=${a}", "Col 2": "b has value: ${b}"}
-        self.gen_foo.SEPARATOR = " | "
-
-        self.gen_foo.export(tmpfile.open('w'), N=3, header=True, seed=12345)
-
-        expected_output = textwrap.dedent("""\
-            #Col 1 | Col 2
-            a=6649 | b has value: foo_001
-            a=7170 | b has value: foo_002
-            a=8552 | b has value: foo_003
-            """)
-
-        assert tmpfile.read() == expected_output
-
-    def test_export_to_file_with_custom_field_formatters_and_header_attribute(self, tmpdir):
-        """
-        Test that the HEADER attribute supersedes the standard header derived from FMT_FIELDS.
-        """
-        tmpfile = tmpdir.join("output.txt")
-
-        self.gen_foo.FMT_FIELDS = {"Col 1": "a = ${a}", "Col 2": "b has value: ${b}"}
-        self.gen_foo.SEPARATOR = " --- "
-        self.gen_foo.HEADER = "# This is a custom header line"
-
-        self.gen_foo.export(tmpfile.open('w'), N=3, header=True, seed=12345)
-
-        expected_output = textwrap.dedent("""\
-            # This is a custom header line
-            a = 6649 --- b has value: foo_001
-            a = 7170 --- b has value: foo_002
-            a = 8552 --- b has value: foo_003
-            """)
-
-        assert tmpfile.read() == expected_output
-
-    def test_export_to_file_with_custom_field_formatters_and_header_argument(self, tmpdir):
-        """
-        Test that the HEADER attribute supersedes the standard header derived from FMT_FIELDS.
-        """
-        tmpfile = tmpdir.join("output.txt")
-
-        self.gen_foo.FMT_FIELDS = {"Col 1": "a = ${a}", "Col 2": "b has value: ${b}"}
-        self.gen_foo.SEPARATOR = " --- "
-
-        self.gen_foo.export(tmpfile.open('w'), N=3, header="# Another way to specify a custom header line", seed=12345)
-
-        expected_output = textwrap.dedent("""\
-            # Another way to specify a custom header line
-            a = 6649 --- b has value: foo_001
-            a = 7170 --- b has value: foo_002
-            a = 8552 --- b has value: foo_003
-            """)
-
-        assert tmpfile.read() == expected_output
-
-    def test_fields_can_be_defined_in_init(self):
-        """
-        Test that fields can be defined in __init__() of custom generators.
+        Test that fields can be defined at classlevel an in __init__() of custom generators.
         """
         class QuuxGenerator(CustomGenerator):
             x = Integer(lo=400, hi=499)
@@ -204,3 +76,25 @@ class TestCustomGenerator:
 
         assert str(item1) == "Quux(x=488, y=2.032576355272894)"
         assert str(item2) == "Quux(x=496, y=5.032576355272894)"
+
+    # def test_formatting_items_returns_string_with_field_values(self):
+    #     """
+    #     Test that formatting items produced by {Foobar|Quux}Generator
+    #     results in strings that are concatenations of their field values.
+    #     """
+    #
+    #     item1 = next(self.gen_foo)
+    #     item2 = next(self.gen_foo)
+    #
+    #     item3 = next(self.gen_quux)
+    #     item4 = next(self.gen_quux)
+    #
+    #     assert str(item1) == "Foobar(a=2184, b='foo_001')"
+    #     assert str(item2) == "Foobar(a=8875, b='foo_002')"
+    #     assert format(item1) == "2184,foo_001\n"
+    #     assert format(item2) == "8875,foo_002\n"
+    #
+    #     assert str(item3) == "Quux(c='Hello', d='quux_01', e=4001)"
+    #     assert str(item4) == "Quux(c='Hello', d='quux_02', e=5032)"
+    #     assert format(item3) == "Hello,quux_01,4001\n"
+    #     assert format(item4) == "Hello,quux_02,5032\n"
