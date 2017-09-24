@@ -142,12 +142,13 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         Reset generator using the given seed (unless seed is None, in which case this is a no-op).
         """
         # Reset the seed generator
-        self.seed_generator.seed(seed)
+        if seed is not None:
+            self.seed_generator.seed(seed)
 
-        # Reset each constituent generator with a new seed
-        # produced by the seed generator.
-        for g, x in zip(self.field_gens.values(), self.seed_generator):
-            g.reset(x)
+            # Reset each constituent generator with a new seed
+            # produced by the seed generator.
+            for g, x in zip(self.field_gens.values(), self.seed_generator):
+                g.reset(x)
 
     def __next__(self):
         field_values = [next(g) for g in self.field_gens.values()]
