@@ -6,11 +6,8 @@ Generator classes to produce random data with specific properties.
 import datetime as dt
 import pandas as pd
 import re
-import sys
-import textwrap
 from collections import namedtuple
 from itertools import count, islice
-from mako.template import Template
 from random import Random
 from tqdm import tqdm
 
