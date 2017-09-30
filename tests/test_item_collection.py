@@ -50,11 +50,11 @@ class TestItemCollection:
         quux = QuuxGenerator(foo_items)
 
         csv_fields = {
-            'Column_1': 'foo1.aaa',
-            'Column_2': 'foo1.bbb',
-            'Column_3': 'foo2.aaa',
-            'Column_4': 'foo2.ccc',
-            'Column_5': 'date_str',
+            'Column_1': '${foo1.aaa}',
+            'Column_2': '${foo1.bbb}',
+            'Column_3': '${foo2.aaa}',
+            'Column_4': '${foo2.ccc}',
+            'Column_5': '${date_str}',
         }
 
         assert not os.path.exists(filename1)
