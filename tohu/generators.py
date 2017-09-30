@@ -62,10 +62,16 @@ class BaseGenerator:
 
 class Constant(BaseGenerator):
     """
-    Generator which produces a constant sequence (repeating the same element indefinitely).
+    Generator which produces a constant sequence (repeating the same value indefinitely).
     """
 
     def __init__(self, value):
+        """
+        Parameters
+        ----------
+        value:
+            The constant value produced by this generator.
+        """
         self.value = value
 
     def _spawn(self):
@@ -84,6 +90,16 @@ class Integer(BaseGenerator):
     """
 
     def __init__(self, lo, hi, *, seed=None):
+        """
+        Parameters
+        ----------
+        lo: integer
+            Lower bound (inclusive).
+        hi: integer
+            Upper bound (inclusive).
+        seed: integer (optional)
+            Seed to initialise this random generator.
+        """
         self.lo = lo
         self.hi = hi
         self.randgen = Random()
@@ -105,6 +121,16 @@ class Float(BaseGenerator):
     """
 
     def __init__(self, lo, hi, *, seed=None):
+        """
+        Parameters
+        ----------
+        lo: integer
+            Lower bound (inclusive).
+        hi: integer
+            Upper bound (inclusive).
+        seed: integer (optional)
+            Seed to initialise this random generator.
+        """
         self.lo = lo
         self.hi = hi
         self.randgen = Random()
@@ -132,9 +158,28 @@ class Sequential(BaseGenerator):
 
     Both the prefix and the number of digits can
     be modified by the user.
+
+    Example:
+        >>> s = Sequential(prefix="Foobar_", digits=4)
+        >>> next(s)
+        Foobar_0001
+        >>> next(s)
+        Foobar_0002
+        >>> next(s)
+        Foobar_0003
     """
 
     def __init__(self, *, prefix, digits):
+        """
+        Parameters
+        ----------
+        prefix: string
+            Prefix to be appended to generated elements.
+        digits: integer
+            Number of digits to use for the sequential numbering.
+            Any numbers will fewer digits will be zero-padded;
+            numbers with more digits are unaffected.
+        """
         self.prefix = prefix
         self.digits = digits
         self.fmt_str = self.prefix + '{{:0{digits}}}'.format(digits=digits)
@@ -161,10 +206,12 @@ class ChooseFrom(BaseGenerator):
 
     def __init__(self, values, *, seed=None):
         """
-        Initialise generator.
-
-        Args:
-            values (list):    List of options from which to choose elements.
+        Parameters
+        ----------
+        values: list
+            List of options from which to choose elements.
+        seed: integer (optional)
+            Seed to initialise this random generator.
         """
         self.values = values
         self.idxgen = Integer(lo=1, hi=(len(self.values) - 1))
@@ -190,6 +237,16 @@ class CharString(BaseGenerator):
     """
 
     def __init__(self, *, length, chars, seed=None):
+        """
+        Parameters
+        ----------
+        length: integer
+            Length of the character strings produced by this generator.
+        chars: iterable
+            Character set to draw from when generating strings.
+        seed: integer (optional)
+            Seed to initialise this random generator.
+        """
         self.length = length
         self.chars = chars
         self.chargen = ChooseFrom(self.chars)
@@ -209,6 +266,14 @@ class DigitString(CharString):
     """
 
     def __init__(self, *, length, seed=None):
+        """
+        Parameters
+        ----------
+        length: int
+            Length of the digit strings produced by this generator.
+        seed: integer (optional)
+            Seed to initialise this random generator.
+        """
         chars = "0123456789"
         self.length = length
         super().__init__(length=length, chars=chars, seed=seed)
@@ -223,6 +288,14 @@ class HashDigest(CharString):
     """
 
     def __init__(self, *, length, seed=None):
+        """
+        Parameters
+        ----------
+        length: int
+            Length of the strings produced by this generator.
+        seed: integer (optional)
+            Seed to initialise this random generator.
+        """
         chars = "0123456789ABCDEF"
         self.length = length
         super().__init__(length=length, chars=chars, seed=seed)
