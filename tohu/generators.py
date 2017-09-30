@@ -10,6 +10,7 @@ from collections import namedtuple
 from itertools import count, islice
 from random import Random
 from tqdm import tqdm
+from .item_collection import ItemCollection
 
 __all__ = [
     'Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
@@ -49,7 +50,7 @@ class BaseGenerator:
         items = islice(self, N)
         if progressbar:
             items = tqdm(items, total=N)
-        yield from items
+        return ItemCollection(items)
 
     def _spawn(self):
         """
@@ -432,58 +433,58 @@ def _create_namedtuple_class(item_cls_name, attrgens):
     return namedtuple(item_cls_name, item_fields)
 
 
-class ItemCollection:
-    def __init__(self, items, N):
-        """
-        Parameters:
-        -----------
-        items: iterable
-            Sequence of items in the collection.
-        N: int
-            Number of items in the collection. This needs to be specified explicitly
-            because `items` is typically an iterator.
-        """
-        self.items = list(items)
-        self.N = N
-
-    def __repr__(self):
-        return "<ItemCollection of length {}>".format(len(self))
-
-    def __len__(self):
-        return self.N
-
-    def __getitem__(self, i):
-        return self.items[i]
-
-    def __iter__(self):
-        yield from self.items
-
-    def write(self, filename, *, mode='w', header=None, progressbar=True):
-        """
-        Export items to a file.
-
-        Arguments:
-            filename:     Name of the output file.
-            mode:         How to open the file ('w' = write, 'a' = append)
-            header:       Header line printed at the very beginning (remember to add a newline at the end).
-            progressbar:  Whether to display a progress bar while exporting data.
-        """
-        assert mode in ['w', 'a', 'write', 'append'], "Argument 'mode' must be either 'w'/'write' or 'a'/'append'."
-        assert header is None or isinstance(header, str), "Argument 'header' must be a string."
-
-        with open(filename, mode=mode[0]) as f:
-            if header is not None:
-                f.write(header)
-
-            rng = range(self.N)
-            if progressbar:
-                rng = tqdm(rng)
-
-            for _, x in zip(rng, self.items):
-                f.write(format(x))
-
-    def to_df(self):
-        return pd.DataFrame([pd.Series(item._asdict()) for item in self.items])
+# class ItemCollection:
+#     def __init__(self, items, N):
+#         """
+#         Parameters:
+#         -----------
+#         items: iterable
+#             Sequence of items in the collection.
+#         N: int
+#             Number of items in the collection. This needs to be specified explicitly
+#             because `items` is typically an iterator.
+#         """
+#         self.items = list(items)
+#         self.N = N
+#
+#     def __repr__(self):
+#         return "<ItemCollection of length {}>".format(len(self))
+#
+#     def __len__(self):
+#         return self.N
+#
+#     def __getitem__(self, i):
+#         return self.items[i]
+#
+#     def __iter__(self):
+#         yield from self.items
+#
+#     def write(self, filename, *, mode='w', header=None, progressbar=True):
+#         """
+#         Export items to a file.
+#
+#         Arguments:
+#             filename:     Name of the output file.
+#             mode:         How to open the file ('w' = write, 'a' = append)
+#             header:       Header line printed at the very beginning (remember to add a newline at the end).
+#             progressbar:  Whether to display a progress bar while exporting data.
+#         """
+#         assert mode in ['w', 'a', 'write', 'append'], "Argument 'mode' must be either 'w'/'write' or 'a'/'append'."
+#         assert header is None or isinstance(header, str), "Argument 'header' must be a string."
+#
+#         with open(filename, mode=mode[0]) as f:
+#             if header is not None:
+#                 f.write(header)
+#
+#             rng = range(self.N)
+#             if progressbar:
+#                 rng = tqdm(rng)
+#
+#             for _, x in zip(rng, self.items):
+#                 f.write(format(x))
+#
+#     def to_df(self):
+#         return pd.DataFrame([pd.Series(item._asdict()) for item in self.items])
 
 
 # class SeedGenerator:
