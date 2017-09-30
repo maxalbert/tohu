@@ -75,7 +75,7 @@ class TestCustomGenerator:
         item2 = next(g2)
 
         assert str(item1) == "Quux(x=488, y=2.032576355272894)"
-        assert str(item2) == "Quux(x=496, y=5.032576355272894)"
+        assert str(item2) == "Quux(x=488, y=5.032576355272894)"
 
     def test_formatting_items_returns_string_with_field_values(self):
         """
