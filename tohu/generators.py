@@ -50,7 +50,7 @@ class BaseGenerator:
         items = islice(self, N)
         if progressbar:
             items = tqdm(items, total=N)
-        return ItemCollection(items)
+        return ItemCollection(items, N)
 
     def _spawn(self):
         """

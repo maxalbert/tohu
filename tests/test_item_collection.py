@@ -14,24 +14,20 @@ from tohu.generators import ChooseFrom, HashDigest, Integer, Sequential, Timesta
 
 class TestItemCollection:
 
-    @pytest.mark.parametrize("items", [[42, 23, "Hello", 12, "foobar"], range(100)])
-    def test_converting_item_collection_to_list_returns_original_items(self, items):
+    @pytest.mark.parametrize("items, N", [
+        ([42, 23, "Hello", 12, "foobar"], 5),
+        (range(100), 100),
+    ])
+    def test_converting_item_collection_to_list_returns_original_items(self, items, N):
         """
         Converting an ItemCollection to a list returns the original items.
         """
-        c = ItemCollection(items)
+        c = ItemCollection(items, N)
         assert list(c) == list(items)
 
     def test_length(self):
-        c = ItemCollection(["hello", "world", "foobar", "quux"])
+        c = ItemCollection(["hello", "world", "foobar", "quux"], 4)
         assert len(c) == 4
-
-    def test_indexing(self):
-        c = ItemCollection(["hello", "world", "foobar", "quux"])
-        assert c[0] == "hello"
-        assert c[1] == "world"
-        assert c[2] == "foobar"
-        assert c[3] == "quux"
 
     def test_write_csv(self, tmpdir):
         filename1 = tmpdir.join("output_without_header.csv").strpath
@@ -50,9 +46,8 @@ class TestItemCollection:
                 self.date_str = Timestamp(start="2006-01-01", end="2017-09-01", fmt='%d-%b-%y')
 
         foo = FoobarGenerator()
-        foo_items = foo.generate(10, seed=12345)
+        foo_items = list(foo.generate(10, seed=12345))
         quux = QuuxGenerator(foo_items)
-        quux_items = quux.generate(5, seed=99999)
 
         csv_fields = {
             'Column_1': 'foo1.aaa',
@@ -65,8 +60,11 @@ class TestItemCollection:
         assert not os.path.exists(filename1)
         assert not os.path.exists(filename2)
         assert not os.path.exists(filename3)
+        quux_items = quux.generate(5, seed=99999)
         quux_items.write(filename1, fields=csv_fields, header=False)
+        quux_items = quux.generate(5, seed=99999)
         quux_items.write(filename2, fields=csv_fields, header=True)
+        quux_items = quux.generate(5, seed=99999)
         quux_items.write(filename3, fields=csv_fields, header="# This is a custom header line")
         assert os.path.exists(filename1)
         assert os.path.exists(filename2)
