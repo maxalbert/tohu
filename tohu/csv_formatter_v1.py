@@ -1,7 +1,7 @@
 from mako.template import Template
 
 
-class CSVFormatter:
+class CSVFormatterV1:
     """
     This class is responsible for formatting items to strings
     representing individual rows in a CSV file, and for exporting

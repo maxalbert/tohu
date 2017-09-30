@@ -1,19 +1,19 @@
 import pytest
 import textwrap
 from collections import namedtuple
-from tohu.formatters import CSVFormatter
+from tohu.csv_formatter_v1 import CSVFormatterV1
 
 
 @pytest.fixture
 def csvfmt(scope="module"):
-    return CSVFormatter(
+    return CSVFormatterV1(
         {"Column 1": "a=${a}",
          "Column 2": "b: ${b}",
          "Column 3": "c has value ${c}"
          })
 
 
-class TestCSVFormatter:
+class TestCSVFormatterV1:
 
     def setup(self):
         Foobar = namedtuple("Foobar", ["a", "b", "c"])
@@ -73,7 +73,7 @@ class TestCSVFormatter:
         """
         Test that the `sep` argument is used as field separator.
         """
-        csvfmt = CSVFormatter(
+        csvfmt = CSVFormatterV1(
             {"Column 1": "a=${a}",
              "Column 2": "b: ${b}",
              "Column 3": "c has value ${c}"

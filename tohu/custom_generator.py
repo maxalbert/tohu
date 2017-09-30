@@ -4,7 +4,7 @@ from collections import namedtuple
 from random import Random
 
 from tohu.generators import BaseGenerator
-from tohu.formatters import CSVFormatter
+from tohu.csv_formatter_v1 import CSVFormatterV1
 
 __all__ = ["CustomGenerator"]
 
@@ -68,7 +68,7 @@ class CustomGeneratorMeta(type):
             self.item_cls = namedtuple(clsname, self.field_gens.keys())
 
             fmt_dict = {name: "${" + name + "}" for name in self.field_gens.keys()}
-            self.csvformatter = CSVFormatter(fmt_dict)
+            self.csvformatter = CSVFormatterV1(fmt_dict)
 
             self.item_cls.__format__ = lambda item, fmt: self.csvformatter.format_item(item)
             self.seed_generator = SeedGenerator()
