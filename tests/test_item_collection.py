@@ -34,7 +34,9 @@ class TestItemCollection:
         assert c[3] == "quux"
 
     def test_write_csv(self, tmpdir):
-        filename = tmpdir.join("output.csv").strpath
+        filename1 = tmpdir.join("output_without_header.csv").strpath
+        filename2 = tmpdir.join("output_with_default_header.csv").strpath
+        filename3 = tmpdir.join("output_with_custom_header.csv").strpath
 
         class FoobarGenerator(CustomGenerator):
             aaa = HashDigest(length=6)
@@ -60,12 +62,17 @@ class TestItemCollection:
             'Column_5': 'date_str',
         }
 
-        assert not os.path.exists(filename)
-        quux_items.write(filename, fields=csv_fields)
-        assert os.path.exists(filename)
+        assert not os.path.exists(filename1)
+        assert not os.path.exists(filename2)
+        assert not os.path.exists(filename3)
+        quux_items.write(filename1, fields=csv_fields, header=False)
+        quux_items.write(filename2, fields=csv_fields, header=True)
+        quux_items.write(filename3, fields=csv_fields, header="# This is a custom header line")
+        assert os.path.exists(filename1)
+        assert os.path.exists(filename2)
+        assert os.path.exists(filename3)
 
-        expected_output = textwrap.dedent("""\
-            #Column_1,Column_2,Column_3,Column_4,Column_5
+        expected_output_without_header = textwrap.dedent("""\
             27E995,Foo_04,27E995,58,25-Sep-10
             27E995,Foo_04,9CB45F,36,12-Aug-11
             9CB45F,Foo_10,297F9D,39,17-Jan-07
@@ -73,4 +80,14 @@ class TestItemCollection:
             F5C771,Foo_08,8CE1AD,68,09-Mar-12
             """)
 
-        assert open(filename).read() == expected_output
+        expected_output_with_default_header = \
+            ("#Column_1,Column_2,Column_3,Column_4,Column_5\n" +
+             expected_output_without_header)
+
+        expected_output_with_custom_header = \
+            ("# This is a custom header line\n" +
+             expected_output_without_header)
+
+        assert open(filename1).read() == expected_output_without_header
+        assert open(filename2).read() == expected_output_with_default_header
+        assert open(filename3).read() == expected_output_with_custom_header

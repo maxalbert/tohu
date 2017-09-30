@@ -40,7 +40,7 @@ class ItemCollection:
     def __getitem__(self, idx):
         return self.items[idx]
 
-    def write(self, filename, fields, sep=",", line_separator="\n"):
+    def write(self, filename, fields, sep=",", line_separator="\n", header=True):
         """
         Write item collection to CSV file.
 
@@ -57,7 +57,15 @@ class ItemCollection:
         """
 
         template = make_mako_template(fields, sep=sep, line_separator=line_separator)
-        header_line = "#" + sep.join(fields.keys()) + line_separator
+
+        if header is False:
+            header_line = ""
+        elif header is True:
+            header_line = "#" + sep.join(fields.keys()) + line_separator
+        elif isinstance(header, str):
+            header_line = header + line_separator
+        else:
+            raise ValueError("Invalid argument for argument 'header': '{}' (must be either True/False or a string).".format(header))
 
         with open(filename, 'w') as f:
             f.write(header_line)
