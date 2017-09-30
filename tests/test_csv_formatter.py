@@ -40,6 +40,26 @@ class TestCSVFormatter:
 
         assert csv == csv_expected
 
+    def test_init_with_field_dict_and_custom_field_separator(self):
+        """
+        Test that custom field_separator is taken into account.
+        """
+        fields = {
+            'Column 1': 'a=${aaa}',
+            'Column 2': 'b=${bbb}',
+            'Column 3': 'c=${ccc}',
+        }
+        csv_formatter = CSVFormatter(fields=fields, sep=" || ")
+        csv = csv_formatter.format_records(self.records)
+
+        csv_expected = textwrap.dedent("""\
+            #Column 1 || Column 2 || Column 3
+            a=foobar_01 || b=8 || c=4898FE19
+            a=foobar_02 || b=160 || c=5825D187
+            a=foobar_03 || b=99 || c=3648A436
+            """)
+
+        assert csv == csv_expected
     def test_init_with_format_string(self):
         """
         Test that CSVFormatter can be initialised with a formatting string.
@@ -109,6 +129,10 @@ class TestCSVFormatterHeaderLine:
     def test_init_with_field_dict_and_custom_header(self):
         formatter = CSVFormatter(fields=self.fields, header="# This is a custom header line")
         assert formatter.format_records(records=[]) == "# This is a custom header line\n"
+
+    def test_init_with_field_dict_and_custom_separator(self):
+        formatter = CSVFormatter(fields=self.fields, sep=" || ", header=True)
+        assert formatter.format_records(records=[]) == "#Column 1 || Column 2 || Column 3\n"
 
     def test_init_with_format_str_and_no_header_argument(self):
         formatter = CSVFormatter(fmt_str="", header=None)

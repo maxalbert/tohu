@@ -7,10 +7,11 @@ class CSVFormatter:
     a sequence of records as CSV output.
     """
 
-    def __init__(self, *, fields=None, fmt_str=None, header=None):
+    def __init__(self, *, fields=None, fmt_str=None, sep=",", header=None):
         """
         Initialise CSV formatter.
-        Either `fields` or `fmt_str` (but not both) must be specified.
+
+        Either `fields` or `fmt_str` must be specified (but not both).
 
         If `fields` is given (which must be a dictionary of column names
         and associated format strings) then a header line is automatically
@@ -23,11 +24,14 @@ class CSVFormatter:
             Formatting string that specifies how an
             individual record should be formatted.
 
+        sep: string
+            Field separator. Default: ','
+
         header: string (optional)
             Header line to be used in the CSV output.
         """
         self.line_separator = "\n"
-        self.sep = ","
+        self.sep = sep
 
         if fields is not None:
             if header is None or header is True:
