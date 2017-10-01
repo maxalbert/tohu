@@ -98,7 +98,7 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
 
-    def write(self, filename, *, N, seed=None, fields=None, fmt_str=None, header=None):
+    def to_csv(self, filename, *, N, seed=None, fields=None, fmt_str=None, header=None):
         """
         Generate N items and write output to a CSV file.
 

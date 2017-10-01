@@ -39,7 +39,7 @@ class ItemCollection:
     def __iter__(self):
         return iter(self.items)
 
-    def write(self, filename, *, fmt_str=None, fields=None, sep=",", header=None):
+    def to_csv(self, filename, *, fmt_str=None, fields=None, sep=",", header=None):
         """
         Write item collection to CSV file.
 

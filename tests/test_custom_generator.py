@@ -106,8 +106,8 @@ class TestCustomGenerator:
         filename1 = tmpdir.join("output1.txt").strpath
         filename2 = tmpdir.join("output2.txt").strpath
 
-        self.gen_foo.write(filename1, N=3, seed=12345, header="# Custom header")
-        self.gen_foo.write(filename2, N=3, seed=12345, header="# Custom header")
+        self.gen_foo.to_csv(filename1, N=3, seed=12345, header="# Custom header")
+        self.gen_foo.to_csv(filename2, N=3, seed=12345, header="# Custom header")
 
         csv_expected = textwrap.dedent("""\
             # Custom header
@@ -131,7 +131,7 @@ class TestCustomGenerator:
         filename = tmpdir.join("output.csv").strpath
 
         g = FoobarGenerator()
-        g.write(filename, N=3, seed=12345)
+        g.to_csv(filename, N=3, seed=12345)
 
         csv_expected = textwrap.dedent("""\
             #Column 1,Column 2
@@ -155,7 +155,7 @@ class TestCustomGenerator:
         filename = tmpdir.join("output.csv").strpath
 
         g = FoobarGenerator()
-        g.write(filename, N=3, seed=12345)
+        g.to_csv(filename, N=3, seed=12345)
 
         csv_expected = textwrap.dedent("""\
             # My custom header line
@@ -178,7 +178,7 @@ class TestCustomGenerator:
         filename = tmpdir.join("output.csv").strpath
 
         g = FoobarGenerator()
-        g.write(filename, N=3, seed=12345)
+        g.to_csv(filename, N=3, seed=12345)
 
         csv_expected = textwrap.dedent("""\
             a=6649 || b: foo_001
