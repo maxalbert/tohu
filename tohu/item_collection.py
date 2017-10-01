@@ -54,8 +54,4 @@ class ItemCollection:
         """
 
         formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, sep=sep, header=header)
-
-        with open(filename, 'w') as f:
-            f.write(formatter.header_line)
-            for item in self.items:
-                f.write(formatter.format_record(item))
+        formatter.write(filename, self.items)

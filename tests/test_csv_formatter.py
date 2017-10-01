@@ -60,6 +60,7 @@ class TestCSVFormatter:
             """)
 
         assert csv == csv_expected
+
     def test_init_with_format_string(self):
         """
         Test that CSVFormatter can be initialised with a formatting string.
@@ -94,6 +95,25 @@ class TestCSVFormatter:
             a=foobar_02,c=5825D187,second_line
             a=foobar_03,b=99,first_line
             a=foobar_03,c=3648A436,second_line
+            """)
+
+        assert csv == csv_expected
+
+    def test_write_csv_file(self, tmpdir):
+        """
+
+        """
+        filename = tmpdir.join("output.csv").strpath
+
+        csv_formatter = CSVFormatter(fmt_str="${aaa},${bbb},${ccc}", header="# Custom header line")
+        csv_formatter.write(filename, self.records)
+
+        csv = open(filename).read()
+        csv_expected = textwrap.dedent("""\
+            # Custom header line
+            foobar_01,8,4898FE19
+            foobar_02,160,5825D187
+            foobar_03,99,3648A436
             """)
 
         assert csv == csv_expected

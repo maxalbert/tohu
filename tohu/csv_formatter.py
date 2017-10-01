@@ -67,3 +67,12 @@ class CSVFormatter:
         for r in records:
             s += self.template.render(**r._asdict())
         return s
+
+    def write(self, filename, items):
+        """
+        Write items to file.
+        """
+        with open(filename, 'w') as f:
+            f.write(self.header_line)
+            for item in items:
+                f.write(self.format_record(item))
