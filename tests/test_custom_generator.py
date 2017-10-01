@@ -118,3 +118,72 @@ class TestCustomGenerator:
 
         assert open(filename1).read() == csv_expected
         assert open(filename2).read() == csv_expected
+
+    def test_csv_fields_can_be_defined_in_class_declaration(self, tmpdir):
+        """
+        Test that fields for CSV export can be defined via the CSV_FIELDS class attribute.
+        """
+        class FoobarGenerator(CustomGenerator):
+            a = Integer(lo=1000, hi=9000)
+            b = Sequential(prefix="foo_", digits=3)
+            CSV_FIELDS = {"Column 1": "a=${a}", "Column 2": "b=${b}"}
+
+        filename = tmpdir.join("output.csv").strpath
+
+        g = FoobarGenerator()
+        g.write(filename, N=3, seed=12345)
+
+        csv_expected = textwrap.dedent("""\
+            #Column 1,Column 2
+            a=6649,b=foo_001
+            a=7170,b=foo_002
+            a=8552,b=foo_003
+            """)
+
+        assert open(filename).read() == csv_expected
+
+    def test_csv_header_can_be_defined_in_class_declaration(self, tmpdir):
+        """
+        Test that CSV header can be defined via the CSV_HEADER class attribute .
+        """
+        class FoobarGenerator(CustomGenerator):
+            a = Integer(lo=1000, hi=9000)
+            b = Sequential(prefix="foo_", digits=3)
+            CSV_HEADER = "# My custom header line"
+            CSV_FIELDS = {"Column 1": "a: ${a}", "Column 2": "b: ${b}"}
+
+        filename = tmpdir.join("output.csv").strpath
+
+        g = FoobarGenerator()
+        g.write(filename, N=3, seed=12345)
+
+        csv_expected = textwrap.dedent("""\
+            # My custom header line
+            a: 6649,b: foo_001
+            a: 7170,b: foo_002
+            a: 8552,b: foo_003
+            """)
+
+        assert open(filename).read() == csv_expected
+
+    def test_csv_format_string_can_be_defined_in_class_declaration(self, tmpdir):
+        """
+        Test that CSV formatting can be defined via the CSV_FMT_STR class attribute .
+        """
+        class FoobarGenerator(CustomGenerator):
+            a = Integer(lo=1000, hi=9000)
+            b = Sequential(prefix="foo_", digits=3)
+            CSV_FMT_STR = "a=${a} || b: ${b}"
+
+        filename = tmpdir.join("output.csv").strpath
+
+        g = FoobarGenerator()
+        g.write(filename, N=3, seed=12345)
+
+        csv_expected = textwrap.dedent("""\
+            a=6649 || b: foo_001
+            a=7170 || b: foo_002
+            a=8552 || b: foo_003
+            """)
+
+        assert open(filename).read() == csv_expected

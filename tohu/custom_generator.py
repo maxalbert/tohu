@@ -114,8 +114,12 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         The remaining arguments `fields`, `fmt_str`, `header`
         are passed on to CSVFormatter.
         """
+        if fmt_str is None:
+            fmt_str = getattr(self, 'CSV_FMT_STR', None)
         if fields is None and fmt_str is None:
-            fields = self.fmt_dict
+            fields = getattr(self, 'CSV_FIELDS', self.fmt_dict)
+        if header is None:
+            header = getattr(self, 'CSV_HEADER', None)
 
         formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, header=header)
         formatter.write(filename, self.generate(N, seed=seed))
