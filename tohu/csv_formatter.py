@@ -1,3 +1,4 @@
+import os
 from mako.template import Template
 
 
@@ -72,6 +73,11 @@ class CSVFormatter:
         """
         Write items to file.
         """
+        dirname = os.path.dirname(filename)
+
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
         with open(filename, 'w') as f:
             f.write(self.header_line)
             for item in items:
