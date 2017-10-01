@@ -14,7 +14,7 @@ from .item_collection import ItemCollection
 
 __all__ = [
     'Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
-    'HashDigest', 'Geolocation', 'Timestamp',
+    'HashDigest', 'GeolocationPair', 'Timestamp',
 ]
 
 
@@ -59,6 +59,26 @@ class BaseGenerator:
         which has the same attributes but is otherwise independent.
         """
         raise NotImplementedError("Class {} does not implement method '_spawn'.".format(self.__class__.__name__))
+
+
+class TupleGenerator(BaseGenerator):
+    """
+    Abstract base class
+    """
+
+    @property
+    def tuple_len(self):
+        """
+        Length of tuples produced by this generator.
+        """
+        try:
+            return self._tuple_len
+        except AttributeError:
+            raise NotImplementedError("Class {} does not implement attribute 'tuple_len'.".format(self.__class__.__name__))
+
+    @tuple_len.setter
+    def tuple_len(self, value):
+        self._tuple_len = value
 
 
 class Constant(BaseGenerator):
@@ -305,7 +325,7 @@ class HashDigest(CharString):
         return HashDigest(length=self.length)
 
 
-class Geolocation(BaseGenerator):
+class GeolocationPair(TupleGenerator):
     """
     Generator which produces a sequence of (lon, lat) coordinates.
     """
@@ -313,9 +333,10 @@ class Geolocation(BaseGenerator):
     def __init__(self):
         self.lon_gen = Float(-180, 180)
         self.lat_gen = Float(-90, 90)
+        self.tuple_len = 2
 
     def _spawn(self):
-        return Geolocation()
+        return GeolocationPair()
 
     def __next__(self):
         return (next(self.lon_gen), next(self.lat_gen))
@@ -323,6 +344,10 @@ class Geolocation(BaseGenerator):
     def reset(self, seed):
         self.lon_gen.reset(seed)
         self.lat_gen.reset(seed)
+
+
+def Geolocation():
+    return Split(GeolocationPair())
 
 
 class TimestampError(Exception):
