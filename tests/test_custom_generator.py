@@ -98,3 +98,23 @@ class TestCustomGenerator:
         assert str(item4) == "Quux(c='Hello', d='quux_02', e=5032)"
         assert format(item3) == "Hello,quux_01,4001"
         assert format(item4) == "Hello,quux_02,5032"
+
+    def test_write_csv_file(self, tmpdir):
+        """
+        Test that generated items can be written to a CSV file.
+        """
+        filename1 = tmpdir.join("output1.txt").strpath
+        filename2 = tmpdir.join("output2.txt").strpath
+
+        self.gen_foo.write(filename1, N=3, seed=12345, header="# Custom header")
+        self.gen_foo.write(filename2, N=3, seed=12345, header="# Custom header")
+
+        csv_expected = textwrap.dedent("""\
+            # Custom header
+            6649,foo_001
+            7170,foo_002
+            8552,foo_003
+            """)
+
+        assert open(filename1).read() == csv_expected
+        assert open(filename2).read() == csv_expected

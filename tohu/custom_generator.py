@@ -3,8 +3,9 @@ import sys
 from collections import namedtuple
 from random import Random
 
-from tohu.generators import BaseGenerator
-from tohu.csv_formatter_v1 import CSVFormatterV1
+from .generators import BaseGenerator
+from .csv_formatter import CSVFormatter
+from .csv_formatter_v1 import CSVFormatterV1
 
 __all__ = ["CustomGenerator"]
 
@@ -67,8 +68,8 @@ class CustomGeneratorMeta(type):
             clsname = get_item_class_name(self.__class__.__name__)
             self.item_cls = namedtuple(clsname, self.field_gens.keys())
 
-            fmt_dict = {name: "${" + name + "}" for name in self.field_gens.keys()}
-            self.csvformatter = CSVFormatterV1(fmt_dict)
+            self.fmt_dict = {name: "${" + name + "}" for name in self.field_gens.keys()}
+            self.csvformatter = CSVFormatterV1(self.fmt_dict)
 
             self.item_cls.__format__ = lambda item, fmt: self.csvformatter.format_item(item)
             self.seed_generator = SeedGenerator()
@@ -96,3 +97,25 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
     def __next__(self):
         field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
+
+    def write(self, filename, *, N, seed=None, fields=None, fmt_str=None, header=None):
+        """
+        Generate N items and write output to a CSV file.
+
+        Parameters
+        ----------
+        filename: string
+            Output filename.
+        N: integer
+            Number of items to generate.
+        seed: integer (optional)
+            Seed with which to initialise random generator.
+
+        The remaining arguments `fields`, `fmt_str`, `header`
+        are passed on to CSVFormatter.
+        """
+        if fields is None and fmt_str is None:
+            fields = self.fmt_dict
+
+        formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, header=header)
+        formatter.write(filename, self.generate(N, seed=seed))
