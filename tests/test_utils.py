@@ -1,5 +1,5 @@
 from .context import tohu
-from tohu.generators import Integer, Float, Sequential, TupleGenerator
+from tohu.generators import ChooseFrom, Integer, Float, Sequential, TupleGenerator
 from tohu.utils import First, Second, Nth, BufferedTuple, Split, Zip
 
 
@@ -134,9 +134,25 @@ class TestUtils:
         assert next(g3) == "Quux4"
         assert next(g3) == "Quux5"
 
+    def test_split_output_of_choosefrom_generator(self):
+        """
+        Test that we can split the output of a ChooseFrom generator that produces tuples.
+        """
+        pairs = [('a', 1), ('b', 2), ('c', 3), ('d', 4)]
+        g, h = Split(ChooseFrom(pairs, seed=99999), tuple_len=2)
+
+        assert list(g.generate(N=5)) == ['b', 'c', 'd', 'd', 'd']
+        assert list(h.generate(N=5)) == [2, 3, 4, 4, 4]
+
+        g, h = Split(ChooseFrom(pairs, seed=99999), tuple_len=2)
+        assert (next(g), next(h)) == ('b', 2)
+        assert (next(g), next(h)) == ('c', 3)
+        assert (next(g), next(h)) == ('d', 4)
+        assert (next(g), next(h)) == ('d', 4)
+        assert (next(g), next(h)) == ('d', 4)
+
     def test_zip(self):
         """
-
         """
         g1 = Sequential(prefix="Foo_", digits=3)
         g2 = Integer(0, 1000)
