@@ -38,7 +38,7 @@ class TestBufferedTuple:
         """
 
         pair_gen = DummyTupleGen("Foo", "Bar")
-        b = BufferedTuple(pair_gen)
+        b = BufferedTuple(pair_gen, tuple_len=2)
 
         assert b.next_nth(0) == "Foo1"
         assert b.next_nth(1) == "Bar1"

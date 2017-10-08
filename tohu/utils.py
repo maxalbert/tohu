@@ -34,26 +34,28 @@ class BufferedTuple(BaseGenerator):
     of items from a tuple generator.
     """
 
-    def __init__(self, g, *, maxbuffer=10):
+    def __init__(self, g, *, tuple_len, maxbuffer=10):
         """
         Parameters
         ----------
 
         g: tohu generator
             The generator to be buffered. The items produced by `g` must be tuples.
+        tuple_len: integer
+            Length of tuples produced by g.
         maxbuffer: integer
             Maximum number of items to be buffered.
         """
-        assert isinstance(g, TupleGenerator)
         self.g = g
+        self.tuple_len = tuple_len
         self.maxbuffer = maxbuffer
         self._reset_queues()
 
     def _spawn(self):
-        return BufferedTuple(self.g._spawn(), maxbuffer=self.maxbuffer)
+        return BufferedTuple(self.g._spawn(), tuple_len=self.tuple_len, maxbuffer=self.maxbuffer)
 
     def _reset_queues(self):
-        self._queues = [deque(maxlen=self.maxbuffer) for _ in range(self.g.tuple_len)]
+        self._queues = [deque(maxlen=self.maxbuffer) for _ in range(self.tuple_len)]
 
     def _refill(self):
         item = next(self.g)
@@ -70,7 +72,7 @@ class BufferedTuple(BaseGenerator):
         return self._queues[n].popleft()
 
 
-def Split(g, *, maxbuffer=10):
+def Split(g, *, maxbuffer=10, tuple_len=None):
     """
     Split a tuple generator into individual generators.
 
@@ -81,9 +83,13 @@ def Split(g, *, maxbuffer=10):
     maxbuffer: integer
         Maximum number of items produced by `g` that will be buffered.
     """
-    assert isinstance(g, TupleGenerator)
+    if tuple_len is None:
+        try:
+            tuple_len = g.tuple_len
+        except AttributeError:
+            raise ValueError("Argument 'tuple_len' must be given since generator is not of type TupleGenerator.")
 
-    g_buffered = BufferedTuple(g, maxbuffer=maxbuffer)
+    g_buffered = BufferedTuple(g, maxbuffer=maxbuffer, tuple_len=tuple_len)
 
     class NthBuffered(BaseGenerator):
         def __init__(self, g, idx):
@@ -99,7 +105,7 @@ def Split(g, *, maxbuffer=10):
         def reset(self, seed):
             self.g.reset(seed)
 
-    return tuple(NthBuffered(g_buffered, i) for i in range(g.tuple_len))
+    return tuple(NthBuffered(g_buffered, i) for i in range(tuple_len))
 
 
 class Zip(TupleGenerator):
