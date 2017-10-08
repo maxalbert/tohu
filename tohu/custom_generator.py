@@ -98,7 +98,7 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
 
-    def to_csv(self, path_or_buf=None, *, N, seed=None, fields=None, fmt_str=None, header=None):
+    def to_csv(self, path_or_buf=None, *, N, seed=None, fields=None, fmt_str=None, header=None, progressbar=True):
         """
         Generate N items and return the resulting CSV string or output to a file.
 
@@ -111,6 +111,8 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
             Number of items to generate.
         seed: integer (optional)
             Seed with which to initialise random generator.
+        progressbar: boolean
+            Whether to display a progressbar during item generation.
 
         The remaining arguments `fields`, `fmt_str`, `header`
         are passed on to CSVFormatter.
@@ -123,4 +125,4 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
             header = getattr(self, 'CSV_HEADER', None)
 
         formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, header=header)
-        return formatter.to_csv(self.generate(N, seed=seed), path_or_buf=path_or_buf)
+        return formatter.to_csv(self.generate(N, seed=seed, progressbar=progressbar), path_or_buf=path_or_buf)

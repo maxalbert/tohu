@@ -2,7 +2,7 @@ from collections import deque
 from functools import partial
 from .generators import BaseGenerator, GeolocationPair, TupleGenerator
 
-__all__ = ['First', 'Second', 'Nth', 'Split', 'Geolocation']
+__all__ = ['First', 'Second', 'Nth', 'Split', 'Zip', 'Geolocation']
 
 
 class Nth(BaseGenerator):
