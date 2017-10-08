@@ -99,6 +99,20 @@ class TestCustomGenerator:
         assert format(item3) == "Hello,quux_01,4001"
         assert format(item4) == "Hello,quux_02,5032"
 
+    def test_return_csv_string(self):
+        """
+        Test that to_csv() returns the expected CSV string if no filename is given.
+        """
+        csv_expected = textwrap.dedent("""\
+            # Custom header
+            6649,foo_001
+            7170,foo_002
+            8552,foo_003
+            """)
+
+        csv = self.gen_foo.to_csv(N=3, seed=12345, header="# Custom header")
+        assert csv == csv_expected
+
     def test_write_csv_file(self, tmpdir):
         """
         Test that generated items can be written to a CSV file.

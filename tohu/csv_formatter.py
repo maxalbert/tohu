@@ -1,3 +1,4 @@
+import io
 import os
 from mako.template import Template
 
@@ -69,16 +70,25 @@ class CSVFormatter:
             s += self.template.render(**r._asdict())
         return s
 
-    def write(self, filename, items):
+    def to_csv(self, items, *, path_or_buf):
         """
-        Write items to file.
+        Format items as CSV string or writ them to a file.
         """
-        dirname = os.path.dirname(filename)
+        if isinstance(path_or_buf, str):
+            dirname = os.path.dirname(path_or_buf)
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            f = open(path_or_buf, 'w')
+        elif path_or_buf is None:
+            f = io.StringIO()
+        elif isinstance(path_or_buf, io.IOBase):
+            f = path_or_buf
+        else:
+            raise TypeError("Argument 'filename' must be string or None. Got: {} ({})".format(path_or_buf, type(path_or_buf)))
 
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
+        f.write(self.header_line)
+        for item in items:
+            f.write(self.format_record(item))
 
-        with open(filename, 'w') as f:
-            f.write(self.header_line)
-            for item in items:
-                f.write(self.format_record(item))
+        if path_or_buf is None:
+            return f.getvalue()

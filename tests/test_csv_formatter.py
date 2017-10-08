@@ -99,6 +99,23 @@ class TestCSVFormatter:
 
         assert csv == csv_expected
 
+    def test_return_csv_string(self):
+        """
+        Test that to_csv() returns the expected CSV string if no filename is given.
+        """
+
+        csv_formatter = CSVFormatter(fmt_str="${aaa},${bbb},${ccc}", header="# Custom header line")
+
+        csv_expected = textwrap.dedent("""\
+            # Custom header line
+            foobar_01,8,4898FE19
+            foobar_02,160,5825D187
+            foobar_03,99,3648A436
+            """)
+
+        csv = csv_formatter.to_csv(self.records, path_or_buf=None)
+        assert csv == csv_expected
+
     def test_write_csv_file(self, tmpdir):
         """
         Test that writing records to a CSV file produces the expected result.
@@ -106,7 +123,7 @@ class TestCSVFormatter:
         filename = tmpdir.join("output.csv").strpath
 
         csv_formatter = CSVFormatter(fmt_str="${aaa},${bbb},${ccc}", header="# Custom header line")
-        csv_formatter.write(filename, self.records)
+        csv_formatter.to_csv(self.records, path_or_buf=filename)
 
         csv = open(filename).read()
         csv_expected = textwrap.dedent("""\
@@ -128,7 +145,7 @@ class TestCSVFormatter:
         assert not tmpdir.join("foo/bar").exists()
 
         csv_formatter = CSVFormatter(fmt_str="${aaa},${bbb},${ccc}", header="# Custom header line")
-        csv_formatter.write(filename, self.records)
+        csv_formatter.to_csv(self.records, path_or_buf=filename)
 
         assert tmpdir.join("foo").exists()
         assert tmpdir.join("foo/bar").exists()

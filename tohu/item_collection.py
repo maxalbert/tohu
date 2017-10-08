@@ -39,14 +39,15 @@ class ItemCollection:
     def __iter__(self):
         return iter(self.items)
 
-    def to_csv(self, filename, *, fmt_str=None, fields=None, sep=",", header=None):
+    def to_csv(self, path_or_buf, *, fmt_str=None, fields=None, sep=",", header=None):
         """
         Write item collection to CSV file.
 
         Parameters
         ----------
-        filename: string
-            Name of the output CSV file.
+        path_or_buf: string or file handle, default None
+            File path or object. If None is provided the result
+            is returned as a string.
         fields: dict
             Dictionary of the form {<column_name>: <field_name>, ...}
         sep: string
@@ -54,4 +55,4 @@ class ItemCollection:
         """
 
         formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, sep=sep, header=header)
-        formatter.write(filename, self.items)
+        return formatter.to_csv(self.items, path_or_buf=path_or_buf)

@@ -98,14 +98,15 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
 
-    def to_csv(self, filename, *, N, seed=None, fields=None, fmt_str=None, header=None):
+    def to_csv(self, path_or_buf=None, *, N, seed=None, fields=None, fmt_str=None, header=None):
         """
-        Generate N items and write output to a CSV file.
+        Generate N items and return the resulting CSV string or output to a file.
 
         Parameters
         ----------
-        filename: string
-            Output filename.
+        path_or_buf: string or file handle, default None
+            File path or object. If None is provided the result
+            is returned as a string.
         N: integer
             Number of items to generate.
         seed: integer (optional)
@@ -122,4 +123,4 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
             header = getattr(self, 'CSV_HEADER', None)
 
         formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, header=header)
-        formatter.write(filename, self.generate(N, seed=seed))
+        return formatter.to_csv(self.generate(N, seed=seed), path_or_buf=path_or_buf)
