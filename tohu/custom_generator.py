@@ -1,3 +1,4 @@
+import pandas as pd
 import re
 import sys
 from collections import namedtuple
@@ -126,3 +127,9 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
 
         formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, header=header)
         return formatter.to_csv(self.generate(N, seed=seed, progressbar=progressbar), path_or_buf=path_or_buf)
+
+    def to_df(self, *, N, seed=None):
+        """
+        Return pandas DataFrame containing N items produced by this generator.
+        """
+        return self.generate(N, seed=seed).to_df()

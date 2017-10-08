@@ -2,7 +2,7 @@
 Tests for the CustomGenerator class.
 """
 
-import pytest
+import pandas as pd
 import textwrap
 from .context import tohu
 
@@ -201,3 +201,23 @@ class TestCustomGenerator:
             """)
 
         assert open(filename).read() == csv_expected
+
+    def test_dataframe_export(self):
+        """
+        Test that items produced by generator can be exported as a pandas dataframe.
+        """
+        class QuuxGenerator(CustomGenerator):
+            c = Sequential(prefix="quux_", digits=2)
+            d = Float(7., 8.)
+            e = Integer(lo=3000, hi=6000)
+
+        g = QuuxGenerator()
+        df = g.to_df(N=4, seed=12345)
+
+        df_expected = pd.DataFrame({
+            'c': ['quux_01', 'quux_02', 'quux_03', 'quux_04'],
+            'd': [7.0325763552728944, 7.8934148759848224, 7.627555493119079, 7.3326721555147056],
+            'e': [4001, 5032, 5198, 4866],
+        })
+
+        pd.testing.assert_frame_equal(df_expected, df)

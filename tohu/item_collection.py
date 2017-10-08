@@ -1,3 +1,4 @@
+import pandas as pd
 from mako.template import Template
 from .csv_formatter import CSVFormatter
 
@@ -56,3 +57,9 @@ class ItemCollection:
 
         formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, sep=sep, header=header)
         return formatter.to_csv(self.items, path_or_buf=path_or_buf)
+
+    def to_df(self):
+        """
+        Export item collection as pandas DataFrame, with one item per row.
+        """
+        return pd.DataFrame((pd.Series(item._asdict()) for item in self.items))
