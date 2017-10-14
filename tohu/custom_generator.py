@@ -11,17 +11,17 @@ from .csv_formatter_v1 import CSVFormatterV1
 __all__ = ["CustomGenerator"]
 
 
-def get_item_class_name(generator_class_name):
+def get_item_class_name(generator):
     """
-    Given the name of a generator class (such as "FoobarGenerator),
-    return the first part of the name before "Generator", which
+    Given a generator class (such as "FoobarGenerator), return
+    the first part of the class name before "Generator", which
     will be used for the namedtuple items produced by this generator.
 
     Examples:
         FoobarGenerator -> Foobar
         QuuxGenerator   -> Quux
     """
-    return re.match('^(.*)Generator$', generator_class_name).group(1)
+    return re.match('^(.*)Generator$', generator.__class__.__name__).group(1)
 
 
 class SeedGenerator:
@@ -63,16 +63,8 @@ class CustomGeneratorMeta(type):
             # Call original __init__ function to make sure all generator attributes are defined
             orig_init(self, *args, **kwargs)
 
-            clsdict = self.__class__.__dict__
-            instdict = self.__dict__
-            self.field_gens = {name: gen._spawn() for name, gen in dict(**clsdict, **instdict).items() if isinstance(gen, BaseGenerator)}
-            clsname = get_item_class_name(self.__class__.__name__)
-            self.item_cls = namedtuple(clsname, self.field_gens.keys())
-
-            self.fmt_dict = {name: "${" + name + "}" for name in self.field_gens.keys()}
-            self.csvformatter = CSVFormatterV1(self.fmt_dict)
-
-            self.item_cls.__format__ = lambda item, fmt: self.csvformatter.format_item(item)
+            self.field_gens = self._calculate_field_gens()
+            self.item_cls = self._make_item_class()
             self.seed_generator = SeedGenerator()
             self.reset(seed)
 
@@ -94,6 +86,22 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
             # produced by the seed generator.
             for g, x in zip(self.field_gens.values(), self.seed_generator):
                 g.reset(x)
+
+    def _make_item_class(self):
+        clsname = get_item_class_name(self)
+        attr_names = self.field_gens.keys()
+        item_cls = namedtuple(clsname, attr_names)
+
+        self.fmt_dict = {name: "${" + name + "}" for name in self.field_gens.keys()}
+        self.csvformatter = CSVFormatterV1(self.fmt_dict)
+        item_cls.__format__ = lambda item, fmt: self.csvformatter.format_item(item)
+
+        return item_cls
+
+    def _calculate_field_gens(self):
+        clsdict = self.__class__.__dict__
+        instdict = self.__dict__
+        return {name: gen._spawn() for name, gen in dict(**clsdict, **instdict).items() if isinstance(gen, BaseGenerator)}
 
     def __next__(self):
         field_values = [next(g) for g in self.field_gens.values()]
