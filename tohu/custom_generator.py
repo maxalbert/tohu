@@ -133,3 +133,30 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         Return pandas DataFrame containing N items produced by this generator.
         """
         return self.generate(N, seed=seed).to_df()
+
+    def to_psql(self, url, table_name, N, *, if_exists='fail', seed=None):
+        """
+        Generate N items and export them as rows in a PostgreSQL table.
+
+        Parameters
+        ----------
+
+        url: string
+            Connection string to connect to the database.
+            Example: "postgresql://postgres@127.0.0.1:5432/testdb"
+
+        table_name: string
+            Name of the database table.
+
+        N: integer
+            Number of items to export.
+
+        if_exists : {'fail', 'replace', 'append'}, default 'fail'
+            - fail: If table exists, raise an error.
+            - replace: If table exists, drop it, recreate it, and insert data.
+            - append: If table exists, insert data. Create if does not exist.
+
+        seed: integer (optional)
+            Seed with which to initialise random generator.
+        """
+        self.generate(N, seed=seed).to_psql(url, table_name, if_exists=if_exists)

@@ -1,5 +1,6 @@
 import pandas as pd
 from mako.template import Template
+from sqlalchemy import create_engine
 from .csv_formatter import CSVFormatter
 
 __all__ = ['ItemCollection']
@@ -63,3 +64,26 @@ class ItemCollection:
         Export item collection as pandas DataFrame, with one item per row.
         """
         return pd.DataFrame((pd.Series(item._asdict()) for item in self.items))
+
+    def to_psql(self, url, table_name, *, if_exists="fail"):
+        """
+        Export items as rows in a PostgreSQL table.
+
+        Parameters
+        ----------
+
+        url: string
+            Connection string to connect to the database.
+            Example: "postgresql://postgres@127.0.0.1:5432/testdb"
+
+        table_name: string
+            Name of the database table.
+
+        if_exists : {'fail', 'replace', 'append'}, default 'fail'
+            - fail: If table exists, raise an error.
+            - replace: If table exists, drop it, recreate it, and insert data.
+            - append: If table exists, insert data. Create if does not exist.
+        """
+        engine = create_engine(url)
+        with engine.begin() as conn:
+            self.to_df().to_sql(table_name, conn, index=False, if_exists=if_exists)
