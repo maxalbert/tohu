@@ -235,7 +235,7 @@ class ChooseFrom(BaseGenerator):
             Seed to initialise this random generator.
         """
         self.values = values
-        self.idxgen = Integer(lo=1, hi=(len(self.values) - 1))
+        self.idxgen = Integer(lo=0, hi=(len(self.values) - 1))
         self.reset(seed)
 
     def __next__(self):
