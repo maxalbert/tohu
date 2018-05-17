@@ -235,7 +235,7 @@ class ChooseFrom(BaseGenerator):
             Seed to initialise this random generator.
         """
         self.values = values
-        self.idxgen = Integer(lo=1, hi=(len(self.values) - 1))
+        self.idxgen = Integer(lo=0, hi=(len(self.values) - 1))
         self.reset(seed)
 
     def __next__(self):
@@ -386,7 +386,7 @@ class Timestamp(BaseGenerator):
                 raise TimestampError("Argument `date` is mutually exclusive with `start` and `end`.")
 
             self.start = dt.datetime.strptime(date, '%Y-%m-%d')
-            self.end = self.start + dt.timedelta(days=1)
+            self.end = self.start + dt.timedelta(hours=23, minutes=59, seconds=59)
         else:
             if (start is None or end is None):
                 raise TimestampError("Either `date` or both `start` and `end` must be provided.")
