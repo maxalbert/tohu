@@ -1,50 +1,24 @@
 tohu: Create random data in a controllable way
 ==============================================
 
+Prerequisites
+-------------
+
+- [pipenv](https://docs.pipenv.org/)
+
 
 Quick start
 -----------
 
-(i) Create a new conda environment called `tohu` containing all necessary prerequisites.
-
-Note: If a conda environment with this name already exists it will update the packages and even the Python version in it, so make sure this is ok before you run this command.
-
+To run the tests:
 ```
-$ make update-conda-environment
-```
-
-(ii) Activate the new conda environment:
-
-```
-$ source activate tohu
-```
-
-(iii) Install tohu into new conda environment:
-
-```
-$ pip install .
-```
-
-(iv) Run the test suite to make sure everything works correctly:
-
-```
+$ pipenv install --dev
+$ pipenv shell
 $ make test
 ```
 
 
-Prerequisites:
---------------
-
-- `conda`
-
-Use [miniconda](http://conda.pydata.org/miniconda.html) if you want a small
-installation which just provides the `conda` command. Alternatively, you can
-install the full [Anaconda distribution](https://www.continuum.io/downloads)
-which comes pre-packaged with lots of Python modules useful for data analysis
-and scientific computing.
-
-
-Copyright:
-----------
+Copyright
+---------
 
 See [LICENSE](./LICENSE)
