@@ -15,9 +15,9 @@ remove-conda-environment:
 test: unit-tests
 
 unit-tests:
-	py.test -svx tests/
+	pytest -svx tests/
 
 test-notebooks:
-	py.test --nbval notebooks/
+	pytest --nbval notebooks/
 
 .PHONY: all create-conda-environment update-conda-environment remove-conda-environment test test-notebooks unit-tests
