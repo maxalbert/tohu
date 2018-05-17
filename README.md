@@ -5,6 +5,7 @@ Prerequisites
 -------------
 
 - [pipenv](https://docs.pipenv.org/)
+- [PostgreSQL](https://www.postgresql.org/) (for running the tests)
 
 
 Quick start
