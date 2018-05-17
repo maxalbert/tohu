@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pandas = "*"
+tqdm = "*"
+Mako = "*"
+SQLAlchemy = "*"
+"psycopg2-binary" = "*"
+
+[dev-packages]
+pytest = "*"
+nbval = "*"
+jupyter = "*"
+ipython = "*"
+pytest-cov = "*"
+yapf = "*"
+"testing.postgresql" = "*"
+
+[requires]
+python_version = "3.6"
