@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/maxalbert/tohu.svg?style=shield)](https://circleci.com/gh/maxalbert/tohu)
+
 tohu: Create random data in a controllable way
 ==============================================
 
