@@ -71,11 +71,11 @@ class TestItemCollection:
         assert os.path.exists(filename3)
 
         expected_output_without_header = textwrap.dedent("""\
-            27E995,Foo_04,27E995,58,25-Sep-10
-            27E995,Foo_04,9CB45F,36,12-Aug-11
-            9CB45F,Foo_10,297F9D,39,17-Jan-07
-            1A2721,Foo_06,B2A827,1,05-Jan-16
-            F5C771,Foo_08,8CE1AD,68,09-Mar-12
+            82E3D0,Foo_03,82E3D0,68,25-Sep-10
+            82E3D0,Foo_03,95C98E,14,12-Aug-11
+            95C98E,Foo_09,795B26,69,17-Jan-07
+            8CC131,Foo_05,2D302C,58,05-Jan-16
+            75BB5C,Foo_07,E7F13C,63,09-Mar-12
             """)
 
         expected_output_with_default_header = \

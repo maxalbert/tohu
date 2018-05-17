@@ -141,14 +141,14 @@ class TestUtils:
         pairs = [('a', 1), ('b', 2), ('c', 3), ('d', 4)]
         g, h = Split(ChooseFrom(pairs, seed=99999), tuple_len=2)
 
-        assert list(g.generate(N=5)) == ['b', 'c', 'd', 'd', 'd']
-        assert list(h.generate(N=5)) == [2, 3, 4, 4, 4]
+        assert list(g.generate(N=5)) == ['a', 'c', 'b', 'c', 'd']
+        assert list(h.generate(N=5)) == [1, 3, 2, 3, 4]
 
         g, h = Split(ChooseFrom(pairs, seed=99999), tuple_len=2)
+        assert (next(g), next(h)) == ('a', 1)
+        assert (next(g), next(h)) == ('c', 3)
         assert (next(g), next(h)) == ('b', 2)
         assert (next(g), next(h)) == ('c', 3)
-        assert (next(g), next(h)) == ('d', 4)
-        assert (next(g), next(h)) == ('d', 4)
         assert (next(g), next(h)) == ('d', 4)
 
     def test_zip(self):
