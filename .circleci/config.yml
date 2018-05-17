@@ -1,0 +1,34 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    environment:
+      - PYENV_VERSION: 3.6.3
+      - PIPENV_CACHE_DIR: "/home/circleci/.pipenv_cache"
+      - PYTHON_BUILD_CACHE_PATH: "/home/circleci/.pyenv/cache"
+    steps:
+      - checkout
+      - run:
+          name: Enable pyenv cache
+          command: mkdir -p ~/.pyenv/cache
+      - run:
+          name: Install python version ${PYENV_VERSION}
+          command: pyenv install ${PYENV_VERSION}
+      - run:
+          name: Install pipenv
+          command: pip install pipenv
+      - run:
+          name: Install PostgreSQL
+          command: sudo apt-get update && sudo apt-get install -y postgresql
+      - run:
+          name: Install Python dependencies
+          command: pipenv install --dev
+      - run:
+          name: Install tohu
+          command: pipenv run pip install .
+      - run:
+          name: Run tests
+          command: pipenv run make test
+      - run:
+          name: Run notebook tests
+          command: pipenv run make test-notebooks
