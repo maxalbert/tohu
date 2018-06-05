@@ -1,6 +1,6 @@
 from .context import tohu
 from tohu.generators import ChooseFrom, Integer, Float, Sequential, TupleGenerator
-from tohu.utils import First, Second, Nth, BufferedTuple, Split, Zip
+from tohu.generators import First, Second, Nth, BufferedTuple, Split, Zip
 
 
 class DummyTupleGen(TupleGenerator):
