@@ -4,7 +4,7 @@ import sys
 from collections import namedtuple
 from random import Random
 
-from .generators import BaseGenerator
+from .generators import BaseGenerator, SeedGenerator
 from .csv_formatter import CSVFormatter
 from .csv_formatter_v1 import CSVFormatterV1
 
@@ -22,34 +22,6 @@ def get_item_class_name(generator):
         QuuxGenerator   -> Quux
     """
     return re.match('^(.*)Generator$', generator.__class__.__name__).group(1)
-
-
-class SeedGenerator:
-    """
-    This class is used in custom generators to create a collection of
-    seeds when reset() is called, so that each of the constituent
-    generators can be re-initialised with a different seed in a
-    reproducible way.
-
-    Note: This is almost identical to the `Integer` class above, but
-    we need a version which does *not* inherit from `BaseGenerator`,
-    otherwise the automatic namedtuple creation in `CustomGeneratorMeta`
-    gets confused.
-    """
-
-    def __init__(self):
-        self.r = Random()
-        self.minval = 0
-        self.maxval = sys.maxsize
-
-    def seed(self, value):
-        self.r.seed(value)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return self.r.randint(self.minval, self.maxval)
 
 
 class CustomGeneratorMeta(type):
@@ -80,7 +52,7 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         """
         # Reset the seed generator
         if seed is not None:
-            self.seed_generator.seed(seed)
+            self.seed_generator.reset(seed)
 
             # Reset each constituent generator with a new seed
             # produced by the seed generator.
