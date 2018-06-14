@@ -41,6 +41,9 @@ class ItemCollection:
     def __iter__(self):
         return iter(self.items)
 
+    def __getitem__(self, idx):
+        return self.items[idx]
+
     def to_csv(self, path_or_buf, *, fmt_str=None, fields=None, sep=",", header=None):
         """
         Write item collection to CSV file.

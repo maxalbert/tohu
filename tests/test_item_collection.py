@@ -30,6 +30,13 @@ class TestItemCollection:
         c = ItemCollection(["hello", "world", "foobar", "quux"], 4)
         assert len(c) == 4
 
+    def test_indexing(self):
+        c = ItemCollection(["hello", "world", "foobar", "quux"], 4)
+        assert c[0] == "hello"
+        assert c[1] == "world"
+        assert c[2] == "foobar"
+        assert c[3] == "quux"
+
     def test_write_csv(self, tmpdir):
         filename1 = tmpdir.join("output_without_header.csv").strpath
         filename2 = tmpdir.join("output_with_default_header.csv").strpath
