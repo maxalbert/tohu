@@ -15,7 +15,7 @@ from .item_collection import ItemCollection
 
 __all__ = [
     'Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
-    'HashDigest', 'GeolocationPair', 'Timestamp',
+    'HashDigest', 'GeolocationPair', 'SelectOne', 'Timestamp',
 ]
 
 
@@ -221,7 +221,7 @@ class Sequential(BaseGenerator):
         return self.fmt_str.format(next(self.cnt))
 
 
-class ChooseFrom(BaseGenerator):
+class SelectOne(BaseGenerator):
     """
     Generator which produces a sequence of items taken from given a given set of elements.
     """
@@ -247,10 +247,14 @@ class ChooseFrom(BaseGenerator):
         return self.values[idx]
 
     def _spawn(self):
-        return ChooseFrom(values=self.values)
+        return SelectOne(values=self.values)
 
     def reset(self, seed):
         self.idxgen.reset(seed)
+
+
+# Define alias for backwards compatibilty
+ChooseFrom = SelectOne
 
 
 class CharString(BaseGenerator):
@@ -271,7 +275,7 @@ class CharString(BaseGenerator):
         """
         self.length = length
         self.chars = chars
-        self.chargen = ChooseFrom(self.chars)
+        self.chargen = SelectOne(self.chars)
         self.reset(seed)
 
     def __next__(self):

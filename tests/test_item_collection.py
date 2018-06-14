@@ -10,7 +10,7 @@ import textwrap
 from .context import tohu
 from tohu.item_collection import ItemCollection
 from tohu.custom_generator import CustomGenerator
-from tohu.generators import ChooseFrom, Float, HashDigest, Integer, Sequential, Timestamp
+from tohu.generators import SelectOne, Float, HashDigest, Integer, Sequential, Timestamp
 
 
 class TestItemCollection:
@@ -42,8 +42,8 @@ class TestItemCollection:
 
         class QuuxGenerator(CustomGenerator):
             def __init__(self, foo_items):
-                self.foo1 = ChooseFrom(foo_items)
-                self.foo2 = ChooseFrom(foo_items)
+                self.foo1 = SelectOne(foo_items)
+                self.foo2 = SelectOne(foo_items)
                 self.date_str = Timestamp(start="2006-01-01", end="2017-09-01", fmt='%d-%b-%y')
 
         foo = FoobarGenerator()
