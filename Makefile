@@ -8,7 +8,7 @@ test: unit-tests
 unit-tests:
 	pytest -svx tests/
 
-test-notebooks:
+notebooks-tests:
 	pytest --nbval notebooks/
 
-.PHONY: all test test-notebooks unit-tests
+.PHONY: all test notebooks-tests unit-tests
