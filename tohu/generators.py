@@ -274,11 +274,25 @@ class SelectMultiple(BaseGenerator):
         seed: integer (optional)
             Seed to initialise this random generator.
         """
-        if n < 0:
-            raise ValueError(f'Number of tuple elements cannot be negative. Got: n={n}')
+        if isinstance(n, int):
+            if n < 0:
+                raise ValueError(f'Number of tuple elements cannot be negative. Got: n={n}')
+            n = Integer(lo=n, hi=n)
+        elif not isinstance(n, Integer):
+            raise TypeError(f'Argument `n` must be an integer or an Integer generator. Got: n={n} (type: {type(n)})')
+
+        # Note: the chosen implementation is not the most efficient for large values of `n`
+        # because we create `n` different SelectOne generators, one for each possible position
+        # in the the output tuples. Alternatively, we could just create a single SelectOne
+        # generator to produce all output elements. The advantage of multiple generators is
+        # that the value of `n` is increased, the first few elements of the output tuples
+        # remain the same. This feels nice and consistent, but I'm not sure if this is really
+        # necessary (or even desired). In most cases it probably doesn't matter because `n`
+        # will typically have a fairly small value.
         self.values = values
-        self.n = n
-        self._elem_gens = [SelectOne(values) for _ in range(n)]
+        self._gen_n = n
+        self._max_n = self._gen_n.hi
+        self._elem_gens = [SelectOne(values) for _ in range(self._max_n)]
         self._seed_generator = SeedGenerator()
         self.reset(seed)
 
@@ -286,7 +300,8 @@ class SelectMultiple(BaseGenerator):
         """
         Return tuple of length `self.n` with elements drawn from the list of values provided during initialisation.
         """
-        return tuple(next(g) for g in self._elem_gens)
+        cur_length = next(self._gen_n)
+        return tuple(next(g) for g in islice(self._elem_gens, cur_length))
 
     def _spawn(self):
         return SelectMultiple(values=self.values, n=n)
@@ -294,6 +309,7 @@ class SelectMultiple(BaseGenerator):
     def reset(self, seed):
         # Reset each individual element generator with a new seed
         self._seed_generator.reset(seed)
+        self._gen_n.reset(next(self._seed_generator))
         for g in self._elem_gens:
             elem_seed = next(self._seed_generator)
             g.reset(elem_seed)
