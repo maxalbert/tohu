@@ -42,7 +42,10 @@ class ItemCollection:
         return iter(self.items)
 
     def __getitem__(self, idx):
-        return self.items[idx]
+        try:
+            return self.items[idx]
+        except TypeError:
+            raise TypeError(f'ItemCollection was initialised with an object of type "{type(self.items)}" that does not support indexing.')
 
     def to_csv(self, path_or_buf, *, fmt_str=None, fields=None, sep=",", header=None):
         """

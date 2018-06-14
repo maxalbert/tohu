@@ -37,6 +37,15 @@ class TestItemCollection:
         assert c[2] == "foobar"
         assert c[3] == "quux"
 
+    def test_indexing_with_non_subscriptable_type(self):
+        """
+        Test that indexing fails if the item collection was initialised with a non-subscriptable object.
+        """
+        items = (x for x in range(20))  # generator expression is not subscriptable
+        c = ItemCollection(items, N=20)
+        with pytest.raises(TypeError):
+            _ = c[5]
+
     def test_write_csv(self, tmpdir):
         filename1 = tmpdir.join("output_without_header.csv").strpath
         filename2 = tmpdir.join("output_with_default_header.csv").strpath
