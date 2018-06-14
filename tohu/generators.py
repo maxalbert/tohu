@@ -6,6 +6,7 @@ Generator classes to produce random data with specific properties.
 import datetime as dt
 import pandas as pd
 import re
+import sys
 from collections import deque, namedtuple
 from functools import partial
 from itertools import count, islice
@@ -15,7 +16,7 @@ from .item_collection import ItemCollection
 
 __all__ = [
     'Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
-    'HashDigest', 'GeolocationPair', 'SelectOne', 'Timestamp',
+    'HashDigest', 'GeolocationPair', 'SelectOne', 'SelectMultiple', 'Timestamp',
 ]
 
 
@@ -255,6 +256,47 @@ class SelectOne(BaseGenerator):
 
 # Define alias for backwards compatibilty
 ChooseFrom = SelectOne
+
+
+class SelectMultiple(BaseGenerator):
+    """
+    Generator which produces a sequence of tuples with elements taken from a given set of elements.
+    """
+
+    def __init__(self, values, n, *, seed=None):
+        """
+        Parameters
+        ----------
+        values: list
+            List of options from which to choose elements.
+        n: integer
+            Length of the output tuples.
+        seed: integer (optional)
+            Seed to initialise this random generator.
+        """
+        if n < 0:
+            raise ValueError(f'Number of tuple elements cannot be negative. Got: n={n}')
+        self.values = values
+        self.n = n
+        self._elem_gens = [SelectOne(values) for _ in range(n)]
+        self._seed_generator = SeedGenerator()
+        self.reset(seed)
+
+    def __next__(self):
+        """
+        Return tuple of length `self.n` with elements drawn from the list of values provided during initialisation.
+        """
+        return tuple(next(g) for g in self._elem_gens)
+
+    def _spawn(self):
+        return SelectMultiple(values=self.values, n=n)
+
+    def reset(self, seed):
+        # Reset each individual element generator with a new seed
+        self._seed_generator.reset(seed)
+        for g in self._elem_gens:
+            elem_seed = next(self._seed_generator)
+            g.reset(elem_seed)
 
 
 class CharString(BaseGenerator):
@@ -517,34 +559,34 @@ def _create_namedtuple_class(item_cls_name, attrgens):
 #         return pd.DataFrame([pd.Series(item._asdict()) for item in self.items])
 
 
-# class SeedGenerator:
-#     """
-#     This class is used in custom generators to create a collection of
-#     seeds when reset() is called, so that each of the constituent
-#     generators can be re-initialised with a different seed in a
-#     reproducible way.
-#
-#     Note: This is almost identical to the `Integer` class above, but
-#     we need a version which does *not* inherit from `BaseGenerator`,
-#     otherwise the automatic namedtuple creation in `CustomGeneratorMeta`
-#     gets confused.
-#     """
-#
-#     def __init__(self):
-#         self.r = Random()
-#         self.minval = 0
-#         self.maxval = sys.maxsize
-#
-#     def seed(self, value):
-#         self.r.seed(value)
-#
-#     def __iter__(self):
-#         return self
-#
-#     def __next__(self):
-#         return self.r.randint(self.minval, self.maxval)
-#
-#
+class SeedGenerator:
+    """
+    This class is used in custom generators to create a collection of
+    seeds when reset() is called, so that each of the constituent
+    generators can be re-initialised with a different seed in a
+    reproducible way.
+
+    Note: This is almost identical to the `Integer` class above, but
+    we need a version which does *not* inherit from `BaseGenerator`,
+    otherwise the automatic namedtuple creation in `CustomGeneratorMeta`
+    gets confused.
+    """
+
+    def __init__(self):
+        self.randgen = Random()
+        self.minval = 0
+        self.maxval = sys.maxsize
+
+    def reset(self, seed):
+        self.randgen.seed(seed)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.randgen.randint(self.minval, self.maxval)
+
+
 # class CustomGeneratorMeta(type):
 #     def __new__(metacls, cg_name, bases, clsdict):
 #         gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
