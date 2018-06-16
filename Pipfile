@@ -9,6 +9,7 @@ tqdm = "*"
 Mako = "*"
 SQLAlchemy = "*"
 "psycopg2-binary" = "*"
+attrs = "*"
 
 [dev-packages]
 pytest = "*"
