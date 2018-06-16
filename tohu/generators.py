@@ -673,7 +673,7 @@ class SeedGenerator:
     def __init__(self):
         self.randgen = Random()
         self.minval = 0
-        self.maxval = sys.maxsize
+        self.maxval = 2**32-1
 
     def reset(self, seed):
         self.randgen.seed(seed)
