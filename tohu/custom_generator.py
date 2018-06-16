@@ -24,6 +24,24 @@ def get_item_class_name(generator):
     return re.match('^(.*)Generator$', generator.__class__.__name__).group(1)
 
 
+def make_item_class(cg):
+    """
+    Parameters
+    ----------
+    cg: CustomGenerator
+    """
+
+    clsname = get_item_class_name(cg)
+    attr_names = cg.field_gens.keys()
+    item_cls = namedtuple(clsname, attr_names)
+
+    cg.fmt_dict = {name: "${" + name + "}" for name in cg.field_gens.keys()}
+    cg.csvformatter = CSVFormatterV1(cg.fmt_dict)
+    item_cls.__format__ = lambda item, fmt: cg.csvformatter.format_item(item)
+
+    return item_cls
+
+
 class CustomGeneratorMeta(type):
     def __new__(metacls, cg_name, bases, clsdict):
         gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
@@ -36,7 +54,7 @@ class CustomGeneratorMeta(type):
             orig_init(self, *args, **kwargs)
 
             self.field_gens = self._calculate_field_gens()
-            self.item_cls = self._make_item_class()
+            self.item_cls = make_item_class(self)
             self.seed_generator = SeedGenerator()
             self.reset(seed)
 
@@ -58,17 +76,6 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
             # produced by the seed generator.
             for g, x in zip(self.field_gens.values(), self.seed_generator):
                 g.reset(x)
-
-    def _make_item_class(self):
-        clsname = get_item_class_name(self)
-        attr_names = self.field_gens.keys()
-        item_cls = namedtuple(clsname, attr_names)
-
-        self.fmt_dict = {name: "${" + name + "}" for name in self.field_gens.keys()}
-        self.csvformatter = CSVFormatterV1(self.fmt_dict)
-        item_cls.__format__ = lambda item, fmt: self.csvformatter.format_item(item)
-
-        return item_cls
 
     def _calculate_field_gens(self):
         clsdict = self.__class__.__dict__
