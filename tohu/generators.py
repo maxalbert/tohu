@@ -913,14 +913,17 @@ class Zip(TupleGenerator):
 
     def __init__(self, *generators, seed=None):
         self._generators = [g._spawn() for g in generators]
+        self.seed_generator = SeedGenerator()
         self.reset(seed)
 
     def __next__(self):
         return tuple(next(g) for g in self._generators)
 
     def reset(self, seed):
+        self.seed_generator.reset(seed)
         for g in self._generators:
-            g.reset(seed)
+            new_seed = next(self.seed_generator)
+            g.reset(new_seed)
 
 
 def Geolocation():
