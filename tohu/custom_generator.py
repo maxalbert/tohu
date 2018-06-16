@@ -1,7 +1,7 @@
+import attr
 import pandas as pd
 import re
 import sys
-from collections import namedtuple
 from random import Random
 
 from .generators import BaseGenerator, SeedGenerator
@@ -22,7 +22,31 @@ def make_item_class(clsname, attr_names):
         Names of the attributes of the class to be created
     """
 
-    item_cls = namedtuple(clsname, attr_names)
+    item_cls = attr.make_class(clsname, {name: attr.ib() for name in attr_names}, repr=False, cmp=True)
+
+    def new_repr(self):
+        all_fields = ', '.join([f'{name}={repr(value)}' for name, value in attr.asdict(self).items()])
+        return f'{clsname}({all_fields})'
+
+    orig_eq = item_cls.__eq__
+    def new_eq(self, other):
+        # allow comparisons with tuples and dicts, too (mostly for convenience in testing)
+        if isinstance(other, self.__class__):
+            return orig_eq(self, other)
+        else:
+            if isinstance(other, tuple):
+                return attr.astuple(self) == other
+            elif isinstance(other, dict):
+                return attr.asdict(self) == other
+            else:
+                return NotImplemented
+
+    item_cls.__repr__ = new_repr
+    item_cls.__eq__ = new_eq
+    item_cls.keys = lambda self: attr_names
+    item_cls.__getitem__ = lambda self, key: getattr(self, key)
+    item_cls.asdict = lambda self: attr.asdict(self)
+
     return item_cls
 
 
@@ -52,8 +76,9 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
 
     def get_item_class_name(self):
         """
-        Return the first part of the class name of this custom generator
-        will be used for the namedtuple items produced by this generator.
+        Return the first part of the class name of this custom generator.
+        This will be used for the class name of the items produced by this
+        generator.
 
         Examples:
             FoobarGenerator -> Foobar

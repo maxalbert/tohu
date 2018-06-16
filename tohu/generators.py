@@ -7,7 +7,7 @@ import datetime as dt
 import pandas as pd
 import re
 import sys
-from collections import deque, namedtuple
+from collections import deque
 from functools import partial
 from itertools import count, islice
 from random import Random
@@ -516,9 +516,9 @@ def _get_item_class_name(cg_name):
     return re.match('^(.*)Generator$', cg_name).group(1)
 
 
-def _create_namedtuple_class(item_cls_name, attrgens):
-    item_fields = [name for name in attrgens.keys()]
-    return namedtuple(item_cls_name, item_fields)
+# def _create_namedtuple_class(item_cls_name, attrgens):
+#     item_fields = [name for name in attrgens.keys()]
+#     return namedtuple(item_cls_name, item_fields)
 
 
 # class ItemCollection:
@@ -584,7 +584,7 @@ class SeedGenerator:
 
     Note: This is almost identical to the `Integer` class above, but
     we need a version which does *not* inherit from `BaseGenerator`,
-    otherwise the automatic namedtuple creation in `CustomGeneratorMeta`
+    otherwise the automatic item class creation in `CustomGeneratorMeta`
     gets confused.
     """
 

@@ -2,6 +2,7 @@ import pytest
 import textwrap
 from collections import namedtuple
 from tohu.csv_formatter_v1 import CSVFormatterV1
+from tohu.custom_generator import make_item_class
 
 
 @pytest.fixture
@@ -16,7 +17,7 @@ def csvfmt(scope="module"):
 class TestCSVFormatterV1:
 
     def setup(self):
-        Foobar = namedtuple("Foobar", ["a", "b", "c"])
+        Foobar = make_item_class("Foobar", ["a", "b", "c"])
         self.item1 = Foobar(1234, "quux_01", 9.8765)
         self.item2 = Foobar(5678, "quux_02", 2.2222)
         self.items = [self.item1, self.item2]

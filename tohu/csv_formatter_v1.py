@@ -1,3 +1,4 @@
+import attr
 from mako.template import Template
 
 
@@ -37,7 +38,7 @@ class CSVFormatterV1:
         item: namedtuple
             The item to be formatted.
         """
-        return self.fmt_template.render(**item._asdict())
+        return self.fmt_template.render(**attr.asdict(item))
 
     def get_header_line(self, header):
         if isinstance(header, str):

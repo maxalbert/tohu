@@ -1,8 +1,8 @@
-from collections import namedtuple
 import pytest
 import textwrap
 from .context import tohu
 from tohu.csv_formatter import CSVFormatter
+from tohu.custom_generator import make_item_class
 
 
 class TestCSVFormatter:
@@ -12,7 +12,7 @@ class TestCSVFormatter:
         """
         Create a few records of type `Foobar` to be used in tests.
         """
-        Foobar = namedtuple("Foobar", ["aaa", "bbb", "ccc"])
+        Foobar = make_item_class("Foobar", ["aaa", "bbb", "ccc"])
         cls.records = [
             Foobar(aaa='foobar_01', bbb=8, ccc='4898FE19'),
             Foobar(aaa='foobar_02', bbb=160, ccc='5825D187'),

@@ -59,7 +59,7 @@ class CSVFormatter:
         """
         Return formatted string representing the individual record.
         """
-        return self.template.render(**record._asdict())
+        return self.template.render(**record)
 
     def format_records(self, records):
         """
@@ -67,7 +67,7 @@ class CSVFormatter:
         """
         s = self.header_line
         for r in records:
-            s += self.template.render(**r._asdict())
+            s += self.template.render(**r)
         return s
 
     def to_csv(self, items, *, path_or_buf):
