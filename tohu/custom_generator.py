@@ -11,14 +11,16 @@ from .csv_formatter_v1 import CSVFormatterV1
 __all__ = ["CustomGenerator"]
 
 
-def make_item_class(cg):
+def make_item_class(cg, clsname):
     """
     Parameters
     ----------
     cg: CustomGenerator
+
+    clsname: string
+        Name of the class to be created
     """
 
-    clsname = cg.get_item_class_name()
     attr_names = cg.field_gens.keys()
     item_cls = namedtuple(clsname, attr_names)
 
@@ -41,7 +43,7 @@ class CustomGeneratorMeta(type):
             orig_init(self, *args, **kwargs)
 
             self.field_gens = self._calculate_field_gens()
-            self.item_cls = make_item_class(self)
+            self.item_cls = make_item_class(self, self.get_item_class_name())
             self.seed_generator = SeedGenerator()
             self.reset(seed)
 
