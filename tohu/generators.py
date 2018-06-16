@@ -914,6 +914,7 @@ class Zip(TupleGenerator):
     def __init__(self, *generators, seed=None):
         self._generators = [g._spawn() for g in generators]
         self.seed_generator = SeedGenerator()
+        self.tuple_len = len(self._generators)
         self.reset(seed)
 
     def __next__(self):
