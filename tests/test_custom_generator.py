@@ -2,6 +2,8 @@
 Tests for the CustomGenerator class.
 """
 
+import pytest
+
 import pandas as pd
 import textwrap
 from .context import tohu
@@ -77,6 +79,7 @@ class TestCustomGenerator:
         assert str(item1) == "Quux(x=488, y=2.032576355272894)"
         assert str(item2) == "Quux(x=488, y=5.032576355272894)"
 
+    @pytest.mark.skip(msg="Formatting needs to be reworked and it's unclear what format(item) should return")
     def test_formatting_items_returns_string_with_field_values(self):
         """
         Test that formatting items produced by {Foobar|Quux}Generator
