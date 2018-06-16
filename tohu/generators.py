@@ -9,6 +9,7 @@ import pandas as pd
 import re
 import sys
 from collections import deque
+from faker import Faker
 from functools import partial
 from itertools import count, islice
 from random import Random
@@ -16,7 +17,7 @@ from tqdm import tqdm
 from .item_collection import ItemCollection
 
 __all__ = [
-    'Integer', 'Constant', 'Float', 'NumpyRandomGenerator', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
+    'Integer', 'Constant', 'Float', 'NumpyRandomGenerator', 'FakerGenerator', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
     'HashDigest', 'GeolocationPair', 'SelectOne', 'SelectMultiple', 'Timestamp',
 ]
 
@@ -182,11 +183,15 @@ class NumpyRandomGenerator(BaseGenerator):
         Parameters
         ----------
         method: string
-            Name of the numpy function to use (see [1])
+            Name of the numpy function to use (see [1] for details)
         seed: integer (optional)
             Seed to initialise this random generator
         numpy_args:
-            Remaining arguments passed to the numpy function
+            Remaining arguments passed to the numpy function (see [1] for details)
+
+        References
+        ----------
+        [1] https://docs.scipy.org/doc/numpy/reference/routines.random.html
         """
         self.method = method
         self.random_state = np.random.RandomState()
@@ -202,6 +207,48 @@ class NumpyRandomGenerator(BaseGenerator):
 
     def __next__(self):
         return self.randgen(**self.numpy_args)
+
+
+class FakerGenerator(BaseGenerator):
+    """
+    Generator which produces random elements using one of the methods supported by faker. [1]
+
+    [1] https://faker.readthedocs.io/
+    """
+
+    def __init__(self, method, *, seed=None, locale=None, **faker_args):
+        """
+        Parameters
+        ----------
+        method: string
+            Name of the faker provider to use (see [1] for details)
+        seed: integer (optional)
+            Seed to initialise this random generator
+        locale: string
+             Locale to use when generating data, e.g. 'en_US' (see [1] for details)
+        faker_args:
+            Remaining arguments passed to the faker provider (see [1] for details)
+
+        References
+        ----------
+        [1] https://faker.readthedocs.io/
+        """
+        self.method = method
+        self.locale = locale
+        self.faker_args = faker_args
+
+        self.fake = Faker(locale=locale)
+        self.randgen = getattr(self.fake, method)
+        self.reset(seed)
+
+    def _spawn(self):
+        return FakerGenerator(method=self.method, locale=self.locale, **self.faker_args)
+
+    def reset(self, seed):
+        self.fake.seed(seed)
+
+    def __next__(self):
+        return self.randgen(**self.faker_args)
 
 
 class Sequential(BaseGenerator):
