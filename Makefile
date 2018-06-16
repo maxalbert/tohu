@@ -3,12 +3,12 @@ CONDA_ENV_NAME ?= tohu
 
 all: test
 
-test: unit-tests
+test: unit-tests notebook-tests
 
 unit-tests:
 	pytest -svx tests/
 
-notebooks-tests:
+notebook-tests:
 	pytest --nbval notebooks/
 
-.PHONY: all test notebooks-tests unit-tests
+.PHONY: all test notebook-tests unit-tests
