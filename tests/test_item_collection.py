@@ -114,7 +114,7 @@ class TestItemCollection:
         class QuuxGenerator(CustomGenerator):
             c = Sequential(prefix="quux_", digits=2)
             d = Float(7., 8.)
-            e = Integer(lo=3000, hi=6000)
+            e = Integer(low=3000, high=6000)
 
         g = QuuxGenerator()
         items = g.generate(N=4, seed=12345)

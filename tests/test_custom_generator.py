@@ -15,13 +15,13 @@ class TestCustomGenerator:
     def setup(self):
 
         class FoobarGenerator(CustomGenerator):
-            a = Integer(lo=1000, hi=9000)
+            a = Integer(low=1000, high=9000)
             b = Sequential(prefix="foo_", digits=3)
 
         class QuuxGenerator(CustomGenerator):
             c = Constant("Hello")
             d = Sequential(prefix="quux_", digits=2)
-            e = Integer(lo=3000, hi=6000)
+            e = Integer(low=3000, high=6000)
 
         self.gen_foo = FoobarGenerator(seed=99999)
         self.gen_quux = QuuxGenerator(seed=12345)
@@ -61,10 +61,10 @@ class TestCustomGenerator:
         Test that fields can be defined at classlevel an in __init__() of custom generators.
         """
         class QuuxGenerator(CustomGenerator):
-            x = Integer(lo=400, hi=499)
+            x = Integer(low=400, high=499)
 
             def __init__(self, z_min, z_max):
-                self.y = Float(lo=z_min, hi=z_max)
+                self.y = Float(low=z_min, high=z_max)
 
         g1 = QuuxGenerator(z_min=2.0, z_max=3.0)
         g2 = QuuxGenerator(z_min=5.0, z_max=6.0)
@@ -138,7 +138,7 @@ class TestCustomGenerator:
         Test that fields for CSV export can be defined via the CSV_FIELDS class attribute.
         """
         class FoobarGenerator(CustomGenerator):
-            a = Integer(lo=1000, hi=9000)
+            a = Integer(low=1000, high=9000)
             b = Sequential(prefix="foo_", digits=3)
             CSV_FIELDS = {"Column 1": "a=${a}", "Column 2": "b=${b}"}
 
@@ -161,7 +161,7 @@ class TestCustomGenerator:
         Test that CSV header can be defined via the CSV_HEADER class attribute .
         """
         class FoobarGenerator(CustomGenerator):
-            a = Integer(lo=1000, hi=9000)
+            a = Integer(low=1000, high=9000)
             b = Sequential(prefix="foo_", digits=3)
             CSV_HEADER = "# My custom header line"
             CSV_FIELDS = {"Column 1": "a: ${a}", "Column 2": "b: ${b}"}
@@ -185,7 +185,7 @@ class TestCustomGenerator:
         Test that CSV formatting can be defined via the CSV_FMT_STR class attribute .
         """
         class FoobarGenerator(CustomGenerator):
-            a = Integer(lo=1000, hi=9000)
+            a = Integer(low=1000, high=9000)
             b = Sequential(prefix="foo_", digits=3)
             CSV_FMT_STR = "a=${a} || b: ${b}"
 
@@ -209,7 +209,7 @@ class TestCustomGenerator:
         class QuuxGenerator(CustomGenerator):
             c = Sequential(prefix="quux_", digits=2)
             d = Float(7., 8.)
-            e = Integer(lo=3000, hi=6000)
+            e = Integer(low=3000, high=6000)
 
         g = QuuxGenerator()
         df = g.to_df(N=4, seed=12345)

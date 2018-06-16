@@ -109,64 +109,64 @@ class Constant(BaseGenerator):
 
 class Integer(BaseGenerator):
     """
-    Generator which produces random integers k in the range lo <= k <= hi.
+    Generator which produces random integers k in the range low <= k <= high.
     """
 
-    def __init__(self, lo, hi, *, seed=None):
+    def __init__(self, low, high, *, seed=None):
         """
         Parameters
         ----------
-        lo: integer
+        low: integer
             Lower bound (inclusive).
-        hi: integer
+        high: integer
             Upper bound (inclusive).
         seed: integer (optional)
             Seed to initialise this random generator.
         """
-        self.lo = lo
-        self.hi = hi
+        self.low = low
+        self.high = high
         self.randgen = Random()
         self.reset(seed)
 
     def _spawn(self):
-        return Integer(self.lo, self.hi)
+        return Integer(self.low, self.high)
 
     def reset(self, seed):
         self.randgen.seed(seed)
 
     def __next__(self):
-        return self.randgen.randint(self.lo, self.hi)
+        return self.randgen.randint(self.low, self.high)
 
 
 class Float(BaseGenerator):
     """
-    Generator which produces random floating point numbers x in the range lo <= x <= hi.
+    Generator which produces random floating point numbers x in the range low <= x <= high.
     """
 
-    def __init__(self, lo, hi, *, seed=None):
+    def __init__(self, low, high, *, seed=None):
         """
         Parameters
         ----------
-        lo: integer
+        low: integer
             Lower bound (inclusive).
-        hi: integer
+        high: integer
             Upper bound (inclusive).
         seed: integer (optional)
             Seed to initialise this random generator.
         """
-        self.lo = lo
-        self.hi = hi
+        self.low = low
+        self.high = high
         self.randgen = Random()
         self.reset(seed)
 
     def _spawn(self):
-        return Float(self.lo, self.hi)
+        return Float(self.low, self.high)
 
     def reset(self, seed):
         self.randgen.seed(seed)
 
     def __next__(self):
-        return self.randgen.uniform(self.lo, self.hi)
+        return self.randgen.uniform(self.low, self.high)
 
 
 class Sequential(BaseGenerator):
@@ -237,7 +237,7 @@ class SelectOne(BaseGenerator):
             Seed to initialise this random generator.
         """
         self.values = values
-        self.idxgen = Integer(lo=0, hi=(len(self.values) - 1))
+        self.idxgen = Integer(low=0, high=(len(self.values) - 1))
         self.reset(seed)
 
     def __next__(self):
@@ -277,7 +277,7 @@ class SelectMultiple(BaseGenerator):
         if isinstance(size, int):
             if size < 0:
                 raise ValueError(f'Size of output tuples cannot be negative. Got: size={size}')
-            size = Integer(lo=size, hi=size)
+            size = Integer(low=size, high=size)
         elif not isinstance(size, Integer):
             raise TypeError(f'Argument `size` must be an integer or an Integer generator. Got: size={size} (type: {type(size)})')
 
@@ -291,7 +291,7 @@ class SelectMultiple(BaseGenerator):
         # will typically have a fairly small value.
         self.values = values
         self._size_gen = size
-        self._max_size = self._size_gen.hi
+        self._max_size = self._size_gen.high
         self._elem_gens = [SelectOne(values) for _ in range(self._max_size)]
         self._seed_generator = SeedGenerator()
         self.reset(seed)
