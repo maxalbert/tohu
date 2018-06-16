@@ -46,6 +46,7 @@ def make_item_class(clsname, attr_names):
     item_cls.keys = lambda self: attr_names
     item_cls.__getitem__ = lambda self, key: getattr(self, key)
     item_cls.as_dict = lambda self: attr.asdict(self)
+    item_cls.as_series = lambda self: pd.Series(attr.asdict(self))
 
     return item_cls
 
