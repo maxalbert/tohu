@@ -10,6 +10,7 @@ Mako = "*"
 SQLAlchemy = "*"
 "psycopg2-binary" = "*"
 attrs = "*"
+faker = "*"
 
 [dev-packages]
 pytest = "*"
