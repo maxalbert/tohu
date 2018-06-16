@@ -4,6 +4,7 @@ Generator classes to produce random data with specific properties.
 """
 
 import datetime as dt
+import numpy as np
 import pandas as pd
 import re
 import sys
@@ -15,7 +16,7 @@ from tqdm import tqdm
 from .item_collection import ItemCollection
 
 __all__ = [
-    'Integer', 'Constant', 'Float', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
+    'Integer', 'Constant', 'Float', 'NumpyRandomGenerator', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
     'HashDigest', 'GeolocationPair', 'SelectOne', 'SelectMultiple', 'Timestamp',
 ]
 
@@ -167,6 +168,40 @@ class Float(BaseGenerator):
 
     def __next__(self):
         return self.randgen.uniform(self.low, self.high)
+
+
+class NumpyRandomGenerator(BaseGenerator):
+    """
+    Generator which produces random numbers using one of the methods supported by numpy. [1]
+
+    [1] https://docs.scipy.org/doc/numpy/reference/routines.random.html
+    """
+
+    def __init__(self, method, *, seed=None, **numpy_args):
+        """
+        Parameters
+        ----------
+        method: string
+            Name of the numpy function to use (see [1])
+        seed: integer (optional)
+            Seed to initialise this random generator
+        numpy_args:
+            Remaining arguments passed to the numpy function
+        """
+        self.method = method
+        self.random_state = np.random.RandomState()
+        self.randgen = getattr(self.random_state, method)
+        self.numpy_args = numpy_args
+        self.reset(seed)
+
+    def _spawn(self):
+        return NumpyRandomGenerator(method=self.method, **self.numpy_args)
+
+    def reset(self, seed):
+        self.random_state.seed(seed)
+
+    def __next__(self):
+        return self.randgen(**self.numpy_args)
 
 
 class Sequential(BaseGenerator):
