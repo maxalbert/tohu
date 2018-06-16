@@ -824,6 +824,9 @@ First = partial(Nth, idx=0)
 Second = partial(Nth, idx=1)
 
 
+# FIXME: Maybe we should remove the `maxbuffer` argument because the way in which `deque`
+#        is implemented is that it silently drops elements instead of raising an exception
+#        when too many elements are pushed onto the queue?
 class BufferedTuple(BaseGenerator):
     """
     Helper class which allows buffered extraction
