@@ -16,10 +16,10 @@ from random import Random
 from tqdm import tqdm
 from .item_collection import ItemCollection
 
-__all__ = [
-    'Integer', 'Constant', 'Float', 'NumpyRandomGenerator', 'FakerGenerator', 'Sequential', 'ChooseFrom', 'CharString', 'DigitString',
-    'HashDigest', 'GeolocationPair', 'SelectOne', 'SelectMultiple', 'Timestamp',
-]
+__all__ = ['CharString', 'Constant', 'DigitString', 'FakerGenerator', 'First', 'Float', 'Geolocation',
+           'GeolocationPair', 'HashDigest', 'Integer', 'Nth', 'NumpyRandomGenerator', 'Second',
+           'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Timestamp',
+           'TimestampError', 'TupleGenerator', 'Zip']
 
 
 # Note: It would be better to make this an abstract base class
