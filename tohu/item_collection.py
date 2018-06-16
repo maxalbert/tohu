@@ -69,7 +69,7 @@ class ItemCollection:
         """
         Export item collection as pandas DataFrame, with one item per row.
         """
-        return pd.DataFrame((pd.Series(item.asdict()) for item in self.items))
+        return pd.DataFrame((pd.Series(item.as_dict()) for item in self.items))
 
     def to_psql(self, url, table_name, *, if_exists="fail"):
         """
