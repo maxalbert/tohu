@@ -11,19 +11,6 @@ from .csv_formatter_v1 import CSVFormatterV1
 __all__ = ["CustomGenerator"]
 
 
-def get_item_class_name(generator):
-    """
-    Given a generator class (such as "FoobarGenerator), return
-    the first part of the class name before "Generator", which
-    will be used for the namedtuple items produced by this generator.
-
-    Examples:
-        FoobarGenerator -> Foobar
-        QuuxGenerator   -> Quux
-    """
-    return re.match('^(.*)Generator$', generator.__class__.__name__).group(1)
-
-
 def make_item_class(cg):
     """
     Parameters
@@ -31,7 +18,7 @@ def make_item_class(cg):
     cg: CustomGenerator
     """
 
-    clsname = get_item_class_name(cg)
+    clsname = cg.get_item_class_name()
     attr_names = cg.field_gens.keys()
     item_cls = namedtuple(clsname, attr_names)
 
@@ -63,6 +50,17 @@ class CustomGeneratorMeta(type):
 
 
 class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
+
+    def get_item_class_name(self):
+        """
+        Return the first part of the class name of this custom generator
+        will be used for the namedtuple items produced by this generator.
+
+        Examples:
+            FoobarGenerator -> Foobar
+            QuuxGenerator   -> Quux
+        """
+        return re.match('^(.*)Generator$', self.__class__.__name__).group(1)
 
     def reset(self, seed=None):
         """
