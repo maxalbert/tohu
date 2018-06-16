@@ -88,11 +88,11 @@ class TestItemCollection:
         assert os.path.exists(filename3)
 
         expected_output_without_header = textwrap.dedent("""\
-            82E3D0,Foo_03,82E3D0,68,25-Sep-10
-            82E3D0,Foo_03,95C98E,14,12-Aug-11
-            95C98E,Foo_09,795B26,69,17-Jan-07
-            8CC131,Foo_05,2D302C,58,05-Jan-16
-            75BB5C,Foo_07,E7F13C,63,09-Mar-12
+            B1DB13,Foo_03,4F7953,50,17-Apr-10
+            4F7953,Foo_04,593213,66,18-Feb-08
+            FD8AFB,Foo_09,855677,81,20-Jul-14
+            0A76B2,Foo_06,FFB25A,90,10-Jun-15
+            C6CD8C,Foo_10,855677,81,15-Sep-06
             """)
 
         expected_output_with_default_header = \
@@ -121,8 +121,8 @@ class TestItemCollection:
 
         df_expected = pd.DataFrame({
             'c': ['quux_01', 'quux_02', 'quux_03', 'quux_04'],
-            'd': [7.0325763552728944, 7.8934148759848224, 7.627555493119079, 7.3326721555147056],
-            'e': [4001, 5032, 5198, 4866],
+            'd': [7.429949009333706, 7.137420914800083, 7.820307854938839, 7.145680371214801],
+            'e': [5895, 5318, 4618, 5606],
         })
 
         df = items.to_df()

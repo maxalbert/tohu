@@ -52,11 +52,11 @@ class TestCustomGenerator:
         item3 = next(self.gen_quux)
         item4 = next(self.gen_quux)
 
-        assert item1 == (2184, "foo_001")
-        assert item2 == (8875, "foo_002")
+        assert item1 == (7715, "foo_001")
+        assert item2 == (2325, "foo_002")
 
-        assert item3 == ("Hello", "quux_01", 4001)
-        assert item4 == ("Hello", "quux_02", 5032)
+        assert item3 == ("Hello", "quux_01", 5895)
+        assert item4 == ("Hello", "quux_02", 5318)
 
     def test_fields_can_be_defined_at_classlevel_and_in_init(self):
         """
@@ -76,8 +76,8 @@ class TestCustomGenerator:
         item1 = next(g1)
         item2 = next(g2)
 
-        assert str(item1) == "Quux(x=488, y=2.032576355272894)"
-        assert str(item2) == "Quux(x=488, y=5.032576355272894)"
+        assert str(item1) == "Quux(x=402, y=2.4299490093337055)"
+        assert str(item2) == "Quux(x=402, y=5.429949009333706)"
 
     @pytest.mark.skip(msg="Formatting needs to be reworked and it's unclear what format(item) should return")
     def test_formatting_items_returns_string_with_field_values(self):
@@ -108,9 +108,9 @@ class TestCustomGenerator:
         """
         csv_expected = textwrap.dedent("""\
             # Custom header
-            6649,foo_001
-            7170,foo_002
-            8552,foo_003
+            1181,foo_001
+            5144,foo_002
+            7732,foo_003
             """)
 
         csv = self.gen_foo.to_csv(N=3, seed=12345, header="# Custom header")
@@ -128,9 +128,9 @@ class TestCustomGenerator:
 
         csv_expected = textwrap.dedent("""\
             # Custom header
-            6649,foo_001
-            7170,foo_002
-            8552,foo_003
+            1181,foo_001
+            5144,foo_002
+            7732,foo_003
             """)
 
         assert open(filename1).read() == csv_expected
@@ -152,9 +152,9 @@ class TestCustomGenerator:
 
         csv_expected = textwrap.dedent("""\
             #Column 1,Column 2
-            a=6649,b=foo_001
-            a=7170,b=foo_002
-            a=8552,b=foo_003
+            a=1181,b=foo_001
+            a=5144,b=foo_002
+            a=7732,b=foo_003
             """)
 
         assert open(filename).read() == csv_expected
@@ -176,10 +176,10 @@ class TestCustomGenerator:
 
         csv_expected = textwrap.dedent("""\
             # My custom header line
-            a: 6649,b: foo_001
-            a: 7170,b: foo_002
-            a: 8552,b: foo_003
-            """)
+            a: 1181,b: foo_001
+            a: 5144,b: foo_002
+            a: 7732,b: foo_003
+             """)
 
         assert open(filename).read() == csv_expected
 
@@ -198,9 +198,9 @@ class TestCustomGenerator:
         g.to_csv(filename, N=3, seed=12345)
 
         csv_expected = textwrap.dedent("""\
-            a=6649 || b: foo_001
-            a=7170 || b: foo_002
-            a=8552 || b: foo_003
+            a=1181 || b: foo_001
+            a=5144 || b: foo_002
+            a=7732 || b: foo_003
             """)
 
         assert open(filename).read() == csv_expected
@@ -219,8 +219,8 @@ class TestCustomGenerator:
 
         df_expected = pd.DataFrame({
             'c': ['quux_01', 'quux_02', 'quux_03', 'quux_04'],
-            'd': [7.0325763552728944, 7.8934148759848224, 7.627555493119079, 7.3326721555147056],
-            'e': [4001, 5032, 5198, 4866],
+            'd': [7.429949009333706, 7.137420914800083, 7.820307854938839, 7.145680371214801],
+            'e': [5895, 5318, 4618, 5606],
         })
 
         pd.testing.assert_frame_equal(df_expected, df)
