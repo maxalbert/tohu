@@ -160,6 +160,6 @@ class TestUtils:
 
         g = Zip(g1, g2, g3, seed=99999)
 
-        assert next(g) == ("Foo_001", 123, 0.12049047611259744)
-        assert next(g) == ("Foo_002", 972, 0.3092850036925837)
-        assert next(g) == ("Foo_003", 316, 0.9529198903583602)
+        assert next(g) == ("Foo_001", 643, 0.2522927816477426)
+        assert next(g) == ("Foo_002", 220, 0.1253337003482793)
+        assert next(g) == ("Foo_003", 477, 0.554832836190999)
