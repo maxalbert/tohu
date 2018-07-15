@@ -29,6 +29,3 @@ jobs:
       - run:
           name: Run tests
           command: pipenv run make test
-      - run:
-          name: Run notebook tests
-          command: pipenv run make test-notebooks
