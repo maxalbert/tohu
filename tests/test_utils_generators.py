@@ -1,5 +1,6 @@
+import pytest
 from .context import tohu
-from tohu.generators import SelectOne, Integer, Float, Sequential, TupleGenerator
+from tohu.generators import SelectOne, Integer, Float, Sequential, TupleGenerator, TohuBufferOverflow
 from tohu.generators import First, Second, Nth, BufferedTuple, Split, Zip
 
 
@@ -163,3 +164,23 @@ class TestUtils:
         assert next(g) == ("Foo_001", 643, 0.2522927816477426)
         assert next(g) == ("Foo_002", 220, 0.1253337003482793)
         assert next(g) == ("Foo_003", 477, 0.554832836190999)
+
+    def test_buffer_overflow(self):
+        """
+        Buffer overflow occurs when items from linked generators are not consumed at the same rate.
+        """
+        maxbuffer = 10
+
+        pairs = [('AA', 'aa'), ('BB', 'bb'), ('CC', 'cc'), ('DD', 'dd'), ('EE', 'ee'), ('FF', 'ff')]
+        x, y = Split(SelectOne(pairs), tuple_len=2, maxbuffer=maxbuffer)
+
+        # This should work because we're only consuming `maxbuffer` elements
+        x.reset(seed=12345)
+        for _ in range(maxbuffer):
+            next(x)
+
+        # This should raise an error because we're only consuming more than `maxbuffer` elements
+        x.reset(seed=12345)
+        with pytest.raises(TohuBufferOverflow):
+            for _ in range(maxbuffer + 1):
+                next(x)

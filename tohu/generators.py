@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import re
 import sys
-from collections import deque
+from queue import Queue, Full
 from faker import Faker
 from functools import partial
 from itertools import count, islice
@@ -842,9 +842,12 @@ First = partial(Nth, idx=0)
 Second = partial(Nth, idx=1)
 
 
-# FIXME: Maybe we should remove the `maxbuffer` argument because the way in which `deque`
-#        is implemented is that it silently drops elements instead of raising an exception
-#        when too many elements are pushed onto the queue?
+class TohuBufferOverflow(Exception):
+    """
+    Custom exception to indicate a buffer overflow due to a mishandling of linked generators.
+    """
+
+
 class BufferedTuple(BaseGenerator):
     """
     Helper class which allows buffered extraction
@@ -875,21 +878,24 @@ class BufferedTuple(BaseGenerator):
         return BufferedTuple(self.g._spawn(), tuple_len=self.tuple_len, maxbuffer=self.maxbuffer)
 
     def _reset_queues(self):
-        self._queues = [deque(maxlen=self.maxbuffer) for _ in range(self.tuple_len)]
+        self._queues = [Queue(maxsize=self.maxbuffer) for _ in range(self.tuple_len)]
 
     def _refill(self):
         item = next(self.g)
         for x, queue in zip(item, self._queues):
-            queue.append(x)
+            try:
+                queue.put_nowait(x)
+            except Full:
+                raise TohuBufferOverflow("Buffer filled up because elements from multiple 'linked' generators were not consumed at the same rate.")
 
     def reset(self, seed):
         self.g.reset(seed)
         self._reset_queues()
 
     def next_nth(self, n):
-        if len(self._queues[n]) == 0:
+        if self._queues[n].empty():
             self._refill()
-        return self._queues[n].popleft()
+        return self._queues[n].get()
 
 
 def Split(g, *, maxbuffer=10, tuple_len=None):
