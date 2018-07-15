@@ -43,7 +43,7 @@ class BaseGenerator:
     def reset(self, seed):
         raise NotImplementedError("Class {} does not implement method 'reset'.".format(self.__class__.__name__))
 
-    def generate(self, N, *, seed=None, progressbar=False):
+    def generate_OLD(self, N, *, seed=None, progressbar=False):
         """
         Return sequence of `N` elements.
 

@@ -136,13 +136,13 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
             header = getattr(self, 'CSV_HEADER', None)
 
         formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, header=header)
-        return formatter.to_csv(self.generate(N, seed=seed, progressbar=progressbar), path_or_buf=path_or_buf)
+        return formatter.to_csv(self.generate_OLD(N, seed=seed, progressbar=progressbar), path_or_buf=path_or_buf)
 
     def to_df(self, *, N, seed=None):
         """
         Return pandas DataFrame containing N items produced by this generator.
         """
-        return self.generate(N, seed=seed).to_df()
+        return self.generate_OLD(N, seed=seed).to_df()
 
     def to_psql(self, url, table_name, N, *, if_exists='fail', seed=None):
         """
@@ -169,4 +169,4 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         seed: integer (optional)
             Seed with which to initialise random generator.
         """
-        self.generate(N, seed=seed).to_psql(url, table_name, if_exists=if_exists)
+        self.generate_OLD(N, seed=seed).to_psql(url, table_name, if_exists=if_exists)

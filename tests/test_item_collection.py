@@ -63,7 +63,7 @@ class TestItemCollection:
                 self.date_str = Timestamp(start="2006-01-01", end="2017-09-01", fmt='%d-%b-%y')
 
         foo = FoobarGenerator()
-        foo_items = list(foo.generate(10, seed=12345))
+        foo_items = list(foo.generate_OLD(10, seed=12345))
         quux = QuuxGenerator(foo_items)
 
         csv_fields = {
@@ -77,11 +77,11 @@ class TestItemCollection:
         assert not os.path.exists(filename1)
         assert not os.path.exists(filename2)
         assert not os.path.exists(filename3)
-        quux_items = quux.generate(5, seed=99999)
+        quux_items = quux.generate_OLD(5, seed=99999)
         quux_items.to_csv(filename1, fields=csv_fields, header=False)
-        quux_items = quux.generate(5, seed=99999)
+        quux_items = quux.generate_OLD(5, seed=99999)
         quux_items.to_csv(filename2, fields=csv_fields, header=True)
-        quux_items = quux.generate(5, seed=99999)
+        quux_items = quux.generate_OLD(5, seed=99999)
         quux_items.to_csv(filename3, fields=csv_fields, header="# This is a custom header line")
         assert os.path.exists(filename1)
         assert os.path.exists(filename2)
@@ -117,7 +117,7 @@ class TestItemCollection:
             e = Integer(low=3000, high=6000)
 
         g = QuuxGenerator()
-        items = g.generate(N=4, seed=12345)
+        items = g.generate_OLD(N=4, seed=12345)
 
         df_expected = pd.DataFrame({
             'c': ['quux_01', 'quux_02', 'quux_03', 'quux_04'],
