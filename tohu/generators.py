@@ -868,6 +868,9 @@ class BufferedTuple(BaseGenerator):
         self.maxbuffer = maxbuffer
         self._reset_queues()
 
+    def __repr__(self):
+        return f"<BufferedTuple, parent: {self.g}>"
+
     def _spawn(self):
         return BufferedTuple(self.g._spawn(), tuple_len=self.tuple_len, maxbuffer=self.maxbuffer)
 
@@ -912,6 +915,9 @@ def Split(g, *, maxbuffer=10, tuple_len=None):
         def __init__(self, g, idx):
             self.g = g
             self.idx = idx
+
+        def __repr__(self):
+            return f"<NthElementBuffered: idx={self.idx}, parent={self.g}>"
 
         def __next__(self):
             return self.g.next_nth(self.idx)
