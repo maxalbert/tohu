@@ -4,6 +4,7 @@ Generator classes to produce random data with specific properties.
 """
 
 import datetime as dt
+import logging
 import numpy as np
 import pandas as pd
 import re
@@ -21,6 +22,9 @@ __all__ = ['CharString', 'Constant', 'DigitString', 'FakerGenerator', 'First', '
            'GeolocationPair', 'HashDigest', 'Integer', 'Nth', 'NumpyRandomGenerator', 'Second',
            'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Timestamp',
            'TimestampError', 'TupleGenerator', 'Zip']
+
+
+logger = logging.getLogger("tohu")
 
 
 # Note: It would be better to make this an abstract base class
@@ -864,7 +868,9 @@ class BufferedTuple(BaseGenerator):
         tuple_len: integer
             Length of tuples produced by g.
         maxbuffer: integer
-            Maximum number of items to be buffered.
+            Maximum number of items to be buffered. Note that under normal
+            circumstances a single buffered element should be sufficient,
+            so the default of 10 is probably overcautious. ;)
         """
         self.g = g
         self.tuple_len = tuple_len
@@ -875,7 +881,10 @@ class BufferedTuple(BaseGenerator):
         return f"<BufferedTuple, parent: {self.g}>"
 
     def _spawn(self):
-        return BufferedTuple(self.g._spawn(), tuple_len=self.tuple_len, maxbuffer=self.maxbuffer)
+        raise NotImplementedError("BufferedTuple cannot be spawned directly. Instead, call _spawn_parent() to rewire it to a spawned version of its parent tuple generator.")
+
+    def _spawn_parent(self):
+        self.g = self.g._spawn()
 
     def _reset_queues(self):
         self._queues = [Queue(maxsize=self.maxbuffer) for _ in range(self.tuple_len)]
@@ -886,7 +895,7 @@ class BufferedTuple(BaseGenerator):
             try:
                 queue.put_nowait(x)
             except Full:
-                raise TohuBufferOverflow("Buffer filled up because elements from multiple 'linked' generators were not consumed at the same rate.")
+                raise TohuBufferOverflow("Buffer filled up because elements from multiple linked generators were not consumed at the same rate.")
 
     def reset(self, seed):
         self.g.reset(seed)
@@ -896,6 +905,63 @@ class BufferedTuple(BaseGenerator):
         if self._queues[n].empty():
             self._refill()
         return self._queues[n].get()
+
+
+class InvalidGeneratorError(Exception):
+    """
+    Custom exception to indicate an instance of NthElementBuffered
+    that has been spawned and is therefore invalid.
+    """
+
+
+class NthElementBuffered(BaseGenerator):
+    """
+    Helper class to iterate over the Nth element in a buffered tuple-generator.
+    """
+
+    def __init__(self, g_buffered, idx):
+        assert isinstance(g_buffered, BufferedTuple)
+        self.g_buffered = g_buffered
+        self.idx = idx
+        self.invalid = False
+
+    def __repr__(self):
+        return f"<NthElementBuffered: idx={self.idx}, parent={self.g_buffered}>"
+
+    def __next__(self):
+
+        if self.invalid:
+            # Note: ideally it would be nice to avoid checking a flag every time
+            # next() is called to avoid a performance penalty. Originally I tried
+            # to invalidate generators by overwriting the __next__ method. However,
+            # magic methods are looked up on the class, not the instance (see [1]),
+            # so we cannot do this for individual instances.
+            #
+            # On the other hand, the overhead seems to be on the order of 1.3us per call
+            # so this is probably fine.
+            #
+            # [1] https://stackoverflow.com/questions/33824228/why-wont-dynamically-adding-a-call-method-to-an-instance-work
+            raise InvalidGeneratorError("This NthElementBuffered generator has been spawned and is therefore invalid. Please call next() on the spawned version instead.")
+
+        return self.g_buffered.next_nth(self.idx)
+
+    def invalidate(self):
+        """
+        Invalidate this generator so that it's impossible to call next() on it.
+        """
+        self.invalid = True
+
+    def _spawn(self):
+        logging.debug(
+            "Generator of type NthElementBuffered is being spawned. Note that "
+            "internally this will spawn its parent, rewire all of the original "
+            "parent's children to the new parent and invalidate this generator.")
+        self.g_buffered._spawn_parent()
+        self.invalidate()
+        return NthElementBuffered(self.g_buffered, self.idx)
+
+    def reset(self, seed):
+        self.g_buffered.reset(seed)
 
 
 def Split(g, *, maxbuffer=10, tuple_len=None):
@@ -916,23 +982,6 @@ def Split(g, *, maxbuffer=10, tuple_len=None):
             raise ValueError("Argument 'tuple_len' must be given since generator is not of type TupleGenerator.")
 
     g_buffered = BufferedTuple(g, maxbuffer=maxbuffer, tuple_len=tuple_len)
-
-    class NthElementBuffered(BaseGenerator):
-        def __init__(self, g, idx):
-            self.g = g
-            self.idx = idx
-
-        def __repr__(self):
-            return f"<NthElementBuffered: idx={self.idx}, parent={self.g}>"
-
-        def __next__(self):
-            return self.g.next_nth(self.idx)
-
-        def _spawn(self):
-            return NthElementBuffered(self.g._spawn(), self.idx)
-
-        def reset(self, seed):
-            self.g.reset(seed)
 
     return tuple(NthElementBuffered(g_buffered, i) for i in range(tuple_len))
 

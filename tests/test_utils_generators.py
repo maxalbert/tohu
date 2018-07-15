@@ -1,5 +1,6 @@
 import pytest
 from .context import tohu
+from tohu.custom_generator import CustomGenerator
 from tohu.generators import SelectOne, Integer, Float, Sequential, TupleGenerator, TohuBufferOverflow
 from tohu.generators import First, Second, Nth, BufferedTuple, Split, Zip
 
@@ -179,8 +180,46 @@ class TestUtils:
         for _ in range(maxbuffer):
             next(x)
 
-        # This should raise an error because we're only consuming more than `maxbuffer` elements
+        # This should raise an error because we're consuming more than `maxbuffer` elements
         x.reset(seed=12345)
         with pytest.raises(TohuBufferOverflow):
             for _ in range(maxbuffer + 1):
                 next(x)
+
+    def test_split_generators_are_synced(self):
+        """
+        Split generators are synced (resetting one will also reset the other)
+        """
+        pairs = [('AA', 'aa'), ('BB', 'bb'), ('CC', 'cc'), ('DD', 'dd'), ('EE', 'ee'), ('FF', 'ff')]
+        x, y = Split(SelectOne(pairs), tuple_len=2)
+
+        x.reset(seed=12345)
+        assert x.generate_NEW(5) == ['DD', 'FF', 'AA', 'CC', 'CC']
+        assert y.generate_NEW(5) == ['dd', 'ff', 'aa', 'cc', 'cc']
+
+        x.reset(seed=99999)
+        assert x.generate_NEW(5) == ['AA', 'CC', 'EE', 'FF', 'FF']
+        assert y.generate_NEW(5) == ['aa', 'cc', 'ee', 'ff', 'ff']
+
+        y.reset(seed=12345)
+        assert x.generate_NEW(5) == ['DD', 'FF', 'AA', 'CC', 'CC']
+        assert y.generate_NEW(5) == ['dd', 'ff', 'aa', 'cc', 'cc']
+
+    def test_split_generators_remain_in_sync_if_used_within_custom_generator(self):
+        """
+        Split generators remain in sync when created as attributes of a CustomGenerator
+        """
+
+        pairs = [('AA', 'aa'), ('BB', 'bb'), ('CC', 'cc'), ('DD', 'dd'), ('EE', 'ee'), ('FF', 'ff')]
+
+        class QuuxGenerator(CustomGenerator):
+            x, y = Split(SelectOne(pairs), tuple_len=2)
+
+        g = QuuxGenerator()
+        g.reset(seed=99999)
+        assert next(g) == ('FF', 'ff')
+        assert next(g) == ('BB', 'bb')
+        assert next(g) == ('DD', 'dd')
+        assert next(g) == ('CC', 'cc')
+        assert next(g) == ('AA', 'aa')
+        assert next(g) == ('CC', 'cc')
