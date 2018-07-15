@@ -15,6 +15,7 @@ from itertools import count, islice
 from random import Random
 from tqdm import tqdm
 from .item_collection import ItemCollection
+from .item_list import ItemList
 
 __all__ = ['CharString', 'Constant', 'DigitString', 'FakerGenerator', 'First', 'Float', 'Geolocation',
            'GeolocationPair', 'HashDigest', 'Integer', 'Nth', 'NumpyRandomGenerator', 'Second',
@@ -55,6 +56,23 @@ class BaseGenerator:
         if progressbar:
             items = tqdm(items, total=N)
         return ItemCollection(items, N)
+
+    def generate_item_list(self, N, *, seed=None, progressbar=False):
+        """
+        Return sequence of `N` elements.
+
+        If `seed` is not None, the generator is reset
+        using this seed before generating the elements.
+        """
+        if seed is not None:
+            self.reset(seed)
+        items = islice(self, N)
+        if progressbar:
+            items = tqdm(items, total=N)
+
+        item_list = [x for x in items]
+
+        return ItemList(item_list, N)
 
     def _spawn(self):
         """
