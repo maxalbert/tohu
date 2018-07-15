@@ -908,7 +908,7 @@ def Split(g, *, maxbuffer=10, tuple_len=None):
 
     g_buffered = BufferedTuple(g, maxbuffer=maxbuffer, tuple_len=tuple_len)
 
-    class NthBuffered(BaseGenerator):
+    class NthElementBuffered(BaseGenerator):
         def __init__(self, g, idx):
             self.g = g
             self.idx = idx
@@ -917,12 +917,12 @@ def Split(g, *, maxbuffer=10, tuple_len=None):
             return self.g.next_nth(self.idx)
 
         def _spawn(self):
-            return NthBuffered(self.g._spawn(), self.idx)
+            return NthElementBuffered(self.g._spawn(), self.idx)
 
         def reset(self, seed):
             self.g.reset(seed)
 
-    return tuple(NthBuffered(g_buffered, i) for i in range(tuple_len))
+    return tuple(NthElementBuffered(g_buffered, i) for i in range(tuple_len))
 
 
 class Zip(TupleGenerator):
