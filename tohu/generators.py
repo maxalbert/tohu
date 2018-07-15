@@ -57,7 +57,7 @@ class BaseGenerator:
             items = tqdm(items, total=N)
         return ItemCollection(items, N)
 
-    def generate_item_list(self, N, *, seed=None, progressbar=False):
+    def generate_NEW(self, N, *, seed=None, progressbar=False):
         """
         Return sequence of `N` elements.
 
