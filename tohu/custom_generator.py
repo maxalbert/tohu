@@ -105,6 +105,12 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         instdict = self.__dict__
         return {name: gen._spawn() for name, gen in dict(**clsdict, **instdict).items() if isinstance(gen, BaseGenerator)}
 
+    def _spawn(self):
+        # TODO/FIXME: Check that this does the right thing:
+        # (i) the spawned generator is independent of the original one (i.e. they can be reset independently without altering the other's behaviour)
+        # (ii) ensure that it also works if this custom generator's __init__ requires additional arguments
+        return self.__class__()
+
     def __next__(self):
         field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
