@@ -87,7 +87,7 @@ class TestItemList:
             """)
 
         expected_output_with_default_header = \
-            ("#Column_1,Column_2,Column_3,Column_4,Column_5\n" +
+            ("Column_1,Column_2,Column_3,Column_4,Column_5\n" +
              expected_output_without_header)
 
         expected_output_with_custom_header = \

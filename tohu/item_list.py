@@ -30,7 +30,7 @@ class ItemList:
             attr_getters = [(field_name, attrgetter(attr_name)) for (field_name, attr_name) in fields.items()]
             return pd.DataFrame([pd.Series({field_name: func(x) for (field_name, func) in attr_getters}) for x in self.items])
 
-    def to_csv(self, filename, *, fields, append=False, sep=',', header=True, header_prefix='#'):
+    def to_csv(self, filename=None, *, fields=None, append=False, sep=',', header=True, header_prefix=''):
         """
         Parameters
         ----------
@@ -49,7 +49,8 @@ class ItemList:
             the field names of the custom generator.
         header_prefix: str
             If `header=True` then the auto-generated header line will be prefixed
-            with `header_prefix` (otherwise this argument has no effect).
+            with `header_prefix` (otherwise this argument has no effect). For example,
+            set `header_prefix='#'` to make the header line start with '#'. Default: ''
         """
         assert isinstance(append, bool)
 
