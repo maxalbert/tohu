@@ -2,6 +2,25 @@ import pandas as pd
 from operator import attrgetter
 
 
+def _generate_csv_header_line(*, header_names, header_prefix='', header=True, sep=',', newline='\n'):
+    """
+    Helper function to generate a CSV header line depending on
+    the combination of arguments provided.
+    """
+    if isinstance(header, str):  # user-provided header line
+        header_line = header + newline
+    else:
+        if not (header is None or isinstance(header, bool)):
+            raise ValueError(f"Invalid value for argument `header`: {header}")
+        else:
+            if header:
+                header_line = header_prefix + sep.join(header_names) + newline
+            else:
+                header_line = ""
+    return header_line
+
+
+
 class ItemList:
 
     def __init__(self, items, N):
@@ -70,20 +89,10 @@ class ItemList:
         if fields is None:
             raise NotImplementedError("TODO: derive field names automatically from the generator which produced this item list")
 
-        header_names = [name for name in fields.keys()]
         attr_getters = [attrgetter(attr_name) for attr_name in fields.values()]
         newline = '\n'
 
-        if isinstance(header, str):  # user-provided header line
-            header_line = header + newline
-        else:
-            if not (header is None or isinstance(header, bool)):
-                raise ValueError(f"Invalid value for argument `header`: {header}")
-            else:
-                if header:
-                    header_line = header_prefix + sep.join(header_names) + newline
-                else:
-                    header_line = ""
+        header_line = _generate_csv_header_line(header=header, header_prefix=header_prefix, header_names=fields.keys(), sep=sep, newline=newline)
 
         # TODO: refactor this!
         if filename is None:
