@@ -25,7 +25,7 @@ class ItemList:
 
     def to_df(self, fields=None):
         if fields is None:
-            return pd.DataFrame([x.as_series() for x in self.items])
+            return pd.DataFrame([x.to_series() for x in self.items])
         else:
             attr_getters = [(field_name, attrgetter(attr_name)) for (field_name, attr_name) in fields.items()]
             return pd.DataFrame([pd.Series({field_name: func(x) for (field_name, func) in attr_getters}) for x in self.items])
