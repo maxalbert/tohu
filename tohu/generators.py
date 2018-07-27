@@ -78,6 +78,8 @@ class BaseGenerator:
 
         return ItemList(item_list, N)
 
+    generate = generate_NEW  # alias; to be removed when generate_OLD is removed
+
     def _spawn(self):
         """
         This method needs to be implemented by derived classes.

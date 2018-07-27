@@ -65,8 +65,8 @@ class TestUtils:
         triples = DummyTupleGen("c", "d", "e")
         g = First(pairs)
         h = First(triples)
-        assert g.generate_NEW(5) == ["a1", "a2", "a3", "a4", "a5"]
-        assert h.generate_NEW(3) == ["c1", "c2", "c3"]
+        assert g.generate(5) == ["a1", "a2", "a3", "a4", "a5"]
+        assert h.generate(3) == ["c1", "c2", "c3"]
 
     def test_extract_second_element_from_tuple_generator(self):
         """
@@ -76,8 +76,8 @@ class TestUtils:
         triples = DummyTupleGen("c", "d", "e")
         g = Second(pairs)
         h = Second(triples)
-        assert list(g.generate_NEW(5)) == ["b1", "b2", "b3", "b4", "b5"]
-        assert list(h.generate_NEW(3)) == ["d1", "d2", "d3"]
+        assert list(g.generate(5)) == ["b1", "b2", "b3", "b4", "b5"]
+        assert list(h.generate(3)) == ["d1", "d2", "d3"]
 
     def test_extract_nth_element_from_tuple_generator(self):
         """
@@ -87,8 +87,8 @@ class TestUtils:
         triples = DummyTupleGen("c", "d", "e")
         g = Nth(pairs, 0)
         h = Nth(triples, 2)
-        assert list(g.generate_NEW(4)) == ["a1", "a2", "a3", "a4"]
-        assert list(h.generate_NEW(3)) == ["e1", "e2", "e3"]
+        assert list(g.generate(4)) == ["a1", "a2", "a3", "a4"]
+        assert list(h.generate(3)) == ["e1", "e2", "e3"]
 
     def test_split_pairs(self):
         """
@@ -143,8 +143,8 @@ class TestUtils:
         pairs = [('a', 1), ('b', 2), ('c', 3), ('d', 4)]
         g, h = Split(SelectOne(pairs, seed=99999), tuple_len=2)
 
-        assert list(g.generate_NEW(N=5)) == ['a', 'c', 'b', 'c', 'd']
-        assert list(h.generate_NEW(N=5)) == [1, 3, 2, 3, 4]
+        assert list(g.generate(N=5)) == ['a', 'c', 'b', 'c', 'd']
+        assert list(h.generate(N=5)) == [1, 3, 2, 3, 4]
 
         g, h = Split(SelectOne(pairs, seed=99999), tuple_len=2)
         assert (next(g), next(h)) == ('a', 1)
@@ -194,16 +194,16 @@ class TestUtils:
         x, y = Split(SelectOne(pairs), tuple_len=2)
 
         x.reset(seed=12345)
-        assert x.generate_NEW(5) == ['DD', 'FF', 'AA', 'CC', 'CC']
-        assert y.generate_NEW(5) == ['dd', 'ff', 'aa', 'cc', 'cc']
+        assert x.generate(5) == ['DD', 'FF', 'AA', 'CC', 'CC']
+        assert y.generate(5) == ['dd', 'ff', 'aa', 'cc', 'cc']
 
         x.reset(seed=99999)
-        assert x.generate_NEW(5) == ['AA', 'CC', 'EE', 'FF', 'FF']
-        assert y.generate_NEW(5) == ['aa', 'cc', 'ee', 'ff', 'ff']
+        assert x.generate(5) == ['AA', 'CC', 'EE', 'FF', 'FF']
+        assert y.generate(5) == ['aa', 'cc', 'ee', 'ff', 'ff']
 
         y.reset(seed=12345)
-        assert x.generate_NEW(5) == ['DD', 'FF', 'AA', 'CC', 'CC']
-        assert y.generate_NEW(5) == ['dd', 'ff', 'aa', 'cc', 'cc']
+        assert x.generate(5) == ['DD', 'FF', 'AA', 'CC', 'CC']
+        assert y.generate(5) == ['dd', 'ff', 'aa', 'cc', 'cc']
 
     def test_split_generators_remain_in_sync_if_used_within_custom_generator(self):
         """
