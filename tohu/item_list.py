@@ -1,3 +1,4 @@
+import io
 import pandas as pd
 from operator import attrgetter
 
@@ -93,20 +94,22 @@ class ItemList:
 
         header_line = _generate_csv_header_line(header=header, header_prefix=header_prefix, header_names=fields.keys(), sep=sep, newline=newline)
 
+        file_or_string = open(filename, 'a' if append else 'w') if (filename is not None) else io.StringIO()
+
+        retval = None
         attr_getters = [attrgetter(attr_name) for attr_name in fields.values()]
+        try:
 
-        # TODO: refactor this!
-        if filename is None:
-            s = header_line
+            file_or_string.write(header_line)
+
             for x in self.items:
-                line = sep.join([str(func(x)) for func in attr_getters]) + newline
-                s += line
-            return s
-        else:
-            assert isinstance(filename, str)
-            with open(filename, 'a' if append else 'w') as f:
-                f.write(header_line)
+                line = sep.join([format(func(x)) for func in attr_getters]) + newline
+                file_or_string.write(line)
 
-                for x in self.items:
-                    line = sep.join([str(func(x)) for func in attr_getters]) + newline
-                    f.write(line)
+            if filename is None:
+                retval = file_or_string.getvalue()
+
+        finally:
+            file_or_string.close()
+
+        return retval
