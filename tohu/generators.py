@@ -20,7 +20,7 @@ from .item_list import ItemList
 
 __all__ = ['CharString', 'Constant', 'DigitString', 'FakerGenerator', 'First', 'Float', 'Geolocation',
            'GeolocationPair', 'HashDigest', 'Integer', 'Nth', 'NumpyRandomGenerator', 'Second',
-           'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Timestamp',
+           'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Timestamp', 'TimestampNEW',
            'TimestampError', 'TupleGenerator', 'Zip']
 
 
@@ -594,6 +594,70 @@ class Timestamp(BaseGenerator):
 
     def reset(self, seed):
         self.offsetgen.reset(seed)
+
+
+class TimestampNEW(BaseGenerator):
+    """
+    Generator which produces random timestamps.
+    """
+
+    def __init__(self, *, start=None, end=None, date=None):
+        """
+        Initialise timestamp generator.
+
+        Note that `start` and `end` are both inclusive. They can either
+        be full timestamps such as 'YYYY-MM-DD HH:MM:SS', or date strings
+        such as 'YYYY-MM-DD'. Note that in the latter case `end` is
+        interpreted as as `YYYY-MM-DD 23:59:59`, i.e. the day is counted
+        in full.
+
+        Args:
+            start (date string):  start time
+            end   (date string):  end time
+            date (str):           string of the form YYYY-MM-DD. This is an alternative (and mutually exclusive)
+                                  to specifying `start` and `end`.
+        """
+        if (date is not None):
+            if not (start is None and end is None):
+                raise TimestampError("Argument `date` is mutually exclusive with `start` and `end`.")
+
+            self.start = dt.datetime.strptime(date, '%Y-%m-%d')
+            self.end = self.start + dt.timedelta(hours=23, minutes=59, seconds=59)
+        else:
+            if (start is None or end is None):
+                raise TimestampError("Either `date` or both `start` and `end` must be provided.")
+
+            try:
+                self.start = dt.datetime.strptime(start, '%Y-%m-%d')
+            except ValueError:
+                self.start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+
+            try:
+                self.end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                end_date = dt.datetime.strptime(end, '%Y-%m-%d')
+                self.end = dt.datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
+
+        self.dt = int((self.end - self.start).total_seconds())
+
+        if self.dt < 0:
+            raise TimestampError("Start time must be before end time. Got: start_time='{}', end_time='{}'."
+                                 "".format(self.start, self.end))
+
+        self.offsetgen = Integer(0, self.dt)
+
+    def _spawn(self):
+        return TimestampNEW(
+            start=self.start.strftime('%Y-%m-%d %H:%M:%S'),
+            end=self.end.strftime('%Y-%m-%d %H:%M:%S'))
+
+    def __next__(self):
+        ts = (self.start + dt.timedelta(seconds=next(self.offsetgen)))
+        return ts
+
+    def reset(self, seed):
+        self.offsetgen.reset(seed)
+
 
 
 def _create_attribute_generators(custom_generator):
