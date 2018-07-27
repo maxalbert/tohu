@@ -49,7 +49,7 @@ class ItemList:
             attr_getters = [(field_name, attrgetter(attr_name)) for (field_name, attr_name) in fields.items()]
             return pd.DataFrame([pd.Series({field_name: func(x) for (field_name, func) in attr_getters}) for x in self.items])
 
-    def to_csv(self, filename=None, *, fields=None, append=False, sep=',', header=True, header_prefix=''):
+    def to_csv(self, filename=None, *, fields=None, append=False, header=True, header_prefix='', sep=',', newline='\n'):
         """
         Parameters
         ----------
@@ -66,8 +66,6 @@ class ItemList:
             Default is `False`, i.e. any existing content will be overwritten.
             This argument only has an effect if `filename` is given (i.e. if output happens
             to a file instead of returning a CSV string).
-        sep: str
-            Field separator to use in the output. Default: ','
         header: bool or str or None
             If `header=False` or `header=None` then no header line will be written.
             If `header` is a string then this string will be used as the header line.
@@ -77,6 +75,10 @@ class ItemList:
             If `header=True` then the auto-generated header line will be prefixed
             with `header_prefix` (otherwise this argument has no effect). For example,
             set `header_prefix='#'` to make the header line start with '#'. Default: ''
+        sep: str
+            Field separator to use in the output. Default: ','
+        newline: str
+            Line terminator to use in the output. Default: '\n'
 
         Returns
         -------
@@ -89,10 +91,9 @@ class ItemList:
         if fields is None:
             raise NotImplementedError("TODO: derive field names automatically from the generator which produced this item list")
 
-        attr_getters = [attrgetter(attr_name) for attr_name in fields.values()]
-        newline = '\n'
-
         header_line = _generate_csv_header_line(header=header, header_prefix=header_prefix, header_names=fields.keys(), sep=sep, newline=newline)
+
+        attr_getters = [attrgetter(attr_name) for attr_name in fields.values()]
 
         # TODO: refactor this!
         if filename is None:
