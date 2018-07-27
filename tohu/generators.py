@@ -47,19 +47,19 @@ class BaseGenerator:
     def reset(self, seed):
         raise NotImplementedError("Class {} does not implement method 'reset'.".format(self.__class__.__name__))
 
-    def generate_OLD(self, N, *, seed=None, progressbar=False):
-        """
-        Return sequence of `N` elements.
+    # def generate_OLD(self, N, *, seed=None, progressbar=False):
+    #     """
+    #     Return sequence of `N` elements.
 
-        If `seed` is not None, the generator is reset
-        using this seed before generating the elements.
-        """
-        if seed is not None:
-            self.reset(seed)
-        items = islice(self, N)
-        if progressbar:
-            items = tqdm(items, total=N)
-        return ItemCollection(items, N)
+    #     If `seed` is not None, the generator is reset
+    #     using this seed before generating the elements.
+    #     """
+    #     if seed is not None:
+    #         self.reset(seed)
+    #     items = islice(self, N)
+    #     if progressbar:
+    #         items = tqdm(items, total=N)
+    #     return ItemCollection(items, N)
 
     def generate_NEW(self, N, *, seed=None, progressbar=False):
         """
