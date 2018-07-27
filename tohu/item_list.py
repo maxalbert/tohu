@@ -34,12 +34,19 @@ class ItemList:
         """
         Parameters
         ----------
+        filename: str or None
+            The file to which output will be written. By default, any existing content is
+            overwritten. Use `append=True` to open the file in append mode instead.
+            If filename is None, the generated CSV output is returned instead of written
+            to a file.
         fields: dict
             Dictionary which maps output field names to attribute names of the generators.
             Example: `fields={'CSV_COL1': 'field_name_1', 'CSV_COL2': 'field_name_2'}
         append: bool
             If `True`, open the file in 'append' mode to avoid overwriting existing content.
             Default is `False`, i.e. any existing content will be overwritten.
+            This argument only has an effect if `filename` is given (i.e. if output happens
+            to a file instead of returning a CSV string).
         sep: str
             Field separator to use in the output. Default: ','
         header: bool or str or None
@@ -51,8 +58,17 @@ class ItemList:
             If `header=True` then the auto-generated header line will be prefixed
             with `header_prefix` (otherwise this argument has no effect). For example,
             set `header_prefix='#'` to make the header line start with '#'. Default: ''
+
+        Returns
+        -------
+        The return value depends on the value of `filename`.
+        If `filename` is given, writes the output to the file and returns `None`.
+        If `filename` is `None`, returns a string containing the CSV output.
         """
         assert isinstance(append, bool)
+
+        if fields is None:
+            raise NotImplementedError("TODO: derive field names automatically from the generator which produced this item list")
 
         header_names = [name for name in fields.keys()]
         attr_getters = [attrgetter(attr_name) for attr_name in fields.values()]
@@ -69,9 +85,18 @@ class ItemList:
                 else:
                     header_line = ""
 
-        with open(filename, 'a' if append else 'w') as f:
-            f.write(header_line)
-
+        # TODO: refactor this!
+        if filename is None:
+            s = header_line
             for x in self.items:
                 line = sep.join([str(func(x)) for func in attr_getters]) + newline
-                f.write(line)
+                s += line
+            return s
+        else:
+            assert isinstance(filename, str)
+            with open(filename, 'a' if append else 'w') as f:
+                f.write(header_line)
+
+                for x in self.items:
+                    line = sep.join([str(func(x)) for func in attr_getters]) + newline
+                    f.write(line)
