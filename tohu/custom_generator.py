@@ -115,64 +115,64 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
 
-    def to_csv(self, path_or_buf=None, *, N, seed=None, fields=None, fmt_str=None, header=None, progressbar=True):
-        """
-        Generate N items and return the resulting CSV string or output to a file.
+    # def to_csv(self, path_or_buf=None, *, N, seed=None, fields=None, fmt_str=None, header=None, progressbar=True):
+    #     """
+    #     Generate N items and return the resulting CSV string or output to a file.
 
-        Parameters
-        ----------
-        path_or_buf: string or file handle, default None
-            File path or object. If None is provided the result
-            is returned as a string.
-        N: integer
-            Number of items to generate.
-        seed: integer (optional)
-            Seed with which to initialise random generator.
-        progressbar: boolean
-            Whether to display a progressbar during item generation.
+    #     Parameters
+    #     ----------
+    #     path_or_buf: string or file handle, default None
+    #         File path or object. If None is provided the result
+    #         is returned as a string.
+    #     N: integer
+    #         Number of items to generate.
+    #     seed: integer (optional)
+    #         Seed with which to initialise random generator.
+    #     progressbar: boolean
+    #         Whether to display a progressbar during item generation.
 
-        The remaining arguments `fields`, `fmt_str`, `header`
-        are passed on to CSVFormatter.
-        """
-        if fmt_str is None:
-            fmt_str = getattr(self, 'CSV_FMT_STR', None)
-        if fields is None and fmt_str is None:
-            fields = getattr(self, 'CSV_FIELDS', self.fmt_dict)
-        if header is None:
-            header = getattr(self, 'CSV_HEADER', None)
+    #     The remaining arguments `fields`, `fmt_str`, `header`
+    #     are passed on to CSVFormatter.
+    #     """
+    #     if fmt_str is None:
+    #         fmt_str = getattr(self, 'CSV_FMT_STR', None)
+    #     if fields is None and fmt_str is None:
+    #         fields = getattr(self, 'CSV_FIELDS', self.fmt_dict)
+    #     if header is None:
+    #         header = getattr(self, 'CSV_HEADER', None)
 
-        formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, header=header)
-        return formatter.to_csv(self.generate_NEW(N, seed=seed, progressbar=progressbar), path_or_buf=path_or_buf)
+    #     formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, header=header)
+    #     return formatter.to_csv(self.generate_NEW(N, seed=seed, progressbar=progressbar), path_or_buf=path_or_buf)
 
-    def to_df(self, *, N, seed=None, fields=None):
-        """
-        Return pandas DataFrame containing N items produced by this generator.
-        """
-        return self.generate_NEW(N, seed=seed).to_df(fields=fields)
+    # def to_df(self, *, N, seed=None, fields=None):
+    #     """
+    #     Return pandas DataFrame containing N items produced by this generator.
+    #     """
+    #     return self.generate_NEW(N, seed=seed).to_df(fields=fields)
 
-    def to_psql(self, url, table_name, N, *, if_exists='fail', seed=None):
-        """
-        Generate N items and export them as rows in a PostgreSQL table.
+    # def to_psql(self, url, table_name, N, *, if_exists='fail', seed=None):
+    #     """
+    #     Generate N items and export them as rows in a PostgreSQL table.
 
-        Parameters
-        ----------
+    #     Parameters
+    #     ----------
 
-        url: string
-            Connection string to connect to the database.
-            Example: "postgresql://postgres@127.0.0.1:5432/testdb"
+    #     url: string
+    #         Connection string to connect to the database.
+    #         Example: "postgresql://postgres@127.0.0.1:5432/testdb"
 
-        table_name: string
-            Name of the database table.
+    #     table_name: string
+    #         Name of the database table.
 
-        N: integer
-            Number of items to export.
+    #     N: integer
+    #         Number of items to export.
 
-        if_exists : {'fail', 'replace', 'append'}, default 'fail'
-            - fail: If table exists, raise an error.
-            - replace: If table exists, drop it, recreate it, and insert data.
-            - append: If table exists, insert data. Create if does not exist.
+    #     if_exists : {'fail', 'replace', 'append'}, default 'fail'
+    #         - fail: If table exists, raise an error.
+    #         - replace: If table exists, drop it, recreate it, and insert data.
+    #         - append: If table exists, insert data. Create if does not exist.
 
-        seed: integer (optional)
-            Seed with which to initialise random generator.
-        """
-        self.generate_NEW(N, seed=seed).to_psql(url, table_name, if_exists=if_exists)
+    #     seed: integer (optional)
+    #         Seed with which to initialise random generator.
+    #     """
+    #     self.generate_NEW(N, seed=seed).to_psql(url, table_name, if_exists=if_exists)

@@ -102,6 +102,7 @@ class TestCustomGenerator:
         assert format(item3) == "Hello,quux_01,4001"
         assert format(item4) == "Hello,quux_02,5032"
 
+    @pytest.mark.xfail(reason="This should be moved out into tests for ItemList")
     def test_return_csv_string(self):
         """
         Test that to_csv() returns the expected CSV string if no filename is given.
@@ -116,6 +117,7 @@ class TestCustomGenerator:
         csv = self.gen_foo.to_csv(N=3, seed=12345, header="# Custom header")
         assert csv == csv_expected
 
+    @pytest.mark.xfail(reason="This should be moved out into tests for ItemList")
     def test_write_csv_file(self, tmpdir):
         """
         Test that generated items can be written to a CSV file.
@@ -136,6 +138,7 @@ class TestCustomGenerator:
         assert open(filename1).read() == csv_expected
         assert open(filename2).read() == csv_expected
 
+    @pytest.mark.xfail(reason="Need to re-think whether the CSV_FIELDS attribute is a good idea")
     def test_csv_fields_can_be_defined_in_class_declaration(self, tmpdir):
         """
         Test that fields for CSV export can be defined via the CSV_FIELDS class attribute.
@@ -159,6 +162,7 @@ class TestCustomGenerator:
 
         assert open(filename).read() == csv_expected
 
+    @pytest.mark.xfail(reason="Need to re-think whether the CSV_FIELDS and CSV_HEADER attributes are a good idea")
     def test_csv_header_can_be_defined_in_class_declaration(self, tmpdir):
         """
         Test that CSV header can be defined via the CSV_HEADER class attribute .
@@ -183,6 +187,7 @@ class TestCustomGenerator:
 
         assert open(filename).read() == csv_expected
 
+    @pytest.mark.xfail(reason="Need to re-think whether the CSV_FMT_STR attribute is a good idea")
     def test_csv_format_string_can_be_defined_in_class_declaration(self, tmpdir):
         """
         Test that CSV formatting can be defined via the CSV_FMT_STR class attribute .
@@ -205,6 +210,7 @@ class TestCustomGenerator:
 
         assert open(filename).read() == csv_expected
 
+    @pytest.mark.xfail(reason="The .to_df() method has been disabled (and will likely be removed)")
     def test_dataframe_export(self):
         """
         Test that items produced by generator can be exported as a pandas dataframe.
