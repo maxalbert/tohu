@@ -144,11 +144,11 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
         formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, header=header)
         return formatter.to_csv(self.generate_NEW(N, seed=seed, progressbar=progressbar), path_or_buf=path_or_buf)
 
-    def to_df(self, *, N, seed=None):
+    def to_df(self, *, N, seed=None, fields=None):
         """
         Return pandas DataFrame containing N items produced by this generator.
         """
-        return self.generate_NEW(N, seed=seed).to_df()
+        return self.generate_NEW(N, seed=seed).to_df(fields=fields)
 
     def to_psql(self, url, table_name, N, *, if_exists='fail', seed=None):
         """
