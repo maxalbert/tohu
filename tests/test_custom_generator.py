@@ -25,8 +25,8 @@ class TestCustomGenerator:
             d = Sequential(prefix="quux_", digits=2)
             e = Integer(low=3000, high=6000)
 
-        self.gen_foo = FoobarGenerator(seed=99999)
-        self.gen_quux = QuuxGenerator(seed=12345)
+        self.gen_foo = FoobarGenerator().reset(seed=99999)
+        self.gen_quux = QuuxGenerator().reset(seed=12345)
 
     def test_custom_generator_produces_objects_of_the_expected_class(self):
         """

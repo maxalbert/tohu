@@ -56,15 +56,12 @@ class CustomGeneratorMeta(type):
         orig_init = gen_cls.__init__
 
         def gen_init(self, *args, **kwargs):
-            seed = kwargs.pop('seed', None)
-
             # Call original __init__ function to make sure all generator attributes are defined
             orig_init(self, *args, **kwargs)
 
             self.field_gens = self._calculate_field_gens()
             self.item_cls = make_item_class(self.get_item_class_name(), self.field_gens.keys())
             self.seed_generator = SeedGenerator()
-            self.reset(seed)
 
         gen_cls.__init__ = gen_init
         return gen_cls
@@ -96,6 +93,7 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
             # produced by the seed generator.
             for g, x in zip(self.field_gens.values(), self.seed_generator):
                 g.reset(x)
+        return self
 
     def _calculate_field_gens(self):
         clsdict = self.__class__.__dict__
