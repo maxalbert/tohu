@@ -112,7 +112,7 @@ class Constant(BaseGenerator):
         return Constant(self.value)
 
     def reset(self, seed=None):
-        pass
+        return self
 
     def __next__(self):
         return self.value
@@ -123,7 +123,7 @@ class Integer(BaseGenerator):
     Generator which produces random integers k in the range low <= k <= high.
     """
 
-    def __init__(self, low, high, *, seed=None):
+    def __init__(self, low, high):
         """
         Parameters
         ----------
@@ -131,19 +131,17 @@ class Integer(BaseGenerator):
             Lower bound (inclusive).
         high: integer
             Upper bound (inclusive).
-        seed: integer (optional)
-            Seed to initialise this random generator.
         """
         self.low = low
         self.high = high
         self.randgen = Random()
-        self.reset(seed)
 
     def _spawn(self):
         return Integer(self.low, self.high)
 
     def reset(self, seed):
         self.randgen.seed(seed)
+        return self
 
     def __next__(self):
         return self.randgen.randint(self.low, self.high)
@@ -154,7 +152,7 @@ class Float(BaseGenerator):
     Generator which produces random floating point numbers x in the range low <= x <= high.
     """
 
-    def __init__(self, low, high, *, seed=None):
+    def __init__(self, low, high):
         """
         Parameters
         ----------
@@ -162,19 +160,17 @@ class Float(BaseGenerator):
             Lower bound (inclusive).
         high: integer
             Upper bound (inclusive).
-        seed: integer (optional)
-            Seed to initialise this random generator.
         """
         self.low = low
         self.high = high
         self.randgen = Random()
-        self.reset(seed)
 
     def _spawn(self):
         return Float(self.low, self.high)
 
     def reset(self, seed):
         self.randgen.seed(seed)
+        return self
 
     def __next__(self):
         return self.randgen.uniform(self.low, self.high)
@@ -187,14 +183,12 @@ class NumpyRandomGenerator(BaseGenerator):
     [1] https://docs.scipy.org/doc/numpy/reference/routines.random.html
     """
 
-    def __init__(self, method, *, seed=None, **numpy_args):
+    def __init__(self, method, **numpy_args):
         """
         Parameters
         ----------
         method: string
             Name of the numpy function to use (see [1] for details)
-        seed: integer (optional)
-            Seed to initialise this random generator
         numpy_args:
             Remaining arguments passed to the numpy function (see [1] for details)
 
@@ -206,13 +200,13 @@ class NumpyRandomGenerator(BaseGenerator):
         self.random_state = np.random.RandomState()
         self.randgen = getattr(self.random_state, method)
         self.numpy_args = numpy_args
-        self.reset(seed)
 
     def _spawn(self):
         return NumpyRandomGenerator(method=self.method, **self.numpy_args)
 
     def reset(self, seed):
         self.random_state.seed(seed)
+        return self
 
     def __next__(self):
         return self.randgen(**self.numpy_args)
@@ -225,14 +219,12 @@ class FakerGenerator(BaseGenerator):
     [1] https://faker.readthedocs.io/
     """
 
-    def __init__(self, method, *, seed=None, locale=None, **faker_args):
+    def __init__(self, method, *, locale=None, **faker_args):
         """
         Parameters
         ----------
         method: string
             Name of the faker provider to use (see [1] for details)
-        seed: integer (optional)
-            Seed to initialise this random generator
         locale: string
              Locale to use when generating data, e.g. 'en_US' (see [1] for details)
         faker_args:
@@ -248,13 +240,13 @@ class FakerGenerator(BaseGenerator):
 
         self.fake = Faker(locale=locale)
         self.randgen = getattr(self.fake, method)
-        self.reset(seed)
 
     def _spawn(self):
         return FakerGenerator(method=self.method, locale=self.locale, **self.faker_args)
 
     def reset(self, seed):
         self.fake.seed(seed)
+        return self
 
     def __next__(self):
         return self.randgen(**self.faker_args)
@@ -308,6 +300,7 @@ class Sequential(BaseGenerator):
         but its value is ignored - the generator is simply reset to its initial value.
         """
         self.cnt = count(start=1)
+        return self
 
     def __next__(self):
         return self.fmt_str.format(next(self.cnt))
@@ -315,10 +308,10 @@ class Sequential(BaseGenerator):
 
 class SelectOne(BaseGenerator):
     """
-    Generator which produces a sequence of items taken from given a given set of elements.
+    Generator which produces a sequence of items taken from a given set of elements.
     """
 
-    def __init__(self, values, *, seed=None):
+    def __init__(self, values):
         """
         Parameters
         ----------
@@ -329,7 +322,6 @@ class SelectOne(BaseGenerator):
         """
         self.values = values
         self.idxgen = Integer(low=0, high=(len(self.values) - 1))
-        self.reset(seed)
 
     def __next__(self):
         """
@@ -343,6 +335,7 @@ class SelectOne(BaseGenerator):
 
     def reset(self, seed):
         self.idxgen.reset(seed)
+        return self
 
 
 # Define alias for backwards compatibilty
@@ -354,7 +347,7 @@ class SelectMultiple(BaseGenerator):
     Generator which produces a sequence of tuples with elements taken from a given set of elements.
     """
 
-    def __init__(self, values, size, *, seed=None):
+    def __init__(self, values, size):
         """
         Parameters
         ----------
@@ -362,8 +355,6 @@ class SelectMultiple(BaseGenerator):
             List of options from which to choose elements.
         size: integer
             Size of the output tuples.
-        seed: integer (optional)
-            Seed to initialise this random generator.
         """
         if isinstance(size, int):
             if size < 0:
@@ -385,7 +376,6 @@ class SelectMultiple(BaseGenerator):
         self._max_size = self._size_gen.high
         self._elem_gens = [SelectOne(values) for _ in range(self._max_size)]
         self._seed_generator = SeedGenerator()
-        self.reset(seed)
 
     def __next__(self):
         """
@@ -404,6 +394,7 @@ class SelectMultiple(BaseGenerator):
         for g in self._elem_gens:
             elem_seed = next(self._seed_generator)
             g.reset(elem_seed)
+        return self
 
 
 class CharString(BaseGenerator):
@@ -411,7 +402,7 @@ class CharString(BaseGenerator):
     Generator which produces a sequence of character strings.
     """
 
-    def __init__(self, *, length, chars, seed=None):
+    def __init__(self, *, length, chars):
         """
         Parameters
         ----------
@@ -419,13 +410,10 @@ class CharString(BaseGenerator):
             Length of the character strings produced by this generator.
         chars: iterable
             Character set to draw from when generating strings.
-        seed: integer (optional)
-            Seed to initialise this random generator.
         """
         self.length = length
         self.chars = chars
         self.chargen = SelectOne(self.chars)
-        self.reset(seed)
 
     def __next__(self):
         chars = [next(self.chargen) for _ in range(self.length)]
@@ -433,6 +421,7 @@ class CharString(BaseGenerator):
 
     def reset(self, seed):
         self.chargen.reset(seed)
+        return self
 
 
 class DigitString(CharString):
@@ -440,7 +429,7 @@ class DigitString(CharString):
     Generator which produces a sequence of strings containing only digits.
     """
 
-    def __init__(self, *, length, seed=None):
+    def __init__(self, *, length):
         """
         Parameters
         ----------
@@ -451,7 +440,7 @@ class DigitString(CharString):
         """
         chars = "0123456789"
         self.length = length
-        super().__init__(length=length, chars=chars, seed=seed)
+        super().__init__(length=length, chars=chars)
 
     def _spawn(self):
         return DigitString(length=self.length)
@@ -462,18 +451,16 @@ class HashDigest(CharString):
     Generator which produces a sequence of hex strings representing hash digest values.
     """
 
-    def __init__(self, *, length, seed=None):
+    def __init__(self, *, length):
         """
         Parameters
         ----------
         length: int
             Length of the strings produced by this generator.
-        seed: integer (optional)
-            Seed to initialise this random generator.
         """
         chars = "0123456789ABCDEF"
         self.length = length
-        super().__init__(length=length, chars=chars, seed=seed)
+        super().__init__(length=length, chars=chars)
 
     def _spawn(self):
         return HashDigest(length=self.length)
@@ -498,6 +485,7 @@ class GeolocationPair(TupleGenerator):
     def reset(self, seed):
         self.lon_gen.reset(seed)
         self.lat_gen.reset(seed)
+        return self
 
 
 def Geolocation():
@@ -579,6 +567,7 @@ class Timestamp(BaseGenerator):
 
     def reset(self, seed):
         self.offsetgen.reset(seed)
+        return self
 
 
 class TimestampNEW(BaseGenerator):
@@ -642,6 +631,7 @@ class TimestampNEW(BaseGenerator):
 
     def reset(self, seed):
         self.offsetgen.reset(seed)
+        return self
 
 
 
@@ -717,6 +707,7 @@ class Nth(BaseGenerator):
 
     def reset(self, seed):
         self.g.reset(seed)
+        return self
 
 
 First = partial(Nth, idx=0)
@@ -777,6 +768,7 @@ class BufferedTuple(BaseGenerator):
     def reset(self, seed):
         self.g.reset(seed)
         self._reset_queues()
+        return self
 
     def next_nth(self, n):
         if self._queues[n].empty():
@@ -839,6 +831,7 @@ class NthElementBuffered(BaseGenerator):
 
     def reset(self, seed):
         self.g_buffered.reset(seed)
+        return self
 
 
 def Split(g, *, maxbuffer=10, tuple_len=None):
@@ -870,11 +863,10 @@ class Zip(TupleGenerator):
     individual generators.
     """
 
-    def __init__(self, *generators, seed=None):
+    def __init__(self, *generators):
         self._generators = [g._spawn() for g in generators]
         self.seed_generator = SeedGenerator()
         self.tuple_len = len(self._generators)
-        self.reset(seed)
 
     def __next__(self):
         return tuple(next(g) for g in self._generators)
@@ -884,10 +876,4 @@ class Zip(TupleGenerator):
         for g in self._generators:
             new_seed = next(self.seed_generator)
             g.reset(new_seed)
-
-
-def Geolocation():
-    """
-    Return a pair (Lon, Lat) of iterators producing.
-    """
-    return Split(GeolocationPair())
+        return self

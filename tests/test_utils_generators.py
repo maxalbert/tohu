@@ -141,12 +141,12 @@ class TestUtils:
         Test that we can split the output of a SelectOne generator that produces tuples.
         """
         pairs = [('a', 1), ('b', 2), ('c', 3), ('d', 4)]
-        g, h = Split(SelectOne(pairs, seed=99999), tuple_len=2)
+        g, h = Split(SelectOne(pairs).reset(seed=99999), tuple_len=2)
 
         assert list(g.generate(N=5)) == ['a', 'c', 'b', 'c', 'd']
         assert list(h.generate(N=5)) == [1, 3, 2, 3, 4]
 
-        g, h = Split(SelectOne(pairs, seed=99999), tuple_len=2)
+        g, h = Split(SelectOne(pairs).reset(seed=99999), tuple_len=2)
         assert (next(g), next(h)) == ('a', 1)
         assert (next(g), next(h)) == ('c', 3)
         assert (next(g), next(h)) == ('b', 2)
@@ -160,7 +160,7 @@ class TestUtils:
         g2 = Integer(0, 1000)
         g3 = Float(0, 1)
 
-        g = Zip(g1, g2, g3, seed=99999)
+        g = Zip(g1, g2, g3).reset(seed=99999)
 
         assert next(g) == ("Foo_001", 643, 0.2522927816477426)
         assert next(g) == ("Foo_002", 220, 0.1253337003482793)
