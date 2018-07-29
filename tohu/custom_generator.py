@@ -6,7 +6,6 @@ from random import Random
 
 from .generators import BaseGenerator, SeedGenerator
 from .csv_formatter import CSVFormatter
-from .csv_formatter_v1 import CSVFormatterV1
 
 __all__ = ["CustomGenerator"]
 
@@ -63,8 +62,6 @@ class CustomGeneratorMeta(type):
             orig_init(self, *args, **kwargs)
 
             self.field_gens = self._calculate_field_gens()
-            self.fmt_dict = {name: "${" + name + "}" for name in self.field_gens.keys()}
-            self.csvformatter = CSVFormatterV1(self.fmt_dict)
             self.item_cls = make_item_class(self.get_item_class_name(), self.field_gens.keys())
             self.seed_generator = SeedGenerator()
             self.reset(seed)
