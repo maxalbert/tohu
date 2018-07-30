@@ -50,36 +50,54 @@ def make_item_class(clsname, attr_names):
     return item_cls
 
 
+def calculate_field_gens(obj):
+    clsdict = obj.__class__.__dict__
+    instdict = obj.__dict__
+    cls_and_inst_dict = dict(**clsdict, **instdict)
+    return {name: gen._spawn() for name, gen in cls_and_inst_dict.items() if isinstance(gen, BaseGenerator)}
+
+
+def get_item_class_name(obj):
+    """
+    Return the first part of the class name of this custom generator.
+    This will be used for the class name of the items produced by this
+    generator.
+
+    Examples:
+        FoobarGenerator -> Foobar
+        QuuxGenerator   -> Quux
+    """
+    return re.match('^(.*)Generator$', obj.__class__.__name__).group(1)
+
+
+def make_custom_generator_class(metacls, cg_name, bases, clsdict):
+    # TODO: can/should we make this less hardcoded?
+    #metacls = CustomGeneratorMeta
+    #bases = (CustomGenerator,)
+
+    cgcls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
+    orig_init = cgcls.__init__
+
+    def new_init(self, *args, **kwargs):
+        # Call original __init__ function to ensure we pick up
+        # any generator attributes that are defined there.
+        orig_init(self, *args, **kwargs)
+
+        self.field_gens = calculate_field_gens(self)
+        self.item_cls = make_item_class(get_item_class_name(self), self.field_gens.keys())
+        self.seed_generator = SeedGenerator()
+
+    cgcls.__init__ = new_init
+    return cgcls
+
+
 class CustomGeneratorMeta(type):
+
     def __new__(metacls, cg_name, bases, clsdict):
-        gen_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
-        orig_init = gen_cls.__init__
-
-        def gen_init(self, *args, **kwargs):
-            # Call original __init__ function to make sure all generator attributes are defined
-            orig_init(self, *args, **kwargs)
-
-            self.field_gens = self._calculate_field_gens()
-            self.item_cls = make_item_class(self.get_item_class_name(), self.field_gens.keys())
-            self.seed_generator = SeedGenerator()
-
-        gen_cls.__init__ = gen_init
-        return gen_cls
+        return make_custom_generator_class(metacls, cg_name, bases, clsdict)
 
 
 class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
-
-    def get_item_class_name(self):
-        """
-        Return the first part of the class name of this custom generator.
-        This will be used for the class name of the items produced by this
-        generator.
-
-        Examples:
-            FoobarGenerator -> Foobar
-            QuuxGenerator   -> Quux
-        """
-        return re.match('^(.*)Generator$', self.__class__.__name__).group(1)
 
     def reset(self, seed=None):
         """
@@ -94,11 +112,6 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
             for g, x in zip(self.field_gens.values(), self.seed_generator):
                 g.reset(x)
         return self
-
-    def _calculate_field_gens(self):
-        clsdict = self.__class__.__dict__
-        instdict = self.__dict__
-        return {name: gen._spawn() for name, gen in dict(**clsdict, **instdict).items() if isinstance(gen, BaseGenerator)}
 
     def _spawn(self):
         # TODO/FIXME: Check that this does the right thing:
