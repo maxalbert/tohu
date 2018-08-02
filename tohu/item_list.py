@@ -1,7 +1,11 @@
 import io
+import logging
+import re
 import pandas as pd
 from operator import attrgetter
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
+
+logger = logging.getLogger('tohu')
 
 
 def _generate_csv_header_line(*, header_names, header_prefix='', header=True, sep=',', newline='\n'):
@@ -21,6 +25,25 @@ def _generate_csv_header_line(*, header_names, header_prefix='', header=True, se
                 header_line = ""
     return header_line
 
+
+def _extract_schema_if_given(table_name):
+    """
+    Return a pair (schema, table) derived from the given `table_name`
+    (anything before the first '.' if the name contains one; otherwise
+    the return value of `schema` is None).
+
+    Examples:
+
+        >>> _extract_schema_if_given('some_schema.my_table')
+        ('some_schema', 'my_table')
+
+        >>> _extract_schema_if_given('my_awesome_table')
+        (None, 'my_awesome_table')
+    """
+    pattern = '^(([^.]+)\.)?(.+)$'
+    m = re.match(pattern, table_name)
+    schema, table_name = m.group(2), m.group(3)
+    return schema, table_name
 
 
 class ItemList:
@@ -115,7 +138,7 @@ class ItemList:
 
         return retval
 
-    def to_sql(self, url, table_name, *, if_exists="fail"):
+    def to_sql(self, url, table_name, *, schema=None, if_exists="fail"):
         """
         Export items as rows in a PostgreSQL table.
 
@@ -129,11 +152,28 @@ class ItemList:
         table_name: string
             Name of the database table.
 
-        if_exists : {'fail', 'replace', 'append'}, default 'fail'
+        schema : string, optional
+            Specify the schema (if database flavor supports this). If None, use default schema.
+
+        if_exists : {'fail', 'do_nothing', 'replace', 'append'}, default 'fail'
             - fail: If table exists, raise an error.
+            - do_nothing: If table exists, do nothing and immediately return.
             - replace: If table exists, drop it, recreate it, and insert data.
             - append: If table exists, insert data. Create if does not exist.
         """
+        if schema is None:
+            schema, table_name = _extract_schema_if_given(table_name)
+
         engine = create_engine(url)
+        ins = inspect(engine)
+
+        if table_name in ins.get_table_names(schema=schema) and if_exists == 'do_nothing':
+            logger.debug("Table already exists (use if_exists='replace' or if_exists='append' to modify it).")
+            return
+
+        if if_exists == 'do_nothing':
+            # we handled the 'do nothing' case above; change to an option that pandas will understand
+            if_exists = 'fail'
+
         with engine.begin() as conn:
             self.to_df().to_sql(table_name, conn, index=False, if_exists=if_exists)
