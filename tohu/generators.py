@@ -6,18 +6,17 @@ Generator classes to produce random data with specific properties.
 import datetime as dt
 import logging
 import numpy as np
-import pandas as pd
 import re
-import sys
-from queue import Queue, Full
 from faker import Faker
 from functools import partial
 from itertools import count, islice
+from operator import attrgetter
+from queue import Queue, Full
 from random import Random
 from tqdm import tqdm
 from .item_list import ItemList
 
-__all__ = ['CharString', 'Constant', 'DigitString', 'FakerGenerator', 'First', 'Float', 'Geolocation',
+__all__ = ['CharString', 'Constant', 'DigitString', 'ExtractAttribute', 'FakerGenerator', 'First', 'Float', 'Geolocation',
            'GeolocationPair', 'HashDigest', 'Integer', 'Nth', 'NumpyRandomGenerator', 'Second',
            'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Timestamp', 'TimestampNEW',
            'TimestampError', 'TupleGenerator', 'Zip']
@@ -877,3 +876,27 @@ class Zip(TupleGenerator):
             new_seed = next(self.seed_generator)
             g.reset(new_seed)
         return self
+
+
+class ExtractAttribute(BaseGenerator):
+    """
+    Generator which produces items that are attributes extracted from
+    the items produced by a different generator.
+    """
+
+    def __init__(self, g, attr_name):
+        self.g = g._spawn()
+        self.attr_name = attr_name
+        self.attrgetter = attrgetter(attr_name)
+
+    def _spawn(self):
+        return ExtractAttribute(self.g, self.attr_name)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.attrgetter(next(self.g))
+
+    def reset(self, seed):
+        self.g.reset(seed)
