@@ -21,6 +21,3 @@ pytest-cov = "*"
 yapf = "*"
 "testing.postgresql" = "*"
 jupyterlab = "*"
-
-[requires]
-python_version = "3.7"
