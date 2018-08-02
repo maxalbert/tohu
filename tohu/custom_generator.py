@@ -158,7 +158,7 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
     #     """
     #     return self.generate_NEW(N, seed=seed).to_df(fields=fields)
 
-    # def to_psql(self, url, table_name, N, *, if_exists='fail', seed=None):
+    # def to_sql(self, url, table_name, N, *, if_exists='fail', seed=None):
     #     """
     #     Generate N items and export them as rows in a PostgreSQL table.
 
@@ -183,4 +183,4 @@ class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
     #     seed: integer (optional)
     #         Seed with which to initialise random generator.
     #     """
-    #     self.generate_NEW(N, seed=seed).to_psql(url, table_name, if_exists=if_exists)
+    #     self.generate_NEW(N, seed=seed).to_sql(url, table_name, if_exists=if_exists)

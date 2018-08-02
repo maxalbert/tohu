@@ -115,7 +115,7 @@ class ItemList:
 
         return retval
 
-    def to_psql(self, url, table_name, *, if_exists="fail"):
+    def to_sql(self, url, table_name, *, if_exists="fail"):
         """
         Export items as rows in a PostgreSQL table.
 

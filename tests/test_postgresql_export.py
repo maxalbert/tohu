@@ -40,7 +40,7 @@ class TestPostgreSQLExport:
 
         table_name = "quux_table_01"
 
-        quux_gen.generate(N=4, seed=12345).to_psql(conn.engine.url, table_name)
+        quux_gen.generate(N=4, seed=12345).to_sql(conn.engine.url, table_name)
 
         result = conn.execute("SELECT * FROM {};".format(table_name))
         rows = result.fetchall()
@@ -63,8 +63,8 @@ class TestPostgreSQLExport:
         table_name = "quux_table_02"
 
         quux_gen.reset(seed=12345)
-        quux_gen.generate(N=3).to_psql(conn.engine.url, table_name)
-        quux_gen.generate(N=3).to_psql(conn.engine.url, table_name, if_exists='append')
+        quux_gen.generate(N=3).to_sql(conn.engine.url, table_name)
+        quux_gen.generate(N=3).to_sql(conn.engine.url, table_name, if_exists='append')
 
         result = conn.execute("SELECT * FROM {};".format(table_name))
         rows = result.fetchall()
