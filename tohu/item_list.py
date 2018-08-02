@@ -70,8 +70,14 @@ class ItemList:
 
     def to_df(self, fields=None):
         if fields is None:
-            return pd.DataFrame([x.to_series() for x in self.items])
+            # New version (much faster!, but needs cleaning up)
+            import attr
+            colnames = list(self.items[0].as_dict().keys())  # hack! the field names should perhaps be passed in during initialisation?
+            return pd.DataFrame([attr.astuple(x) for x in self.items], columns=colnames)
+            # Old version:
+            #return pd.DataFrame([x.to_series() for x in self.items])
         else:
+            # TODO: switch this to the faster version (see above)
             attr_getters = [(field_name, attrgetter(attr_name)) for (field_name, attr_name) in fields.items()]
             return pd.DataFrame([pd.Series({field_name: func(x) for (field_name, func) in attr_getters}) for x in self.items])
 
