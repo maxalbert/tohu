@@ -151,10 +151,13 @@ class ItemList:
             Example: "postgresql://postgres@127.0.0.1:5432/testdb"
 
         table_name: string
-            Name of the database table.
+            Name of the database table. Note that if this name contains a dot ('.')
+            and `schema` is not specified, the first part of the name before the dot
+            will be interpreted as the schema name.
 
         schema : string, optional
-            Specify the schema (if database flavor supports this). If None, use default schema.
+            Specify the schema (if database flavor supports this). If None,
+            use default schema or derive the schema name from `table_name`.
 
         if_exists : {'fail', 'do_nothing', 'replace', 'append'}, default 'fail'
             - fail: If table exists, raise an error.
