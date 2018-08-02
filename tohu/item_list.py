@@ -4,6 +4,7 @@ import re
 import pandas as pd
 from operator import attrgetter
 from sqlalchemy import create_engine, inspect
+from sqlalchemy.schema import CreateSchema
 
 logger = logging.getLogger('tohu')
 
@@ -166,6 +167,10 @@ class ItemList:
 
         engine = create_engine(url)
         ins = inspect(engine)
+
+        if schema is not None and schema not in ins.get_schema_names():
+            logger.debug(f"Creating non-existing schema: '{schema}'")
+            engine.execute(CreateSchema(schema))
 
         if table_name in ins.get_table_names(schema=schema) and if_exists == 'do_nothing':
             logger.debug("Table already exists (use if_exists='replace' or if_exists='append' to modify it).")
