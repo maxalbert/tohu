@@ -17,7 +17,7 @@ from tqdm import tqdm
 from .item_list import ItemList
 
 __all__ = ['CharString', 'Constant', 'DigitString', 'ExtractAttribute', 'FakerGenerator', 'First', 'Float', 'Geolocation',
-           'GeolocationPair', 'HashDigest', 'Integer', 'Nth', 'NumpyRandomGenerator', 'Second',
+           'GeolocationPair', 'HashDigest', 'Integer', 'IterateOver', 'Nth', 'NumpyRandomGenerator', 'Second',
            'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Timestamp', 'TimestampNEW',
            'TimestampError', 'TupleGenerator', 'Zip']
 
@@ -876,6 +876,34 @@ class Zip(TupleGenerator):
             new_seed = next(self.seed_generator)
             g.reset(new_seed)
         return self
+
+
+class IterateOver(BaseGenerator):
+    """
+    Generator which simply iterates over all items in a given iterable
+    """
+
+    def __init__(self, g):
+        assert isinstance(g, list), \
+            "For the time being we enforce g being a list so that we can spawn and reset this generator."
+        self.g = g
+        self._iter_g = None
+        self.reset()
+
+    def __repr__(self):
+        return f"<IterateOver, list with {len(self.g)} items>"
+
+    def __next__(self):
+        return next(self._iter_g)
+
+    def __iter__(self):
+        return self
+
+    def _spawn(self):
+        return IterateOver(self.g)
+
+    def reset(self, seed=None):
+        self._iter_g = iter(self.g)
 
 
 class ExtractAttribute(BaseGenerator):
