@@ -1,22 +1,10 @@
 version: 2
 jobs:
   build:
-    machine: true
-    environment:
-      - PYENV_VERSION: 3.6.3
-      - PIPENV_CACHE_DIR: "/home/circleci/.pipenv_cache"
-      - PYTHON_BUILD_CACHE_PATH: "/home/circleci/.pyenv/cache"
+    docker:
+      - image: circleci/python:3.7
     steps:
       - checkout
-      - run:
-          name: Enable pyenv cache
-          command: mkdir -p ~/.pyenv/cache
-      - run:
-          name: Install python version ${PYENV_VERSION}
-          command: pyenv install ${PYENV_VERSION}
-      - run:
-          name: Install pipenv
-          command: pip install pipenv
       - run:
           name: Install PostgreSQL
           command: sudo apt-get update && sudo apt-get install -y postgresql
