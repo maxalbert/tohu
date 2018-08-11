@@ -69,6 +69,17 @@ class ItemList:
         return iter(self.items)
 
     def to_df(self, fields=None):
+        """
+        Export items as rows in a PostgreSQL table.
+
+        Parameters
+        ----------
+
+        fields: dict
+            Dictionary which maps output column names to attribute names of the generators.
+            Example: `fields={'COL1': 'field_name_1', 'COL2': 'field_name_2'}
+        """
+
         if fields is None:
             # New version (much faster!, but needs cleaning up)
             import attr
