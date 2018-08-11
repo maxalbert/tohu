@@ -472,14 +472,15 @@ class HashDigest(CharString):
             raise ValueError(f"Length must be an even number if as_bytes=True (got: length={length})")
         chars = "0123456789ABCDEF"
         self.length = length
-        self._maybe_convert_type = bytes.fromhex if as_bytes else _identity
+        self.as_bytes = as_bytes
+        self._maybe_convert_type = bytes.fromhex if self.as_bytes else _identity
         super().__init__(length=length, chars=chars)
 
     def __next__(self):
         return self._maybe_convert_type(super().__next__())
 
     def _spawn(self):
-        return HashDigest(length=self.length)
+        return HashDigest(length=self.length, as_bytes=self.as_bytes)
 
 
 class GeolocationPair(TupleGenerator):
