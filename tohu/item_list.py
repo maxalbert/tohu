@@ -145,7 +145,7 @@ class ItemList:
 
         return retval
 
-    def to_sql(self, url, table_name, *, schema=None, fields=None, if_exists="fail"):
+    def to_sql(self, url, table_name, *, schema=None, fields=None, if_exists="fail", dtype=None):
         """
         Export items as rows in a PostgreSQL table.
 
@@ -174,6 +174,11 @@ class ItemList:
             - do_nothing: If table exists, do nothing and immediately return.
             - replace: If table exists, drop it, recreate it, and insert data.
             - append: If table exists, insert data. Create if does not exist.
+
+        dtype : dict, optional
+            Specifying the datatype for columns. The keys should be the column
+            names and the values should be the SQLAlchemy types or strings for
+            the sqlite3 legacy mode. This is passed through to pandas.DataFrame.to_sql().
         """
         if schema is None:
             schema, table_name = _extract_schema_if_given(table_name)
