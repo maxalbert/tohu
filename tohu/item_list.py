@@ -145,7 +145,7 @@ class ItemList:
 
         return retval
 
-    def to_sql(self, url, table_name, *, schema=None, if_exists="fail"):
+    def to_sql(self, url, table_name, *, schema=None, fields=None, if_exists="fail"):
         """
         Export items as rows in a PostgreSQL table.
 
@@ -164,6 +164,10 @@ class ItemList:
         schema : string, optional
             Specify the schema (if database flavor supports this). If None,
             use default schema or derive the schema name from `table_name`.
+
+        fields: dict
+            Dictionary which maps output column names to attribute names of the generators.
+            Example: `fields={'COL1': 'field_name_1', 'COL2': 'field_name_2'}
 
         if_exists : {'fail', 'do_nothing', 'replace', 'append'}, default 'fail'
             - fail: If table exists, raise an error.
@@ -190,4 +194,4 @@ class ItemList:
             if_exists = 'fail'
 
         with engine.begin() as conn:
-            self.to_df().to_sql(table_name, conn, schema=schema, index=False, if_exists=if_exists)
+            self.to_df(fields=fields).to_sql(table_name, conn, schema=schema, index=False, if_exists=if_exists)
