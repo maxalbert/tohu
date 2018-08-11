@@ -210,4 +210,4 @@ class ItemList:
             if_exists = 'fail'
 
         with engine.begin() as conn:
-            self.to_df(fields=fields).to_sql(table_name, conn, schema=schema, index=False, if_exists=if_exists)
+            self.to_df(fields=fields).to_sql(table_name, conn, schema=schema, index=False, if_exists=if_exists, dtype=dtype)
