@@ -445,21 +445,38 @@ class DigitString(CharString):
         return DigitString(length=self.length)
 
 
+def _identity(x):
+    "Helper function which returns its argument unchanged"
+    return x
+
+
 class HashDigest(CharString):
     """
     Generator which produces a sequence of hex strings representing hash digest values.
     """
 
-    def __init__(self, *, length):
+    def __init__(self, *, length, as_bytes=False):
         """
         Parameters
         ----------
         length: int
             Length of the strings produced by this generator.
+        as_bytes: bool
+            If True, return byte-string obtained from converting each
+            pair of consecutive characters in the hash digest string
+            to an ASCII value. Note that in this case `length` must be
+            an even number and the actual number of bytes returned in
+            each generated hash digest byte string is length/2.
         """
+        if as_bytes and (length % 2) != 0:
+            raise ValueError(f"Length must be an even number if as_bytes=True (got: length={length})")
         chars = "0123456789ABCDEF"
         self.length = length
+        self._maybe_convert_type = bytes.fromhex if as_bytes else _identity
         super().__init__(length=length, chars=chars)
+
+    def __next__(self):
+        return self._maybe_convert_type(super().__next__())
 
     def _spawn(self):
         return HashDigest(length=self.length)
