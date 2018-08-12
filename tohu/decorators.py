@@ -42,7 +42,7 @@ def foreach(**var_defs):
     input_name, input_value = list(var_defs.items())[0]
     if not isinstance(input_value, BaseGenerator):
         if not isinstance(input_value, (list, tuple, ItemList)):
-            raise TypeError("Input value to foreach must be a tohu generator, ItemList, list or tuple")
+            raise TypeError(f"Input value to foreach must be a tohu generator, ItemList, list or tuple. Got: {type(input_value)}")
         var_defs = {input_name: IterateOver(input_value)}
 
     clashes = {name: global_vars[name] for name in new_names if name in global_vars}
