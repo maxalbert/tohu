@@ -18,7 +18,7 @@ from .item_list import ItemList
 
 __all__ = ['CharString', 'Constant', 'DigitString', 'ExtractAttribute', 'FakerGenerator', 'First', 'Float', 'Geolocation',
            'GeolocationPair', 'HashDigest', 'Integer', 'IterateOver', 'Nth', 'NumpyRandomGenerator', 'Second',
-           'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Timestamp', 'TimestampNEW',
+           'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Subsample', 'Timestamp', 'TimestampNEW',
            'TimestampError', 'TupleGenerator', 'Zip']
 
 
@@ -395,6 +395,41 @@ class SelectMultiple(BaseGenerator):
             elem_seed = next(self._seed_generator)
             g.reset(elem_seed)
         return self
+
+
+class Subsample(BaseGenerator):
+    """
+    Generator which produces subsamples of a given set of values,
+    where each item is chosen with a certain probability `p`.
+    """
+
+    def __init__(self, values, p):
+        """
+        Parameters
+        ----------
+        values: iterable
+            The set of values from which to draw subsamples.
+        p: float
+            The probability with which each individual element in `values` is
+            chosen during the subsampling process. Must satisfy 0 <= p <= 1.
+        """
+        if p < 0 or p > 1.0:
+            raise ValueError(f"The value of p must be in the range [0, 1]. Got: p={p}")
+
+        self.values = np.array(values)
+        self.size = len(self.values)
+        self.p = p
+        self.randgen = np.random.RandomState()
+
+    def __next__(self):
+        subsample = self.values[self.randgen.random_sample(self.size) < self.p]
+        return subsample
+
+    def _spawn(self):
+        return Subsample(self.values, self.p)
+
+    def reset(self, seed):
+        self.randgen.seed(seed)
 
 
 class CharString(BaseGenerator):
