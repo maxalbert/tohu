@@ -903,8 +903,8 @@ class IterateOver(BaseGenerator):
     """
 
     def __init__(self, g):
-        assert isinstance(g, list), \
-            "For the time being we enforce g being a list so that we can spawn and reset this generator."
+        assert isinstance(g, (list, tuple, ItemList)), \
+            "For the time being we enforce g being a list, tuple or ItemList so that we can spawn and reset this generator."
         self.g = g
         self._iter_g = None
         self.reset()
