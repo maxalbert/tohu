@@ -25,6 +25,9 @@ class TestCustomGenerator:
             d = Sequential(prefix="quux_", digits=2)
             e = Integer(low=3000, high=6000)
 
+        self.FoobarGenerator = FoobarGenerator
+        self.QuuxGenerator = QuuxGenerator
+
         self.gen_foo = FoobarGenerator().reset(seed=99999)
         self.gen_quux = QuuxGenerator().reset(seed=12345)
 
@@ -39,6 +42,12 @@ class TestCustomGenerator:
 
         assert item1.__class__.__name__ == "Foobar"
         assert item2.__class__.__name__ == "Quux"
+
+        Foobar = self.FoobarGenerator.item_cls
+        Quux = self.QuuxGenerator.item_cls
+
+        assert item1 == Foobar(7715, 'foo_001')
+        assert item2 == Quux('Hello', 'quux_01', 5895)
 
     def test_custom_generator_produces_namedtuples_with_expected_field_values(self):
         """

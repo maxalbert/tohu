@@ -84,7 +84,7 @@ def make_custom_generator_class(metacls, cg_name, bases, clsdict):
         orig_init(self, *args, **kwargs)
 
         self.field_gens = calculate_field_gens(self)
-        self.item_cls = make_item_class(get_item_class_name(self), self.field_gens.keys())
+        self.__class__.item_cls = make_item_class(get_item_class_name(self), self.field_gens.keys())
         self.seed_generator = SeedGenerator()
 
     cgcls.__init__ = new_init
