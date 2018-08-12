@@ -49,6 +49,20 @@ class TestCustomGenerator:
         assert item1 == Foobar(7715, 'foo_001')
         assert item2 == Quux('Hello', 'quux_01', 5895)
 
+    @pytest.mark.xfail(reason=("Currently the item_cls attribute is added during __init__(), "
+                               "so it doesn't exist unless at least one instance is created"))
+    def test_item_cls_attribute_exists_immediately_after_class_definition(self):
+        class FoobarbazGenerator(CustomGenerator):
+            a = Integer(100, 200)
+            b = Sequential(prefix="foobarbaz_", digits=3)
+
+        Foobarbaz = FoobarbazGenerator.item_cls
+
+        g = FoobarbazGenerator()
+        g.reset(seed=12345)
+        item = next(g)
+        assert item == Foobarbaz(102, "foobarbaz_001")
+
     def test_custom_generator_produces_namedtuples_with_expected_field_values(self):
         """
         Test that FoobarGenerator and QuuxGenerator produce namedtuples with fields
