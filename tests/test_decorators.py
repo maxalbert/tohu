@@ -2,7 +2,8 @@ import pytest
 
 from .context import tohu
 from tohu.decorators import foreach, with_context
-from tohu import CustomGenerator, HashDigest, Integer, IterateOver
+from tohu.item_list import ItemList
+from tohu import CustomGenerator, HashDigest, IterateOver
 
 
 def test_define_additional_variable_in_context_decorator():
@@ -60,6 +61,7 @@ def test_that_extra_variables_are_visible_in_init():
 
 @pytest.mark.parametrize("input_iterable", [
     IterateOver(['pp_01', 'pp_02', 'pp_03']),
+    ItemList(['pp_01', 'pp_02', 'pp_03'], N=3),
     ['pp_01', 'pp_02', 'pp_03'],
     ('pp_01', 'pp_02', 'pp_03')])
 def test_foreach_decorator(input_iterable):
