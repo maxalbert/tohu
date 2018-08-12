@@ -58,12 +58,19 @@ def test_that_extra_variables_are_visible_in_init():
     assert foo.new_val == 'quux'
 
 
-def test_foreach_decorator():
-    @foreach(pp=IterateOver(['pp_01', 'pp_02', 'pp_03']))
+@pytest.mark.parametrize("input_iterable", [
+    IterateOver(['pp_01', 'pp_02', 'pp_03']),
+    ['pp_01', 'pp_02', 'pp_03'],
+    ('pp_01', 'pp_02', 'pp_03')])
+def test_foreach_decorator(input_iterable):
+    """
+    Foreach decorator iterates over each element in the given input
+    """
+
+    @foreach(pp=input_iterable)
     class QuuxGenerator(CustomGenerator):
-        aa = Integer(0, 100)
-        bb = HashDigest(length=8)
-        cc = pp
+        aa = HashDigest(length=8)
+        bb = pp
 
     g = QuuxGenerator()
     g.reset(seed=12345)
@@ -71,9 +78,9 @@ def test_foreach_decorator():
 
     Quux = QuuxGenerator.item_cls
     items_expected = [
-        Quux(aa=2, bb='D644EE43', cc='pp_01'),
-        Quux(aa=64, bb='E517AFA6', cc='pp_02'),
-        Quux(aa=18, bb='A744587B', cc='pp_03')
+        Quux(aa='046CE0FF', bb='pp_01'),
+        Quux(aa='B25AB1DB', bb='pp_02'),
+        Quux(aa='134F7953', bb='pp_03'),
     ]
 
     assert items == items_expected
