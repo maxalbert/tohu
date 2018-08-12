@@ -30,3 +30,4 @@ def with_context(**var_defs):
     return identity
 
 
+foreach = with_context
