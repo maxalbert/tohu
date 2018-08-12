@@ -1,5 +1,6 @@
 import io
 import logging
+import numpy as np
 import re
 import pandas as pd
 from operator import attrgetter
@@ -52,6 +53,7 @@ class ItemList:
     def __init__(self, items, N):
         self.items = items if isinstance(items, list) else list(items)
         self.N = N
+        self.randstate = np.random.RandomState()
 
     def __repr__(self):
         return f"<ItemList containing {self.N} items>"
@@ -67,6 +69,33 @@ class ItemList:
 
     def __iter__(self):
         return iter(self.items)
+
+    def reset(self, seed):
+        """
+        Reset the internal random state of this ItemList.
+        This is useful to generate reproducible subsamples.
+        """
+        if seed is None:
+            return
+        self.randstate.seed(seed)
+
+    def subsample(self, *, num=None, p=None, seed=None):
+        self.reset(seed)
+
+        if num is None and p is None:
+            raise ValueError("Exactly one of the arguments `num`, `p` must be given.")
+
+        if num is not None:
+            if num > self.N:
+                raise ValueError(f"Subsample cannot be larger than the original sample of size {self.N}")
+            return ItemList(self.randstate.choice(self.items, size=num, replace=False), N=num)
+        elif p is not None:
+            if p < 0 or p > 1.0:
+                raise ValueError(f"The value of p must be in the range [0, 1]. Got: p={p}")
+            subsample = np.array(self.items)[self.randstate.random_sample(self.N) < p]
+            return subsample
+        else:
+            raise ValueError("Arguments `num` and `p` are mutually exclusive - only one of them may be specified.")
 
     def to_df(self, fields=None):
         """

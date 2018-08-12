@@ -60,6 +60,7 @@ class BaseGenerator:
 
         item_list = [x for x in items]
 
+        #logger.warning("TODO: initialise ItemList with random seed!")
         return ItemList(item_list, N)
 
     generate = generate_NEW  # alias; to be removed when generate_OLD is removed
