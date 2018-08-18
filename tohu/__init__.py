@@ -5,7 +5,7 @@ from .custom_generator import CustomGenerator
 from . import generators
 from . import custom_generator
 
-__all__ = generators.__all__ + custom_generator.__all__
+__all__ = generators.__all__ + custom_generator.__all__ + ['tohu_logger']
 
 from ._version import get_versions
 __version__ = get_versions()['version']
@@ -22,3 +22,5 @@ ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter('{asctime} {levelname}  {message}', datefmt='%Y-%m-%d %H:%M:%S', style='{')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
+
+tohu_logger = logger  # alias
