@@ -7,19 +7,21 @@ import datetime as dt
 import logging
 import numpy as np
 import re
+import shapely
 from faker import Faker
 from functools import partial
 from itertools import count, islice
 from operator import attrgetter
 from queue import Queue, Full
 from random import Random
+from shapely.geometry import Point, Polygon, MultiPolygon
 from tqdm import tqdm
 from .item_list import ItemList
 
 __all__ = ['CharString', 'Constant', 'DigitString', 'ExtractAttribute', 'FakerGenerator', 'First', 'Float', 'Geolocation',
-           'GeolocationPair', 'HashDigest', 'Integer', 'IterateOver', 'Nth', 'NumpyRandomGenerator', 'Second',
-           'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Subsample', 'Timestamp', 'TimestampNEW',
-           'TimestampError', 'TupleGenerator', 'Zip']
+           'GeolocationPair', 'GeoJSONGeolocationPair', 'HashDigest', 'Integer', 'IterateOver', 'Nth', 'NumpyRandomGenerator',
+           'Second', 'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Subsample', 'Timestamp',
+           'TimestampNEW', 'TimestampError', 'TupleGenerator', 'Zip']
 
 
 logger = logging.getLogger("tohu")
@@ -581,6 +583,74 @@ class GeolocationPair(TupleGenerator):
 
 def Geolocation():
     return Split(GeolocationPair())
+
+
+class ShapelyGeolocationPair(BaseGenerator):
+    """
+    Generator which produces random locations inside a shapely polygon
+    or multipolygon. This is a helper class and most users will probably
+    find the GeoJSONGeolocationPair generator more useful.
+    """
+
+    def __init__(self, shp, max_tries=100):
+        if not isinstance(shp, (Polygon, MultiPolygon)):
+            raise TypeError(f"Argument 'shp' must be of type Polygon or MultiPolygon. Got: {type(shp)}")
+
+        self.shape = shapely.geometry.shape(shp)
+        lon_min, lat_min, lon_max, lat_max = self.shape.bounds
+        self.lon_gen = Float(lon_min, lon_max)
+        self.lat_gen = Float(lat_min, lat_max)
+        self.max_tries = max_tries
+        self.seed_generator = SeedGenerator()
+
+    def __repr__(self):
+        return f"<ShapelyShape, area={self.area:.3f}>"
+
+    @property
+    def area(self):
+        return self.shape.area
+
+    def __next__(self):
+        for cnt in range(1, self.max_tries + 1):
+            pt = Point(next(self.lon_gen), next(self.lat_gen))
+            if pt.within(self.shape):
+                return (pt.x, pt.y)
+            else:
+                logger.debug(f"Generated point is not within shape. Trying again... [{cnt}/{self.max_tries}]")
+        raise RuntimeError(f"Could not generate point in shape after {self.max_tries} attempts")
+
+    def reset(self, seed):
+        self.seed_generator.reset(seed)
+        self.lon_gen.reset(next(self.seed_generator))
+        self.lat_gen.reset(next(self.seed_generator))
+        return self
+
+
+class GeoJSONGeolocationPair(BaseGenerator):
+    """
+    Generator which produces random locations inside a geographic area.
+    """
+
+    def __init__(self, geojson):
+        self.geojson = geojson
+        self.shape_gens = [ShapelyGeolocationPair(shapely.geometry.shape(feature['geometry'])) for feature in geojson['features']]
+        self.shape_gen_chooser = np.random.RandomState()  # TODO: make this a tohu generator, too
+        areas = np.array([s.area for s in self.shape_gens])
+        self.choice_probs = areas / areas.sum()
+        self.seed_generator = SeedGenerator()
+
+    def _spawn(self):
+        return GeoJSONGeolocationPair(self.geojson)
+
+    def __next__(self):
+        sg = self.shape_gen_chooser.choice(self.shape_gens, p=self.choice_probs)
+        return next(sg)
+
+    def reset(self, seed):
+        self.seed_generator.reset(seed)
+        self.shape_gen_chooser.seed(next(self.seed_generator))
+        for g in self.shape_gens:
+            g.reset(next(self.seed_generator))
 
 
 class TimestampError(Exception):

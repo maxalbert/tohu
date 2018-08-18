@@ -11,6 +11,7 @@ SQLAlchemy = "*"
 "psycopg2-binary" = "*"
 attrs = "*"
 faker = "*"
+shapely = "*"
 
 [dev-packages]
 pytest = "*"
