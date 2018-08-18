@@ -80,9 +80,9 @@ def test_foreach_decorator(input_iterable):
 
     Quux = QuuxGenerator.item_cls
     items_expected = [
-        Quux(aa='046CE0FF', bb='pp_01'),
-        Quux(aa='B25AB1DB', bb='pp_02'),
-        Quux(aa='134F7953', bb='pp_03'),
+        Quux(aa='4804DE9D', bb='pp_01'),
+        Quux(aa='C1CB613B', bb='pp_02'),
+        Quux(aa='15A51DE7', bb='pp_03'),
     ]
 
     assert items == items_expected

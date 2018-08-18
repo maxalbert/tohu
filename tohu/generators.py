@@ -432,30 +432,59 @@ class Subsample(BaseGenerator):
         self.randgen.seed(seed)
 
 
+ALPHANUMERIC_CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+
+
 class CharString(BaseGenerator):
     """
     Generator which produces a sequence of character strings.
     """
 
-    def __init__(self, *, length, chars):
+    def __init__(self, *, length=None, min_length=None, max_length=None, charset=None):
         """
         Parameters
         ----------
         length: integer
-            Length of the character strings produced by this generator.
-        chars: iterable
+            Length of the character strings produced by this generator
+            (mutually exclusive with `min_length`/`max_length`).
+        min_length, max_length: integer
+            Minimum and maximum length of character strings produced by this generator
+            (mutually exclusive with `length`).
+        charset: iterable
             Character set to draw from when generating strings.
+            Default: alphanumeric characters (both lowercase and uppercase letters).
         """
-        self.length = length
-        self.chars = chars
-        self.chargen = SelectOne(self.chars)
+        self.min_length, self.max_length = self._get_min_and_max_length(length, min_length, max_length)
+        self.charset = charset or ALPHANUMERIC_CHARACTERS
+        self.seed_gen = SeedGenerator()
+        self.char_gen = SelectOne(self.charset)
+        self.length_gen = Integer(low=self.min_length, high=self.max_length)
+
+    def _get_min_and_max_length(self, length, min_length, max_length):
+        error_msg = (
+            "Either 'length' or both 'min_length' and 'max_length' must be specified. "
+            f"Got: length={length}, min_length={min_length}, max_length={max_length}"
+        )
+
+        if length is None:
+            if (min_length is None or max_length is None):
+                raise ValueError(error_msg)
+            else:
+                return min_length, max_length
+        else:
+            if not (min_length is None and max_length is None):
+                raise ValueError(error_msg)
+            else:
+                return length, length
 
     def __next__(self):
-        chars = [next(self.chargen) for _ in range(self.length)]
+        chars = [next(self.char_gen) for _ in range(next(self.length_gen))]
         return ''.join(chars)
 
     def reset(self, seed):
-        self.chargen.reset(seed)
+        self.seed_gen.reset(seed)
+        self.char_gen.reset(next(self.seed_gen))
+        self.length_gen.reset(next(self.seed_gen))
         return self
 
 
@@ -473,9 +502,9 @@ class DigitString(CharString):
         seed: integer (optional)
             Seed to initialise this random generator.
         """
-        chars = "0123456789"
+        charset = "0123456789"
         self.length = length
-        super().__init__(length=length, chars=chars)
+        super().__init__(length=length, charset=charset)
 
     def _spawn(self):
         return DigitString(length=self.length)
@@ -506,11 +535,11 @@ class HashDigest(CharString):
         """
         if as_bytes and (length % 2) != 0:
             raise ValueError(f"Length must be an even number if as_bytes=True (got: length={length})")
-        chars = "0123456789ABCDEF"
+        charset = "0123456789ABCDEF"
         self.length = length
         self.as_bytes = as_bytes
         self._maybe_convert_type = bytes.fromhex if self.as_bytes else _identity
-        super().__init__(length=length, chars=chars)
+        super().__init__(length=length, charset=charset)
 
     def __next__(self):
         return self._maybe_convert_type(super().__next__())
