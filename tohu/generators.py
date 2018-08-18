@@ -477,6 +477,9 @@ class CharString(BaseGenerator):
             else:
                 return length, length
 
+    def _spawn(self):
+        return CharString(min_length=self.min_length, max_length=self.max_length, charset=self.charset)
+
     def __next__(self):
         chars = [next(self.char_gen) for _ in range(next(self.length_gen))]
         return ''.join(chars)
@@ -493,21 +496,24 @@ class DigitString(CharString):
     Generator which produces a sequence of strings containing only digits.
     """
 
-    def __init__(self, *, length):
+    def __init__(self, *, length=None, min_length=None, max_length=None):
         """
         Parameters
         ----------
-        length: int
-            Length of the digit strings produced by this generator.
+        length: integer
+            Length of the character strings produced by this generator
+            (mutually exclusive with `min_length`/`max_length`).
+        min_length, max_length: integer
+            Minimum and maximum length of character strings produced by this generator
+            (mutually exclusive with `length`).
         seed: integer (optional)
             Seed to initialise this random generator.
         """
         charset = "0123456789"
-        self.length = length
-        super().__init__(length=length, charset=charset)
+        super().__init__(length=length, min_length=min_length, max_length=max_length, charset=charset)
 
     def _spawn(self):
-        return DigitString(length=self.length)
+        return DigitString(min_length=self.min_length, max_length=self.max_length)
 
 
 def _identity(x):
@@ -520,12 +526,16 @@ class HashDigest(CharString):
     Generator which produces a sequence of hex strings representing hash digest values.
     """
 
-    def __init__(self, *, length, as_bytes=False):
+    def __init__(self, *, length=None, min_length=None, max_length=None, as_bytes=False):
         """
         Parameters
         ----------
-        length: int
-            Length of the strings produced by this generator.
+        length: integer
+            Length of the character strings produced by this generator
+            (mutually exclusive with `min_length`/`max_length`).
+        min_length, max_length: integer
+            Minimum and maximum length of character strings produced by this generator
+            (mutually exclusive with `length`).
         as_bytes: bool
             If True, return byte-string obtained from converting each
             pair of consecutive characters in the hash digest string
@@ -536,16 +546,15 @@ class HashDigest(CharString):
         if as_bytes and (length % 2) != 0:
             raise ValueError(f"Length must be an even number if as_bytes=True (got: length={length})")
         charset = "0123456789ABCDEF"
-        self.length = length
         self.as_bytes = as_bytes
         self._maybe_convert_type = bytes.fromhex if self.as_bytes else _identity
-        super().__init__(length=length, charset=charset)
+        super().__init__(length=length, min_length=min_length, max_length=max_length, charset=charset)
 
     def __next__(self):
         return self._maybe_convert_type(super().__next__())
 
     def _spawn(self):
-        return HashDigest(length=self.length, as_bytes=self.as_bytes)
+        return HashDigest(min_length=self.min_length, max_length=self.max_length, as_bytes=self.as_bytes)
 
 
 class GeolocationPair(TupleGenerator):
