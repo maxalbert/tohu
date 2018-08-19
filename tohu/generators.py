@@ -607,6 +607,9 @@ class ShapelyGeolocationPair(TupleGenerator):
     def __repr__(self):
         return f"<ShapelyShape, area={self.area:.3f}>"
 
+    def _spawn(self):
+        return ShapelyGeolocationPair(self.shape, max_tries=self.max_tries)
+
     @property
     def area(self):
         return self.shape.area
