@@ -585,7 +585,7 @@ def Geolocation():
     return Split(GeolocationPair())
 
 
-class ShapelyGeolocationPair(BaseGenerator):
+class ShapelyGeolocationPair(TupleGenerator):
     """
     Generator which produces random locations inside a shapely polygon
     or multipolygon. This is a helper class and most users will probably
@@ -596,6 +596,7 @@ class ShapelyGeolocationPair(BaseGenerator):
         if not isinstance(shp, (Polygon, MultiPolygon)):
             raise TypeError(f"Argument 'shp' must be of type Polygon or MultiPolygon. Got: {type(shp)}")
 
+        self.tuple_len = 2
         self.shape = shapely.geometry.shape(shp)
         lon_min, lat_min, lon_max, lat_max = self.shape.bounds
         self.lon_gen = Float(lon_min, lon_max)
@@ -626,13 +627,14 @@ class ShapelyGeolocationPair(BaseGenerator):
         return self
 
 
-class GeoJSONGeolocationPair(BaseGenerator):
+class GeoJSONGeolocationPair(TupleGenerator):
     """
     Generator which produces random locations inside a geographic area.
     """
 
     def __init__(self, geojson):
         self.geojson = geojson
+        self.tuple_len = 2
         self.shape_gens = [ShapelyGeolocationPair(shapely.geometry.shape(feature['geometry'])) for feature in geojson['features']]
         self.shape_gen_chooser = np.random.RandomState()  # TODO: make this a tohu generator, too
         areas = np.array([s.area for s in self.shape_gens])
