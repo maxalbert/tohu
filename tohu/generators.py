@@ -313,30 +313,34 @@ class SelectOne(BaseGenerator):
     Generator which produces a sequence of items taken from a given set of elements.
     """
 
-    def __init__(self, values):
+    def __init__(self, values, p=None):
         """
         Parameters
         ----------
         values: list
             List of options from which to choose elements.
-        seed: integer (optional)
-            Seed to initialise this random generator.
+        p: list, optional
+            The probabilities associated with each element in `values`.
+            If not given the assumes a uniform distribution over all values.
         """
         self.values = values
-        self.idxgen = Integer(low=0, high=(len(self.values) - 1))
+        self.p = p
+        self.num_values = len(values)
+        self.randgen = np.random.RandomState()
 
     def __next__(self):
         """
         Return random element from the list of values provided during initialisation.
         """
-        idx = next(self.idxgen)
+        idx = self.randgen.choice(self.num_values, p=self.p)
         return self.values[idx]
 
     def _spawn(self):
-        return SelectOne(values=self.values)
+        return SelectOne(values=self.values, p=self.p)
 
     def reset(self, seed):
-        self.idxgen.reset(seed)
+        if seed is not None:
+            self.randgen.seed(seed)
         return self
 
 
@@ -349,7 +353,7 @@ class SelectMultiple(BaseGenerator):
     Generator which produces a sequence of tuples with elements taken from a given set of elements.
     """
 
-    def __init__(self, values, size):
+    def __init__(self, values, size, p=None):
         """
         Parameters
         ----------
@@ -357,6 +361,9 @@ class SelectMultiple(BaseGenerator):
             List of options from which to choose elements.
         size: integer
             Size of the output tuples.
+        p: list, optional
+            The probabilities associated with each element in `values`.
+            If not given the assumes a uniform distribution over all values.
         """
         if isinstance(size, int):
             if size < 0:
@@ -374,9 +381,11 @@ class SelectMultiple(BaseGenerator):
         # necessary (or even desired). In most cases it probably doesn't matter because `size`
         # will typically have a fairly small value.
         self.values = values
+        self.p = p
+        self.size = size
         self._size_gen = size
         self._max_size = self._size_gen.high
-        self._elem_gens = [SelectOne(values) for _ in range(self._max_size)]
+        self._elem_gens = [SelectOne(values, p) for _ in range(self._max_size)]
         self._seed_generator = SeedGenerator()
 
     def __next__(self):
@@ -387,7 +396,7 @@ class SelectMultiple(BaseGenerator):
         return tuple(next(g) for g in islice(self._elem_gens, cur_size))
 
     def _spawn(self):
-        return SelectMultiple(values=self.values, n=n)
+        return SelectMultiple(values=self.values, n=self.size, p=self.p)
 
     def reset(self, seed):
         # Reset each individual element generator with a new seed

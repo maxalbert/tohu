@@ -9,6 +9,6 @@ unit-tests:
 	pytest -svx tests/
 
 notebook-tests:
-	pytest --nbval notebooks/
+	pytest --nbval --sanitize-with nbval_sanitize_file.cfg notebooks/
 
 .PHONY: all test notebook-tests unit-tests

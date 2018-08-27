@@ -143,15 +143,15 @@ class TestUtils:
         pairs = [('a', 1), ('b', 2), ('c', 3), ('d', 4)]
         g, h = Split(SelectOne(pairs).reset(seed=99999), tuple_len=2)
 
-        assert list(g.generate(N=5)) == ['a', 'c', 'b', 'c', 'd']
-        assert list(h.generate(N=5)) == [1, 3, 2, 3, 4]
+        assert list(g.generate(N=5)) == ['d', 'a', 'a', 'd', 'c']
+        assert list(h.generate(N=5)) == [4, 1, 1, 4, 3]
 
         g, h = Split(SelectOne(pairs).reset(seed=99999), tuple_len=2)
-        assert (next(g), next(h)) == ('a', 1)
-        assert (next(g), next(h)) == ('c', 3)
-        assert (next(g), next(h)) == ('b', 2)
-        assert (next(g), next(h)) == ('c', 3)
         assert (next(g), next(h)) == ('d', 4)
+        assert (next(g), next(h)) == ('a', 1)
+        assert (next(g), next(h)) == ('a', 1)
+        assert (next(g), next(h)) == ('d', 4)
+        assert (next(g), next(h)) == ('c', 3)
 
     def test_zip(self):
         """
@@ -194,16 +194,16 @@ class TestUtils:
         x, y = Split(SelectOne(pairs), tuple_len=2)
 
         x.reset(seed=12345)
-        assert x.generate(5) == ['DD', 'FF', 'AA', 'CC', 'CC']
-        assert y.generate(5) == ['dd', 'ff', 'aa', 'cc', 'cc']
+        assert list(x.generate(5)) == ['CC', 'FF', 'FF', 'BB', 'EE']
+        assert list(y.generate(5)) == ['cc', 'ff', 'ff', 'bb', 'ee']
 
         x.reset(seed=99999)
-        assert x.generate(5) == ['AA', 'CC', 'EE', 'FF', 'FF']
-        assert y.generate(5) == ['aa', 'cc', 'ee', 'ff', 'ff']
+        assert list(x.generate(5)) == ['DD', 'AA', 'EE', 'DD', 'EE']
+        assert list(y.generate(5)) == ['dd', 'aa', 'ee', 'dd', 'ee']
 
         y.reset(seed=12345)
-        assert x.generate(5) == ['DD', 'FF', 'AA', 'CC', 'CC']
-        assert y.generate(5) == ['dd', 'ff', 'aa', 'cc', 'cc']
+        assert list(x.generate(5)) == ['CC', 'FF', 'FF', 'BB', 'EE']
+        assert list(y.generate(5)) == ['cc', 'ff', 'ff', 'bb', 'ee']
 
     def test_split_generators_remain_in_sync_if_used_within_custom_generator(self):
         """
@@ -215,11 +215,19 @@ class TestUtils:
         class QuuxGenerator(CustomGenerator):
             x, y = Split(SelectOne(pairs), tuple_len=2)
 
+        # Note to self: the sequence of pairs generated below
+        # is different from the one generated in the previous
+        # test for the same seed 99999. The reason for this is
+        # that here the two generates x, y occur inside a
+        # CustomGenerator, and when this custom generator is
+        # reset it internally uses a seed generator to reset
+        # all of its constituent generators, so the actual seed
+        # used will be different.
         g = QuuxGenerator()
         g.reset(seed=99999)
         assert next(g) == ('FF', 'ff')
         assert next(g) == ('BB', 'bb')
+        assert next(g) == ('FF', 'ff')
+        assert next(g) == ('CC', 'cc')
+        assert next(g) == ('FF', 'ff')
         assert next(g) == ('DD', 'dd')
-        assert next(g) == ('CC', 'cc')
-        assert next(g) == ('AA', 'aa')
-        assert next(g) == ('CC', 'cc')
