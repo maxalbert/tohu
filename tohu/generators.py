@@ -1096,9 +1096,6 @@ class ExtractAttribute(BaseGenerator):
     def _spawn(self):
         return ExtractAttribute(self.g, self.attr_name)
 
-    def __iter__(self):
-        return self
-
     def __next__(self):
         return self.attrgetter(next(self.g))
 
