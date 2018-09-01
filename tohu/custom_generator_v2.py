@@ -76,12 +76,15 @@ def attach_new_reset_method(obj):
 
     def new_reset(self, seed=None):
         logger.debug(f'[EEE] Inside automatically generated reset() method for {self} (seed={seed})')
-        logger.debug(f'      TODO: reset internal seed generator and call reset() on each child generator')
-        self.seed_generator.reset(seed)
-        for name, gen in self.field_gens.items():
-            next_seed = next(self.seed_generator)
-            logger.debug(f'Resetting field generator {name}={gen} with seed={next_seed}')
-            gen.reset(next_seed)
+
+        if seed is not None:
+            self.seed_generator.reset(seed)
+            for name, gen in self.field_gens.items():
+                next_seed = next(self.seed_generator)
+                logger.debug(f'Resetting field generator {name}={gen} with seed={next_seed}')
+                gen.reset(next_seed)
+
+        return self
 
     obj.reset = new_reset
 
