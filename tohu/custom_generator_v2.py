@@ -63,9 +63,16 @@ def make_item_class(obj):
     obj:
         The custom generator instance for which to create an item class
     """
+    clsname = obj.__tohu_items_name__
     attr_names = obj.field_gens.keys()
 
-    item_cls = attr.make_class(obj.__tohu_items_name__, {name: attr.ib() for name in attr_names}, repr=False, cmp=True)
+    item_cls = attr.make_class(clsname, {name: attr.ib() for name in attr_names}, repr=False, cmp=True)
+
+    def new_repr(obj):
+        all_fields = ', '.join([f'{name}={repr(value)}' for name, value in attr.asdict(obj).items()])
+        return f'{clsname}({all_fields})'
+
+    item_cls.__repr__ = new_repr
 
     return item_cls
 
