@@ -9,6 +9,12 @@ def add_field_generators(field_gens, dct):
 
 
 def find_field_generators(obj):
+    """
+    Return dictionary with the names and instances of
+    all tohu.BaseGenerator occurring in the given
+    object's class & instance namespaces.
+    """
+
     cls_dict = obj.__class__.__dict__
     obj_dict = obj.__dict__
     logger.debug(f'[FFF]')
@@ -23,6 +29,16 @@ def find_field_generators(obj):
 
 
 def attach_new_init_method(obj):
+    """
+    Replace the existing obj.__init__() method with a new one
+    which calls the original one and in addition performs the
+    following actions:
+
+    (1) Finds all instances of tohu.BaseGenerator in the namespace
+        and collects them in the dictionary `self.field_gens`.
+    (2) ..to do..
+    """
+
     orig_init = obj.__init__
 
     def new_init(self, *args, **kwargs):
@@ -39,6 +55,11 @@ def attach_new_init_method(obj):
 
 
 def attach_new_reset_method(obj):
+    """
+    Attach a new `reset()` method to `obj` which resets the internal
+    seed generator of `obj` and then resets each of its constituent
+    field generators found in `obj.field_gens`.
+    """
     #
     # Create and assign automatically generated reset() method
     #
