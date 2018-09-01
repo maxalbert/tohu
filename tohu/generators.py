@@ -15,6 +15,7 @@ from queue import Queue, Full
 from random import Random
 from shapely.geometry import Point, Polygon, MultiPolygon
 from tqdm import tqdm
+from .cloning import CloneableMeta
 from .item_list import ItemList
 
 __all__ = ['CharString', 'Constant', 'DigitString', 'ExtractAttribute', 'FakerGenerator', 'First', 'Float', 'Geolocation',
@@ -32,7 +33,7 @@ logger = logging.getLogger("tohu")
 #    provided by subclasses, but somehow this interferes with
 #    the metaclass CustomGeneratorMeta below.
 #
-class BaseGenerator:
+class BaseGenerator(metaclass=CloneableMeta):
     """
     Base class for all of tohu's random generators.
     """

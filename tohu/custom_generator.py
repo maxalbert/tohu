@@ -1,6 +1,7 @@
 import attr
 import pandas as pd
 import re
+from .cloning import CloneableMeta
 from .debugging import debug_print_dict, logger
 from .generators import BaseGenerator, SeedGenerator
 
@@ -208,7 +209,7 @@ def attach_new_spawn_method(obj):
     obj._spawn = new_spawn
 
 
-class CustomGeneratorMeta(type):
+class CustomGeneratorMeta(CloneableMeta):
 
     def __new__(metacls, cg_name, bases, clsdict):
         logger.debug('[DDD]')
