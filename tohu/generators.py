@@ -14,7 +14,7 @@ from queue import Queue, Full
 from random import Random
 from shapely.geometry import Point, Polygon, MultiPolygon
 from .base import IndependentGenerator, ExtractAttribute
-from .cloning import CloneableMeta
+from .cloning import IndependentGeneratorMeta
 from .item_list import ItemList
 
 __all__ = [
@@ -33,7 +33,7 @@ logger = logging.getLogger("tohu")
 #    provided by subclasses, but somehow this interferes with
 #    the metaclass CustomGeneratorMeta below.
 #
-class BaseGenerator(IndependentGenerator, metaclass=CloneableMeta):
+class BaseGenerator(IndependentGenerator, metaclass=IndependentGeneratorMeta):
     """
     Base class for all of tohu's random generators.
     """

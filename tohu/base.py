@@ -60,6 +60,11 @@ class DependentGenerator(UltraBaseGenerator):
     """
     Abstract base class for dependent generators
     """
+    def reset(self, seed=None):
+        logger.debug(f"Ignoring explicit reset() on dependent generator {self}")
+
+    def reset_dependent_generator(self):
+        raise NotImplementedError("Class {} does not implement reset_dependent_generator().".format(self.__class__.__name__))
 
     def _spawn(self):
         raise NotImplementedError("This is a dependent generator. Please call _spawn_and_reattach_parent() instead of _spawn().")
@@ -84,6 +89,7 @@ class ExtractAttribute(DependentGenerator):
         self.gen = g._spawn()
         self.attr_name = attr_name
         self.attrgetter = attrgetter(attr_name)
+        self.parent._dependent_generators.append(self)
 
     def __repr__(self):
         return f"<ExtractAttribute '{self.attr_name}' from {self.parent} >"
@@ -95,5 +101,6 @@ class ExtractAttribute(DependentGenerator):
     def __next__(self):
         return self.attrgetter(next(self.gen))
 
-    def reset(self, seed):
+    def reset_dependent_generator(self, seed):
+        logger.debug(f'Resetting dependent generator {self} (seed={seed})')
         self.gen.reset(seed)

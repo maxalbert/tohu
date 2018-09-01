@@ -2,7 +2,7 @@ import logging
 from .base import DependentGenerator
 
 
-__all__ = ['CloneableMeta', 'ClonedGenerator']
+__all__ = ['IndependentGeneratorMeta', 'ClonedGenerator']
 
 logger = logging.getLogger('tohu')
 
@@ -35,7 +35,7 @@ class ClonedGenerator(DependentGenerator):
     def reset(self, seed=None):
         logger.debug(f'Ignoring reset() on cloned generator {self}')
 
-    def reset_clone(self, seed):
+    def reset_dependent_generator(self, seed):
         logger.debug(f'Resetting cloned generator {self} (seed={seed})')
         self.gen.reset(seed)
 
@@ -43,14 +43,14 @@ class ClonedGenerator(DependentGenerator):
 def attach_new_init_method(cls):
     """
     Replace the existing cls.__init__() method with a new one which
-    also initialises the _clones attribute to an empty list.
+    also initialises the _dependent_generators attribute to an empty list.
     """
 
     orig_init = cls.__init__
 
     def new_init(self, *args, **kwargs):
         orig_init(self, *args, **kwargs)
-        self._clones = []
+        self._dependent_generators = []
 
     cls.__init__ = new_init
 
@@ -64,8 +64,8 @@ def attach_new_reset_method(cls):
 
     def new_reset(self, seed=None):
         orig_reset(self, seed)
-        for c in self._clones:
-            c.reset_clone(seed)
+        for c in self._dependent_generators:
+            c.reset_dependent_generator(seed)
 
     cls.reset = new_reset
 
@@ -74,16 +74,16 @@ def attach_make_clone_method(cls):
 
     def make_clone(self):
         c = ClonedGenerator(parent=self)
-        self._clones.append(c)
+        self._dependent_generators.append(c)
         return c
 
     cls.clone = make_clone
 
 
-class CloneableMeta(type):
+class IndependentGeneratorMeta(type):
 
     def __new__(metacls, cg_name, bases, clsdict):
-        new_cls = super(CloneableMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
+        new_cls = super(IndependentGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
 
         attach_new_init_method(new_cls)
         attach_new_reset_method(new_cls)
