@@ -1,4 +1,5 @@
 import attr
+import pandas as pd
 import re
 from .debugging import debug_print_dict, logger
 from .generators import BaseGenerator, SeedGenerator
@@ -72,7 +73,29 @@ def make_item_class(obj):
         all_fields = ', '.join([f'{name}={repr(value)}' for name, value in attr.asdict(obj).items()])
         return f'{clsname}({all_fields})'
 
+    orig_eq = item_cls.__eq__
+    def new_eq(obj, other):
+        """
+        Custom __eq__() method which also allows comparisons with
+        tuples and dictionaries. This is mostly for convenience
+        during testing.
+        """
+
+        if isinstance(other, obj.__class__):
+            return orig_eq(obj, other)
+        else:
+            if isinstance(other, tuple):
+                return attr.astuple(obj) == other
+            elif isinstance(other, dict):
+                return attr.asdict(obj) == other
+            else:
+                return NotImplemented
+
     item_cls.__repr__ = new_repr
+    item_cls.__eq__ = new_eq
+    item_cls.__getitem__ = lambda self, key: getattr(self, key)
+    item_cls.as_dict = lambda self: attr.asdict(self)
+    item_cls.to_series = lambda self: pd.Series(attr.asdict(self))
 
     return item_cls
 
