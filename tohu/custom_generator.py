@@ -1,6 +1,7 @@
 import attr
 import pandas as pd
 import re
+from .base import UltraBaseGenerator, IndependentGenerator, DependentGenerator
 from .cloning import CloneableMeta, ClonedGenerator
 from .debugging import debug_print_dict, logger
 from .generators import BaseGenerator, SeedGenerator
@@ -10,7 +11,7 @@ __all__ = ['CustomGenerator']
 
 def add_field_generators(field_gens, dct):
     for name, gen in dct.items():
-        if isinstance(gen, (BaseGenerator, ClonedGenerator)):
+        if isinstance(gen, UltraBaseGenerator):
             field_gens[name] = gen
 
 
@@ -138,28 +139,33 @@ def attach_new_init_method(obj):
         logger.debug(f'Found {len(field_gens_templates)} field generator template(s):')
         debug_print_dict(field_gens_templates)
 
-        def find_orig_parent(clone, origs):
+        def find_orig_parent(dep_gen, origs):
+            """
+            Find name and instance of the parent of the dependent
+            generator `dep_gen` amongst the generators in `origs`.
+            """
             for parent_name, parent in origs.items():
-                if clone.parent is parent:
+                if dep_gen.parent is parent:
                     return parent_name, parent
-            raise RuntimeError(f"Parent of cloned generator {clone} not defined in the same custom generator")
+            raise RuntimeError(f"Parent of dependent generator {dep_gen} not defined in the same custom generator")
 
 
         logger.debug('Spawning field generator templates...')
         origs = {}
         spawned = {}
         for name, gen in field_gens_templates.items():
-            if isinstance(gen, BaseGenerator) and gen in origs.values():
+            if isinstance(gen, IndependentGenerator) and gen in origs.values():
                 logger.debug(f'Cloning generator {name}={gen} because it is an alias for an existing generator')
                 gen = gen.clone()
 
-            if isinstance(gen, BaseGenerator):
+            if isinstance(gen, IndependentGenerator):
                 origs[name] = gen
                 spawned[name] = gen._spawn()
-            elif isinstance(gen, ClonedGenerator):
+            elif isinstance(gen, DependentGenerator):
                 orig_parent_name, orig_parent = find_orig_parent(gen, origs)
                 new_parent = spawned[orig_parent_name]
-                spawned[name] = new_parent.clone()
+                #spawned[name] = new_parent.clone()
+                spawned[name] = gen._spawn_and_reattach_parent(new_parent)
                 logger.debug(f"Reattaching cloned generator {gen} to new parent {new_parent}")
             else:
                 pass

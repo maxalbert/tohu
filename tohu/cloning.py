@@ -22,8 +22,12 @@ class ClonedGenerator(DependentGenerator):
     def __repr__(self):
         return f'<ClonedGenerator: id={id(self)}, parent={self.parent} >'
 
-    def clone(self):
-        return ClonedGenerator(self.parent)
+    # def clone(self):
+    #     return ClonedGenerator(self.parent)
+
+    def _spawn_and_reattach_parent(self, new_parent):
+        logger.debug(f'Spawning cloned generator {self} and re-attaching to new parent {new_parent}')
+        return ClonedGenerator(new_parent)
 
     def __next__(self):
         return next(self.gen)

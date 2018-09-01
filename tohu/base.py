@@ -1,8 +1,11 @@
+import logging
+
 from itertools import islice
 from operator import attrgetter
 from tqdm import tqdm
-
 from .item_list import ItemList
+
+logger = logging.getLogger('tohu')
 
 
 class UltraBaseGenerator:
@@ -58,6 +61,17 @@ class DependentGenerator(UltraBaseGenerator):
     Abstract base class for dependent generators
     """
 
+    def _spawn(self):
+        raise NotImplementedError("This is a dependent generator. Please call _spawn_and_reattach_parent() instead of _spawn().")
+
+    def _spawn_and_reattach_parent(self, new_parent):
+        """
+        This method needs to be implemented by derived classes.
+        It should return a new object of the same type as `self`
+        which has the same attributes but is otherwise independent.
+        """
+        raise NotImplementedError("Class {} does not implement method '_spawn_and_reattach'.".format(self.__class__.__name__))
+
 
 class ExtractAttribute(DependentGenerator):
     """
@@ -74,8 +88,9 @@ class ExtractAttribute(DependentGenerator):
     def __repr__(self):
         return f"<ExtractAttribute '{self.attr_name}' from {self.parent} >"
 
-    def _spawn(self):
-        return ExtractAttribute(self.parent, self.attr_name)
+    def _spawn_and_reattach_parent(self, new_parent):
+        logger.debug(f'Spawning dependent generator {self} and re-attaching to new parent {new_parent}')
+        return ExtractAttribute(new_parent, self.attr_name)
 
     def __next__(self):
         return self.attrgetter(next(self.gen))
