@@ -57,37 +57,38 @@ def set_item_class_name(cls_obj):
                 "definition or change its name so that it ends in '...Generator'")
 
 
-def make_item_class(obj):
+def make_item_class(clsname, attr_names):
     """
     Parameters
     ----------
-    obj:
-        The custom generator instance for which to create an item class
+    clsname: string
+        Name of the class to be created
+
+    attr_names: list of strings
+        Names of the attributes of the class to be created
     """
-    clsname = obj.__tohu_items_name__
-    attr_names = obj.field_gens.keys()
 
     item_cls = attr.make_class(clsname, {name: attr.ib() for name in attr_names}, repr=False, cmp=True)
 
-    def new_repr(obj):
-        all_fields = ', '.join([f'{name}={repr(value)}' for name, value in attr.asdict(obj).items()])
+    def new_repr(self):
+        all_fields = ', '.join([f'{name}={repr(value)}' for name, value in attr.asdict(self).items()])
         return f'{clsname}({all_fields})'
 
     orig_eq = item_cls.__eq__
-    def new_eq(obj, other):
+    def new_eq(self, other):
         """
         Custom __eq__() method which also allows comparisons with
         tuples and dictionaries. This is mostly for convenience
         during testing.
         """
 
-        if isinstance(other, obj.__class__):
-            return orig_eq(obj, other)
+        if isinstance(other, self.__class__):
+            return orig_eq(self, other)
         else:
             if isinstance(other, tuple):
-                return attr.astuple(obj) == other
+                return attr.astuple(self) == other
             elif isinstance(other, dict):
-                return attr.asdict(obj) == other
+                return attr.asdict(self) == other
             else:
                 return NotImplemented
 
@@ -98,6 +99,16 @@ def make_item_class(obj):
     item_cls.to_series = lambda self: pd.Series(attr.asdict(self))
 
     return item_cls
+
+
+def make_item_class_for_custom_generator(obj):
+    """
+    obj:
+        The custom generator instance for which to create an item class
+    """
+    clsname = obj.__tohu_items_name__
+    attr_names = obj.field_gens.keys()
+    return make_item_class(clsname, attr_names)
 
 
 def attach_new_init_method(obj):
@@ -139,7 +150,7 @@ def attach_new_init_method(obj):
         #
         # Create class for the items produced by this generator
         #
-        self.__class__.item_cls = make_item_class(self)
+        self.__class__.item_cls = make_item_class_for_custom_generator(self)
 
     obj.__init__ = new_init
 
