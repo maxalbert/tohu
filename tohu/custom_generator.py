@@ -1,13 +1,60 @@
 import attr
 import pandas as pd
 import re
-import sys
-from random import Random
-
+from .debugging import debug_print_dict, logger
 from .generators import BaseGenerator, SeedGenerator
-from .csv_formatter import CSVFormatter
 
-__all__ = ["CustomGenerator"]
+__all__ = ['CustomGeneratorMetaV2']
+
+
+def add_field_generators(field_gens, dct):
+    for name, gen in dct.items():
+        if isinstance(gen, BaseGenerator):
+            field_gens[name] = gen
+
+
+def find_field_generators(obj):
+    """
+    Return dictionary with the names and instances of
+    all tohu.BaseGenerator occurring in the given
+    object's class & instance namespaces.
+    """
+
+    cls_dict = obj.__class__.__dict__
+    obj_dict = obj.__dict__
+    logger.debug(f'[FFF]')
+    debug_print_dict(cls_dict, 'cls_dict')
+    debug_print_dict(obj_dict, 'obj_dict')
+
+    field_gens = {}
+    add_field_generators(field_gens, cls_dict)
+    add_field_generators(field_gens, obj_dict)
+
+    return field_gens
+
+
+def set_item_class_name(cls_obj):
+    """
+    Return the first part of the class name of this custom generator.
+    This will be used for the class name of the items produced by this
+    generator.
+
+    Examples:
+        FoobarGenerator -> Foobar
+        QuuxGenerator   -> Quux
+    """
+    if hasattr(cls_obj, '__tohu_items_name__'):
+        logger.debug(f"Using item class name '{cls_obj.__tohu_items_name__}' (derived from attribute '__tohu_items_name__')")
+    else:
+        m = re.match('^(.*)Generator$', cls_obj.__name__)
+        if m is not None:
+            cls_obj.__tohu_items_name__ = m.group(1)
+            logger.debug(f"Using item class name '{cls_obj.__tohu_items_name__}' (derived from custom generator name)")
+        else:
+            raise ValueError(
+                "Cannot derive class name for items to be produced by custom generator. "
+                "Please set '__tohu_items_name__' at the top of the custom generator's "
+                "definition or change its name so that it ends in '...Generator'")
 
 
 def make_item_class(clsname, attr_names):
@@ -29,7 +76,12 @@ def make_item_class(clsname, attr_names):
 
     orig_eq = item_cls.__eq__
     def new_eq(self, other):
-        # allow comparisons with tuples and dicts, too (mostly for convenience in testing)
+        """
+        Custom __eq__() method which also allows comparisons with
+        tuples and dictionaries. This is mostly for convenience
+        during testing.
+        """
+
         if isinstance(other, self.__class__):
             return orig_eq(self, other)
         else:
@@ -42,7 +94,6 @@ def make_item_class(clsname, attr_names):
 
     item_cls.__repr__ = new_repr
     item_cls.__eq__ = new_eq
-    item_cls.keys = lambda self: attr_names
     item_cls.__getitem__ = lambda self, key: getattr(self, key)
     item_cls.as_dict = lambda self: attr.asdict(self)
     item_cls.to_series = lambda self: pd.Series(attr.asdict(self))
@@ -50,137 +101,116 @@ def make_item_class(clsname, attr_names):
     return item_cls
 
 
-def calculate_field_gens(obj):
-    clsdict = obj.__class__.__dict__
-    instdict = obj.__dict__
-    cls_and_inst_dict = dict(**clsdict, **instdict)
-    return {name: gen._spawn() for name, gen in cls_and_inst_dict.items() if isinstance(gen, BaseGenerator)}
-
-
-def get_item_class_name(obj):
+def make_item_class_for_custom_generator(obj):
     """
-    Return the first part of the class name of this custom generator.
-    This will be used for the class name of the items produced by this
-    generator.
-
-    Examples:
-        FoobarGenerator -> Foobar
-        QuuxGenerator   -> Quux
+    obj:
+        The custom generator instance for which to create an item class
     """
-    return re.match('^(.*)Generator$', obj.__class__.__name__).group(1)
+    clsname = obj.__tohu_items_name__
+    attr_names = obj.field_gens.keys()
+    return make_item_class(clsname, attr_names)
 
 
-def make_custom_generator_class(metacls, cg_name, bases, clsdict):
-    # TODO: can/should we make this less hardcoded?
-    #metacls = CustomGeneratorMeta
-    #bases = (CustomGenerator,)
+def attach_new_init_method(obj):
+    """
+    Replace the existing obj.__init__() method with a new one
+    which calls the original one and in addition performs the
+    following actions:
 
-    cgcls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
-    orig_init = cgcls.__init__
+    (1) Finds all instances of tohu.BaseGenerator in the namespace
+        and collects them in the dictionary `self.field_gens`.
+    (2) ..to do..
+    """
+
+    orig_init = obj.__init__
 
     def new_init(self, *args, **kwargs):
         # Call original __init__ function to ensure we pick up
-        # any generator attributes that are defined there.
+        # any tohu generators that are defined there.
         orig_init(self, *args, **kwargs)
 
-        self.field_gens = calculate_field_gens(self)
-        self.__class__.item_cls = make_item_class(get_item_class_name(self), self.field_gens.keys())
+        #
+        # Find field generator templates and attach spawned copies
+        #
+        field_gens_templates = find_field_generators(self)
+        logger.debug(f'Found {len(field_gens_templates)} field generator template(s):')
+        debug_print_dict(field_gens_templates)
+
+        logger.debug('Spawning field generator templates...')
+        self.field_gens = {name: gen._spawn() for (name, gen) in field_gens_templates.items()}
+
+        logger.debug(f'Field generators attached to custom generator:')
+        debug_print_dict(self.field_gens)
+
+        #
+        # Add seed generator
+        #
         self.seed_generator = SeedGenerator()
 
-    cgcls.__init__ = new_init
-    return cgcls
+        #
+        # Create class for the items produced by this generator
+        #
+        self.__class__.item_cls = make_item_class_for_custom_generator(self)
+
+    obj.__init__ = new_init
 
 
-class CustomGeneratorMeta(type):
+def attach_new_reset_method(obj):
+    """
+    Attach a new `reset()` method to `obj` which resets the internal
+    seed generator of `obj` and then resets each of its constituent
+    field generators found in `obj.field_gens`.
+    """
+    #
+    # Create and assign automatically generated reset() method
+    #
 
-    def __new__(metacls, cg_name, bases, clsdict):
-        return make_custom_generator_class(metacls, cg_name, bases, clsdict)
+    def new_reset(self, seed=None):
+        logger.debug(f'[EEE] Inside automatically generated reset() method for {self} (seed={seed})')
 
-
-class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
-
-    def reset(self, seed=None):
-        """
-        Reset generator using the given seed (unless seed is None, in which case this is a no-op).
-        """
-        # Reset the seed generator
         if seed is not None:
             self.seed_generator.reset(seed)
+            for name, gen in self.field_gens.items():
+                next_seed = next(self.seed_generator)
+                logger.debug(f'Resetting field generator {name}={gen} with seed={next_seed}')
+                gen.reset(next_seed)
 
-            # Reset each constituent generator with a new seed
-            # produced by the seed generator.
-            for g, x in zip(self.field_gens.values(), self.seed_generator):
-                g.reset(x)
         return self
 
-    def _spawn(self):
-        # TODO/FIXME: Check that this does the right thing:
-        # (i) the spawned generator is independent of the original one (i.e. they can be reset independently without altering the other's behaviour)
-        # (ii) ensure that it also works if this custom generator's __init__ requires additional arguments
-        return self.__class__()
+    obj.reset = new_reset
 
-    def __next__(self):
+
+def attach_new_next_method(obj):
+    """
+    TODO
+    """
+
+    def new_next(self):
         field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
 
-    # def to_csv(self, path_or_buf=None, *, N, seed=None, fields=None, fmt_str=None, header=None, progressbar=True):
-    #     """
-    #     Generate N items and return the resulting CSV string or output to a file.
+    obj.__next__ = new_next
 
-    #     Parameters
-    #     ----------
-    #     path_or_buf: string or file handle, default None
-    #         File path or object. If None is provided the result
-    #         is returned as a string.
-    #     N: integer
-    #         Number of items to generate.
-    #     seed: integer (optional)
-    #         Seed with which to initialise random generator.
-    #     progressbar: boolean
-    #         Whether to display a progressbar during item generation.
 
-    #     The remaining arguments `fields`, `fmt_str`, `header`
-    #     are passed on to CSVFormatter.
-    #     """
-    #     if fmt_str is None:
-    #         fmt_str = getattr(self, 'CSV_FMT_STR', None)
-    #     if fields is None and fmt_str is None:
-    #         fields = getattr(self, 'CSV_FIELDS', self.fmt_dict)
-    #     if header is None:
-    #         header = getattr(self, 'CSV_HEADER', None)
+class CustomGeneratorMetaV2(type):
 
-    #     formatter = CSVFormatter(fmt_str=fmt_str, fields=fields, header=header)
-    #     return formatter.to_csv(self.generate_NEW(N, seed=seed, progressbar=progressbar), path_or_buf=path_or_buf)
+    def __new__(metacls, cg_name, bases, clsdict):
+        logger.debug('[DDD]')
+        logger.debug('CustomGeneratorMetaV2.__new__')
+        logger.debug(f'   - metacls={metacls}')
+        logger.debug(f'   - cg_name={cg_name}')
+        logger.debug(f'   - bases={bases}')
+        logger.debug(f'   - clsdict={clsdict}')
 
-    # def to_df(self, *, N, seed=None, fields=None):
-    #     """
-    #     Return pandas DataFrame containing N items produced by this generator.
-    #     """
-    #     return self.generate_NEW(N, seed=seed).to_df(fields=fields)
+        #
+        # Create new custom generator object
+        #
+        new_obj = super(CustomGeneratorMetaV2, metacls).__new__(metacls, cg_name, bases, clsdict)
+        logger.debug(f'   - new_obj={new_obj}')
 
-    # def to_sql(self, url, table_name, N, *, if_exists='fail', seed=None):
-    #     """
-    #     Generate N items and export them as rows in a PostgreSQL table.
+        set_item_class_name(new_obj)
+        attach_new_init_method(new_obj)
+        attach_new_reset_method(new_obj)
+        attach_new_next_method(new_obj)
 
-    #     Parameters
-    #     ----------
-
-    #     url: string
-    #         Connection string to connect to the database.
-    #         Example: "postgresql://postgres@127.0.0.1:5432/testdb"
-
-    #     table_name: string
-    #         Name of the database table.
-
-    #     N: integer
-    #         Number of items to export.
-
-    #     if_exists : {'fail', 'replace', 'append'}, default 'fail'
-    #         - fail: If table exists, raise an error.
-    #         - replace: If table exists, drop it, recreate it, and insert data.
-    #         - append: If table exists, insert data. Create if does not exist.
-
-    #     seed: integer (optional)
-    #         Seed with which to initialise random generator.
-    #     """
-    #     self.generate_NEW(N, seed=seed).to_sql(url, table_name, if_exists=if_exists)
+        return new_obj
