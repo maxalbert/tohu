@@ -11,7 +11,7 @@ ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter('{levelname}  {message}', datefmt='%Y-%m-%d %H:%M:%S', style='{')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
-logger.setLevel('DEBUG')
+logger.setLevel('INFO')
 
 
 def debug_print_dict(d, name=None):
