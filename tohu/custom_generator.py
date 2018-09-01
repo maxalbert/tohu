@@ -215,3 +215,7 @@ class CustomGeneratorMeta(type):
         attach_new_next_method(new_obj)
 
         return new_obj
+
+
+class CustomGenerator(BaseGenerator, metaclass=CustomGeneratorMeta):
+    pass
