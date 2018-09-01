@@ -38,6 +38,18 @@ def attach_new_init_method(obj):
     obj.__init__ = new_init
 
 
+def attach_new_reset_method(obj):
+    #
+    # Create and assign automatically generated reset() method
+    #
+
+    def new_reset(self, seed=None):
+        logger.debug(f'[EEE] Inside automatically generated reset() method for {self} (seed={seed})')
+        logger.debug(f'      TODO: reset internal seed generator and call reset() on each child generator')
+
+    obj.reset = new_reset
+
+
 class CustomGeneratorMetaV2(type):
 
     def __new__(metacls, cg_name, bases, clsdict):
@@ -55,15 +67,6 @@ class CustomGeneratorMetaV2(type):
         logger.debug(f'   - new_obj={new_obj}')
 
         attach_new_init_method(new_obj)
-
-        #
-        # Create and assign automatically generated reset() method
-        #
-
-        def new_reset(self, seed=None):
-            logger.debug(f'[EEE] Inside automatically generated reset() method for {self} (seed={seed})')
-            logger.debug(f'      TODO: reset internal seed generator and call reset() on each child generator')
-
-        new_obj.reset = new_reset
+        attach_new_reset_method(new_obj)
 
         return new_obj
