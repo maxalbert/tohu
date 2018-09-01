@@ -4,7 +4,7 @@ import re
 from .debugging import debug_print_dict, logger
 from .generators import BaseGenerator, SeedGenerator
 
-__all__ = ['CustomGeneratorMetaV2']
+__all__ = ['CustomGenerator']
 
 
 def add_field_generators(field_gens, dct):
@@ -193,11 +193,11 @@ def attach_new_next_method(obj):
     obj.__next__ = new_next
 
 
-class CustomGeneratorMetaV2(type):
+class CustomGeneratorMeta(type):
 
     def __new__(metacls, cg_name, bases, clsdict):
         logger.debug('[DDD]')
-        logger.debug('CustomGeneratorMetaV2.__new__')
+        logger.debug('CustomGeneratorMeta.__new__')
         logger.debug(f'   - metacls={metacls}')
         logger.debug(f'   - cg_name={cg_name}')
         logger.debug(f'   - bases={bases}')
@@ -206,7 +206,7 @@ class CustomGeneratorMetaV2(type):
         #
         # Create new custom generator object
         #
-        new_obj = super(CustomGeneratorMetaV2, metacls).__new__(metacls, cg_name, bases, clsdict)
+        new_obj = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
         logger.debug(f'   - new_obj={new_obj}')
 
         set_item_class_name(new_obj)
