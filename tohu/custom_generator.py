@@ -1,7 +1,7 @@
 import attr
 import pandas as pd
 import re
-from .cloning import CloneableMeta
+from .cloning import CloneableMeta, ClonedGenerator
 from .debugging import debug_print_dict, logger
 from .generators import BaseGenerator, SeedGenerator
 
@@ -10,7 +10,7 @@ __all__ = ['CustomGenerator']
 
 def add_field_generators(field_gens, dct):
     for name, gen in dct.items():
-        if isinstance(gen, BaseGenerator):
+        if isinstance(gen, (BaseGenerator, ClonedGenerator)):
             field_gens[name] = gen
 
 
@@ -138,8 +138,33 @@ def attach_new_init_method(obj):
         logger.debug(f'Found {len(field_gens_templates)} field generator template(s):')
         debug_print_dict(field_gens_templates)
 
+        def find_orig_parent(clone, origs):
+            for parent_name, parent in origs.items():
+                if clone.parent is parent:
+                    return parent_name, parent
+            raise RuntimeError(f"Parent of cloned generator {clone} not defined in the same custom generator")
+
+
         logger.debug('Spawning field generator templates...')
-        self.field_gens = {name: gen._spawn() for (name, gen) in field_gens_templates.items()}
+        origs = {}
+        spawned = {}
+        for name, gen in field_gens_templates.items():
+            if isinstance(gen, BaseGenerator) and gen in origs.values():
+                logger.debug(f'Cloning generator {name}={gen} because it is an alias for an existing generator')
+                gen = gen.clone()
+
+            if isinstance(gen, BaseGenerator):
+                origs[name] = gen
+                spawned[name] = gen._spawn()
+            elif isinstance(gen, ClonedGenerator):
+                orig_parent_name, orig_parent = find_orig_parent(gen, origs)
+                new_parent = spawned[orig_parent_name]
+                spawned[name] = new_parent.clone()
+                logger.debug(f"Reattaching cloned generator {gen} to new parent {new_parent}")
+            else:
+                pass
+
+        self.field_gens = spawned
 
         logger.debug(f'Field generators attached to custom generator:')
         debug_print_dict(self.field_gens)
