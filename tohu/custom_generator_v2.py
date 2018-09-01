@@ -47,8 +47,13 @@ def attach_new_init_method(obj):
         orig_init(self, *args, **kwargs)
 
         # Find field generators
-        self.field_gens = find_field_generators(self)
-        logger.debug(f'Found {len(self.field_gens)} field generator(s):')
+        field_gens_templates = find_field_generators(self)
+        logger.debug(f'Found {len(field_gens_templates)} field generator template(s):')
+        debug_print_dict(field_gens_templates)
+
+        logger.debug('Spawning field generator templates...')
+        self.field_gens = {name: gen._spawn() for (name, gen) in field_gens_templates.items()}
+        logger.debug(f'Field generatos attached to custom generator:')
         debug_print_dict(self.field_gens)
 
     obj.__init__ = new_init
