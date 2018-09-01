@@ -1,3 +1,4 @@
+import re
 from .debugging import debug_print_dict, logger
 from .generators import BaseGenerator, SeedGenerator
 
@@ -30,6 +31,30 @@ def find_field_generators(obj):
     return field_gens
 
 
+def set_item_class_name(cls_obj):
+    """
+    Return the first part of the class name of this custom generator.
+    This will be used for the class name of the items produced by this
+    generator.
+
+    Examples:
+        FoobarGenerator -> Foobar
+        QuuxGenerator   -> Quux
+    """
+    if hasattr(cls_obj, '__tohu_items_name__'):
+        logger.debug(f"Using item class name '{cls_obj.__tohu_items_name__}' (derived from attribute '__tohu_items_name__')")
+    else:
+        m = re.match('^(.*)Generator$', cls_obj.__name__)
+        if m is not None:
+            cls_obj.__tohu_items_name__ = m.group(1)
+            logger.debug(f"Using item class name '{cls_obj.__tohu_items_name__}' (derived from custom generator name)")
+        else:
+            raise ValueError(
+                "Cannot derive class name for items to be produced by custom generator. "
+                "Please set '__tohu_items_name__' at the top of the custom generator's "
+                "definition or change its name so that it ends in '...Generator'")
+
+
 def attach_new_init_method(obj):
     """
     Replace the existing obj.__init__() method with a new one
@@ -48,17 +73,22 @@ def attach_new_init_method(obj):
         # any tohu generators that are defined there.
         orig_init(self, *args, **kwargs)
 
+        #
         # Find field generator templates and attach spawned copies
+        #
         field_gens_templates = find_field_generators(self)
         logger.debug(f'Found {len(field_gens_templates)} field generator template(s):')
         debug_print_dict(field_gens_templates)
 
         logger.debug('Spawning field generator templates...')
         self.field_gens = {name: gen._spawn() for (name, gen) in field_gens_templates.items()}
-        logger.debug(f'Field generatos attached to custom generator:')
+
+        logger.debug(f'Field generators attached to custom generator:')
         debug_print_dict(self.field_gens)
 
+        #
         # Add seed generator
+        #
         self.seed_generator = SeedGenerator()
 
     obj.__init__ = new_init
@@ -105,6 +135,7 @@ class CustomGeneratorMetaV2(type):
         new_obj = super(CustomGeneratorMetaV2, metacls).__new__(metacls, cg_name, bases, clsdict)
         logger.debug(f'   - new_obj={new_obj}')
 
+        set_item_class_name(new_obj)
         attach_new_init_method(new_obj)
         attach_new_reset_method(new_obj)
 
