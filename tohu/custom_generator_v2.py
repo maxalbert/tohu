@@ -23,6 +23,22 @@ def find_field_generators(obj):
     return field_gens
 
 
+def attach_new_init_method(obj):
+    orig_init = obj.__init__
+
+    def new_init(self, *args, **kwargs):
+        # Call original __init__ function to ensure we pick up
+        # any tohu generators that are defined there.
+        orig_init(self, *args, **kwargs)
+
+        # Find field generators
+        self.field_gens = find_field_generators(self)
+        logger.debug(f'Found {len(self.field_gens)} field generator(s):')
+        debug_print_dict(self.field_gens)
+
+    obj.__init__ = new_init
+
+
 class CustomGeneratorMetaV2(type):
 
     def __new__(metacls, cg_name, bases, clsdict):
@@ -39,17 +55,7 @@ class CustomGeneratorMetaV2(type):
         new_obj = super(CustomGeneratorMetaV2, metacls).__new__(metacls, cg_name, bases, clsdict)
         logger.debug(f'   - new_obj={new_obj}')
 
-        orig_init = new_obj.__init__
-
-        def new_init(self, *args, **kwargs):
-            # Call original __init__ function to ensure we pick up
-            # any tohu generators that are defined there.
-            orig_init(self, *args, **kwargs)
-
-            # Find field generators
-            self.field_gens = find_field_generators(self)
-            logger.debug(f'Found {len(self.field_gens)} field generator(s):')
-            debug_print_dict(self.field_gens)
+        attach_new_init_method(new_obj)
 
         #
         # Create and assign automatically generated reset() method
@@ -59,7 +65,6 @@ class CustomGeneratorMetaV2(type):
             logger.debug(f'[EEE] Inside automatically generated reset() method for {self} (seed={seed})')
             logger.debug(f'      TODO: reset internal seed generator and call reset() on each child generator')
 
-        new_obj.__init__ = new_init
         new_obj.reset = new_reset
 
         return new_obj
