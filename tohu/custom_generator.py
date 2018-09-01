@@ -43,7 +43,7 @@ def set_item_class_name(cls_obj):
         FoobarGenerator -> Foobar
         QuuxGenerator   -> Quux
     """
-    if hasattr(cls_obj, '__tohu_items_name__'):
+    if '__tohu__items__name__' in cls_obj.__dict__:
         logger.debug(f"Using item class name '{cls_obj.__tohu_items_name__}' (derived from attribute '__tohu_items_name__')")
     else:
         m = re.match('^(.*)Generator$', cls_obj.__name__)
