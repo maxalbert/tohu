@@ -1,6 +1,8 @@
 from .debugging import debug_print_dict, logger
 from .generators import BaseGenerator
 
+__all__ = ['CustomGeneratorMetaV2']
+
 
 def add_field_generators(field_gens, dct):
     for name, gen in dct.items():
