@@ -3,22 +3,29 @@ from .generators import BaseGenerator
 
 logger = logging.getLogger('tohu')
 
+def debug_print_dict(d, name=None):
+    if name is not None:
+        logger.debug(f'{name}:')
+    for name, gen in d.items():
+        logger.debug(f'   {name}: {gen}')
+
+
+def add_generators(field_gens, dct):
+    for name, gen in dct.items():
+        if isinstance(gen, BaseGenerator):
+            field_gens[name] = gen
+
 
 def find_field_generators(obj):
     cls_dict = obj.__class__.__dict__
-    inst_dict = obj.__dict__
-    logger.debug(f'[FFF] cls_dict={cls_dict}')
-    logger.debug(f'[FFF] inst_dict={inst_dict}')
+    obj_dict = obj.__dict__
+    logger.debug(f'[FFF]')
+    debug_print_dict(cls_dict, 'cls_dict')
+    debug_print_dict(obj_dict, 'obj_dict')
 
     field_gens = {}
-
-    for name, gen in cls_dict.items():
-        if isinstance(gen, BaseGenerator):
-            field_gens[name] = gen
-
-    for name, gen in inst_dict.items():
-        if isinstance(gen, BaseGenerator):
-            field_gens[name] = gen
+    add_generators(field_gens, cls_dict)
+    add_generators(field_gens, obj_dict)
 
     #return {name: gen for name, gen in cls_and_inst_dict.items() if isinstance(gen, BaseGenerator)}
     return field_gens
@@ -40,23 +47,27 @@ class CustomGeneratorMetaV2(type):
         new_obj = super(CustomGeneratorMetaV2, metacls).__new__(metacls, cg_name, bases, clsdict)
         logger.debug(f'   - new_obj={new_obj}')
 
-        #
-        # Find field generators
-        #
-        field_gens = find_field_generators(new_obj)
-        logger.debug(f'Found {len(field_gens)} field generator(s):')
-        for name, gen in field_gens.items():
-            logger.debug(f'   - {name}: {gen}')
+        orig_init = new_obj.__init__
 
+        def new_init(self, *args, **kwargs):
+            # Call original __init__ function to ensure we pick up
+            # any tohu generators that are defined there.
+            orig_init(self, *args, **kwargs)
+
+            # Find field generators
+            self.field_gens = find_field_generators(self)
+            logger.debug(f'Found {len(self.field_gens)} field generator(s):')
+            debug_print_dict(self.field_gens)
 
         #
         # Create and assign automatically generated reset() method
         #
 
-        def reset(self, seed=None):
+        def new_reset(self, seed=None):
             logger.debug(f'[EEE] Inside automatically generated reset() method for {self} (seed={seed})')
             logger.debug(f'      TODO: reset internal seed generator and call reset() on each child generator')
 
-        new_obj.reset = reset
+        new_obj.__init__ = new_init
+        new_obj.reset = new_reset
 
         return new_obj
