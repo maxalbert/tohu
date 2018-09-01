@@ -18,11 +18,12 @@ from tqdm import tqdm
 from .cloning import CloneableMeta
 from .item_list import ItemList
 
-__all__ = ['CharString', 'Constant', 'DigitString', 'ExtractAttribute', 'FakerGenerator', 'First', 'Float', 'Geolocation',
-           'GeolocationPair', 'GeoJSONGeolocationPair', 'HashDigest', 'Integer', 'IterateOver', 'Nth', 'NumpyRandomGenerator',
-           'Second', 'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Subsample', 'Timestamp',
-           'TimestampNEW', 'TimestampError', 'TupleGenerator', 'Zip']
-
+__all__ = [
+    'CharString', 'Constant', 'DigitString', 'ExtractAttribute', 'FakerGenerator', 'First', 'Float', 'Geolocation',
+    'GeolocationPair', 'GeoJSONGeolocationPair', 'HashDigest', 'Integer', 'IterateOver', 'Nth', 'NumpyRandomGenerator', 'Second',
+    'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Subsample', 'Timestamp', 'TimestampNEW',
+    'TimestampError', 'TupleGenerator', 'Zip'
+]
 
 logger = logging.getLogger("tohu")
 
@@ -472,10 +473,8 @@ class CharString(BaseGenerator):
         self.length_gen = Integer(low=self.min_length, high=self.max_length)
 
     def _get_min_and_max_length(self, length, min_length, max_length):
-        error_msg = (
-            "Either 'length' or both 'min_length' and 'max_length' must be specified. "
-            f"Got: length={length}, min_length={min_length}, max_length={max_length}"
-        )
+        error_msg = ("Either 'length' or both 'min_length' and 'max_length' must be specified. "
+                     f"Got: length={length}, min_length={min_length}, max_length={max_length}")
 
         if length is None:
             if (min_length is None or max_length is None):
@@ -798,7 +797,7 @@ class TimestampNEW(BaseGenerator):
     def _spawn(self):
         return TimestampNEW(
             start=self.start.strftime('%Y-%m-%d %H:%M:%S'),
-            end=self.end.strftime('%Y-%m-%d %H:%M:%S'))
+            end=self.end.strftime('%Y-%m-%d %H:%M:%S'))  # yapf: disable
 
     def __next__(self):
         ts = (self.start + dt.timedelta(seconds=next(self.offsetgen)))
@@ -807,7 +806,6 @@ class TimestampNEW(BaseGenerator):
     def reset(self, seed):
         self.offsetgen.reset(seed)
         return self
-
 
 
 class SeedGenerator:
@@ -826,7 +824,7 @@ class SeedGenerator:
     def __init__(self):
         self.randgen = Random()
         self.minval = 0
-        self.maxval = 2**32-1
+        self.maxval = 2**32 - 1
 
     def reset(self, seed):
         self.randgen.seed(seed)
@@ -897,7 +895,9 @@ class BufferedTuple(BaseGenerator):
         return f"<BufferedTuple, parent: {self.g}>"
 
     def _spawn(self):
-        raise NotImplementedError("BufferedTuple cannot be spawned directly. Instead, call _spawn_parent() to rewire it to a spawned version of its parent tuple generator.")
+        raise NotImplementedError(
+            "BufferedTuple cannot be spawned directly. Instead, call _spawn_parent() to rewire it to a spawned version of its parent tuple generator."
+        )
 
     def _spawn_parent(self):
         self.g = self.g._spawn()
@@ -911,7 +911,8 @@ class BufferedTuple(BaseGenerator):
             try:
                 queue.put_nowait(x)
             except Full:
-                raise TohuBufferOverflow("Buffer filled up because elements from multiple linked generators were not consumed at the same rate.")
+                raise TohuBufferOverflow(
+                    "Buffer filled up because elements from multiple linked generators were not consumed at the same rate.")
 
     def reset(self, seed):
         self.g.reset(seed)
@@ -958,7 +959,9 @@ class NthElementBuffered(BaseGenerator):
             # so this is probably fine.
             #
             # [1] https://stackoverflow.com/questions/33824228/why-wont-dynamically-adding-a-call-method-to-an-instance-work
-            raise InvalidGeneratorError("This NthElementBuffered generator has been spawned and is therefore invalid. Please call next() on the spawned version instead.")
+            raise InvalidGeneratorError(
+                "This NthElementBuffered generator has been spawned and is therefore invalid. Please call next() on the spawned version instead."
+            )
 
         return self.g_buffered.next_nth(self.idx)
 
@@ -969,10 +972,9 @@ class NthElementBuffered(BaseGenerator):
         self.invalid = True
 
     def _spawn(self):
-        logging.debug(
-            "Generator of type NthElementBuffered is being spawned. Note that "
-            "internally this will spawn its parent, rewire all of the original "
-            "parent's children to the new parent and invalidate this generator.")
+        logging.debug("Generator of type NthElementBuffered is being spawned. Note that "
+                      "internally this will spawn its parent, rewire all of the original "
+                      "parent's children to the new parent and invalidate this generator.")
         self.g_buffered._spawn_parent()
         self.invalidate()
         return NthElementBuffered(self.g_buffered, self.idx)

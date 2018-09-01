@@ -52,10 +52,9 @@ def set_item_class_name(cls_obj):
             cls_obj.__tohu_items_name__ = m.group(1)
             logger.debug(f"Using item class name '{cls_obj.__tohu_items_name__}' (derived from custom generator name)")
         else:
-            raise ValueError(
-                "Cannot derive class name for items to be produced by custom generator. "
-                "Please set '__tohu_items_name__' at the top of the custom generator's "
-                "definition or change its name so that it ends in '...Generator'")
+            raise ValueError("Cannot derive class name for items to be produced by custom generator. "
+                             "Please set '__tohu_items_name__' at the top of the custom generator's "
+                             "definition or change its name so that it ends in '...Generator'")
 
 
 def make_item_class(clsname, attr_names):
@@ -76,6 +75,7 @@ def make_item_class(clsname, attr_names):
         return f'{clsname}({all_fields})'
 
     orig_eq = item_cls.__eq__
+
     def new_eq(self, other):
         """
         Custom __eq__() method which also allows comparisons with
@@ -163,6 +163,7 @@ def attach_new_reset_method(obj):
     seed generator of `obj` and then resets each of its constituent
     field generators found in `obj.field_gens`.
     """
+
     #
     # Create and assign automatically generated reset() method
     #
