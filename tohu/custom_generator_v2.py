@@ -17,6 +17,7 @@ class CustomGeneratorMetaV2(type):
 
         def reset(self, seed=None):
             logger.debug(f'[EEE] Inside automatically generated reset() method for {self} (seed={seed})')
+            logger.debug(f'      TODO: reset internal seed generator and call reset() on each child generator')
 
         new_obj.reset = reset
 
