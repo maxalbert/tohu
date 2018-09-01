@@ -1,4 +1,6 @@
 import logging
+from .base import DependentGenerator
+
 
 __all__ = ['CloneableMeta', 'ClonedGenerator']
 
@@ -11,7 +13,7 @@ class TohuCloneError(Exception):
     """
 
 
-class ClonedGenerator:
+class ClonedGenerator(DependentGenerator):
 
     def __init__(self, parent):
         self.parent = parent

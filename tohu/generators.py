@@ -10,16 +10,15 @@ import shapely
 from faker import Faker
 from functools import partial
 from itertools import count, islice
-from operator import attrgetter
 from queue import Queue, Full
 from random import Random
 from shapely.geometry import Point, Polygon, MultiPolygon
-from tqdm import tqdm
+from .base import IndependentGenerator, ExtractAttribute
 from .cloning import CloneableMeta
 from .item_list import ItemList
 
 __all__ = [
-    'CharString', 'Constant', 'DigitString', 'ExtractAttribute', 'FakerGenerator', 'First', 'Float', 'Geolocation',
+    'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'First', 'Float', 'Geolocation',
     'GeolocationPair', 'GeoJSONGeolocationPair', 'HashDigest', 'Integer', 'IterateOver', 'Nth', 'NumpyRandomGenerator', 'Second',
     'SeedGenerator', 'SelectMultiple', 'SelectOne', 'Sequential', 'Split', 'Subsample', 'Timestamp', 'TimestampNEW',
     'TimestampError', 'TupleGenerator', 'Zip'
@@ -34,47 +33,10 @@ logger = logging.getLogger("tohu")
 #    provided by subclasses, but somehow this interferes with
 #    the metaclass CustomGeneratorMeta below.
 #
-class BaseGenerator(metaclass=CloneableMeta):
+class BaseGenerator(IndependentGenerator, metaclass=CloneableMeta):
     """
     Base class for all of tohu's random generators.
     """
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        raise NotImplementedError("Class {} does not implement method '__next__'.".format(self.__class__.__name__))
-
-    def reset(self, seed):
-        raise NotImplementedError("Class {} does not implement method 'reset'.".format(self.__class__.__name__))
-
-    def generate_NEW(self, N, *, seed=None, progressbar=False):
-        """
-        Return sequence of `N` elements.
-
-        If `seed` is not None, the generator is reset
-        using this seed before generating the elements.
-        """
-        if seed is not None:
-            self.reset(seed)
-        items = islice(self, N)
-        if progressbar:
-            items = tqdm(items, total=N)
-
-        item_list = [x for x in items]
-
-        #logger.warning("TODO: initialise ItemList with random seed!")
-        return ItemList(item_list, N)
-
-    generate = generate_NEW  # alias; to be removed when generate_OLD is removed
-
-    def _spawn(self):
-        """
-        This method needs to be implemented by derived classes.
-        It should return a new object of the same type as `self`
-        which has the same attributes but is otherwise independent.
-        """
-        raise NotImplementedError("Class {} does not implement method '_spawn'.".format(self.__class__.__name__))
 
 
 class TupleGenerator(BaseGenerator):
@@ -328,6 +290,9 @@ class SelectOne(BaseGenerator):
         self.p = p
         self.num_values = len(values)
         self.randgen = np.random.RandomState()
+
+    def __getattr__(self, name):
+        return ExtractAttribute(self, name)
 
     def __next__(self):
         """
@@ -1055,24 +1020,3 @@ class IterateOver(BaseGenerator):
 
     def reset(self, seed=None):
         self._iter_g = iter(self.g)
-
-
-class ExtractAttribute(BaseGenerator):
-    """
-    Generator which produces items that are attributes extracted from
-    the items produced by a different generator.
-    """
-
-    def __init__(self, g, attr_name):
-        self.g = g._spawn()
-        self.attr_name = attr_name
-        self.attrgetter = attrgetter(attr_name)
-
-    def _spawn(self):
-        return ExtractAttribute(self.g, self.attr_name)
-
-    def __next__(self):
-        return self.attrgetter(next(self.g))
-
-    def reset(self, seed):
-        self.g.reset(seed)
