@@ -1,5 +1,5 @@
 from .debugging import debug_print_dict, logger
-from .generators import BaseGenerator
+from .generators import BaseGenerator, SeedGenerator
 
 __all__ = ['CustomGeneratorMetaV2']
 
@@ -48,7 +48,7 @@ def attach_new_init_method(obj):
         # any tohu generators that are defined there.
         orig_init(self, *args, **kwargs)
 
-        # Find field generators
+        # Find field generator templates and attach spawned copies
         field_gens_templates = find_field_generators(self)
         logger.debug(f'Found {len(field_gens_templates)} field generator template(s):')
         debug_print_dict(field_gens_templates)
@@ -57,6 +57,9 @@ def attach_new_init_method(obj):
         self.field_gens = {name: gen._spawn() for (name, gen) in field_gens_templates.items()}
         logger.debug(f'Field generatos attached to custom generator:')
         debug_print_dict(self.field_gens)
+
+        # Add seed generator
+        self.seed_generator = SeedGenerator()
 
     obj.__init__ = new_init
 
@@ -74,6 +77,11 @@ def attach_new_reset_method(obj):
     def new_reset(self, seed=None):
         logger.debug(f'[EEE] Inside automatically generated reset() method for {self} (seed={seed})')
         logger.debug(f'      TODO: reset internal seed generator and call reset() on each child generator')
+        self.seed_generator.reset(seed)
+        for name, gen in self.field_gens.items():
+            next_seed = next(self.seed_generator)
+            logger.debug(f'Resetting field generator {name}={gen} with seed={next_seed}')
+            gen.reset(next_seed)
 
     obj.reset = new_reset
 
