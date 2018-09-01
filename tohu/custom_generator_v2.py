@@ -2,7 +2,7 @@ from .debugging import debug_print_dict, logger
 from .generators import BaseGenerator
 
 
-def add_generators(field_gens, dct):
+def add_field_generators(field_gens, dct):
     for name, gen in dct.items():
         if isinstance(gen, BaseGenerator):
             field_gens[name] = gen
@@ -16,10 +16,9 @@ def find_field_generators(obj):
     debug_print_dict(obj_dict, 'obj_dict')
 
     field_gens = {}
-    add_generators(field_gens, cls_dict)
-    add_generators(field_gens, obj_dict)
+    add_field_generators(field_gens, cls_dict)
+    add_field_generators(field_gens, obj_dict)
 
-    #return {name: gen for name, gen in cls_and_inst_dict.items() if isinstance(gen, BaseGenerator)}
     return field_gens
 
 
