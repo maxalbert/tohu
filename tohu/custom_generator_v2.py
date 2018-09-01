@@ -1,3 +1,4 @@
+import attr
 import re
 from .debugging import debug_print_dict, logger
 from .generators import BaseGenerator, SeedGenerator
@@ -55,6 +56,20 @@ def set_item_class_name(cls_obj):
                 "definition or change its name so that it ends in '...Generator'")
 
 
+def make_item_class(obj):
+    """
+    Parameters
+    ----------
+    obj:
+        The custom generator instance for which to create an item class
+    """
+    attr_names = obj.field_gens.keys()
+
+    item_cls = attr.make_class(obj.__tohu_items_name__, {name: attr.ib() for name in attr_names}, repr=False, cmp=True)
+
+    return item_cls
+
+
 def attach_new_init_method(obj):
     """
     Replace the existing obj.__init__() method with a new one
@@ -91,6 +106,11 @@ def attach_new_init_method(obj):
         #
         self.seed_generator = SeedGenerator()
 
+        #
+        # Create class for the items produced by this generator
+        #
+        self.__class__.item_cls = make_item_class(self)
+
     obj.__init__ = new_init
 
 
@@ -119,6 +139,18 @@ def attach_new_reset_method(obj):
     obj.reset = new_reset
 
 
+def attach_new_next_method(obj):
+    """
+    TODO
+    """
+
+    def new_next(self):
+        field_values = [next(g) for g in self.field_gens.values()]
+        return self.item_cls(*field_values)
+
+    obj.__next__ = new_next
+
+
 class CustomGeneratorMetaV2(type):
 
     def __new__(metacls, cg_name, bases, clsdict):
@@ -138,5 +170,6 @@ class CustomGeneratorMetaV2(type):
         set_item_class_name(new_obj)
         attach_new_init_method(new_obj)
         attach_new_reset_method(new_obj)
+        attach_new_next_method(new_obj)
 
         return new_obj
