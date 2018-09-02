@@ -15,7 +15,6 @@ from random import Random
 from shapely.geometry import Point, Polygon, MultiPolygon
 from .base import IndependentGenerator
 from .derived_generators import ExtractAttribute
-from tohu.base import IndependentGeneratorMeta
 from .item_list import ItemList
 
 __all__ = [
