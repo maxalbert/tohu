@@ -2,8 +2,7 @@ import attr
 import logging
 import pandas as pd
 import re
-from .base import UltraBaseGenerator, IndependentGenerator, DependentGenerator
-from .cloning import IndependentGeneratorMeta, ClonedGenerator
+from .base import ClonedGenerator, DependentGenerator, IndependentGenerator, IndependentGeneratorMeta, UltraBaseGenerator
 from .debugging import debug_print_dict
 from .generators import BaseGenerator, SeedGenerator
 
