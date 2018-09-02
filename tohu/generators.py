@@ -210,7 +210,7 @@ class FakerGenerator(BaseGenerator):
         return FakerGenerator(method=self.method, locale=self.locale, **self.faker_args)
 
     def reset(self, seed):
-        self.fake.seed(seed)
+        self.fake.seed_instance(seed)
         return self
 
     def __next__(self):
