@@ -104,7 +104,7 @@ class ClonedGenerator(DependentGenerator):
         logger.debug(f'Ignoring reset() on cloned generator {self}')
 
     def reset_dependent_generator(self, seed):
-        logger.debug(f'Resetting cloned generator {self} (seed={seed})')
+        logger.debug(f'Resetting {self} (seed={seed})')
         self.gen.reset(seed)
 
 
@@ -144,6 +144,7 @@ def add_new_reset_method(cls):
     orig_reset = cls.reset
 
     def new_reset(self, seed=None):
+        logger.debug(f"Calling reset() on {self} (seed={seed})")
         orig_reset(self, seed)
         for c in self._dependent_generators:
             c.reset_dependent_generator(seed)
