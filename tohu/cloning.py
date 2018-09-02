@@ -66,6 +66,7 @@ def attach_new_reset_method(cls):
         orig_reset(self, seed)
         for c in self._dependent_generators:
             c.reset_dependent_generator(seed)
+        return self
 
     cls.reset = new_reset
 
