@@ -27,8 +27,8 @@ def find_field_generators(obj):
     cls_dict = obj.__class__.__dict__
     obj_dict = obj.__dict__
     logger.debug(f'[FFF]')
-    debug_print_dict(cls_dict, 'cls_dict')
-    debug_print_dict(obj_dict, 'obj_dict')
+    #debug_print_dict(cls_dict, 'cls_dict')
+    #debug_print_dict(obj_dict, 'obj_dict')
 
     field_gens = {}
     add_field_generators(field_gens, cls_dict)
