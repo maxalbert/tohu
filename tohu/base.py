@@ -94,7 +94,8 @@ class ClonedGenerator(DependentGenerator):
     #     return ClonedGenerator(self.parent)
 
     def _spawn_and_reattach_parent(self, new_parent):
-        logger.debug(f'Spawning cloned generator {self} and re-attaching to new parent {new_parent}')
+        logger.debug(f'Spawning cloned generator {self}')
+        logger.debug(f'     and re-attaching to new parent: {new_parent}')
         return ClonedGenerator(new_parent)
 
     def __next__(self):

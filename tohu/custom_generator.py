@@ -163,18 +163,18 @@ def add_new_init_method(obj):
             if isinstance(gen, IndependentGenerator):
                 origs[name] = gen
                 spawned[name] = gen._spawn()
+                logger.debug(f'Spawning generator {gen}. New spawn: {spawned[name]}')
             elif isinstance(gen, DependentGenerator):
                 orig_parent_name, orig_parent = find_orig_parent(gen, origs)
                 new_parent = spawned[orig_parent_name]
                 #spawned[name] = new_parent.clone()
                 spawned[name] = gen._spawn_and_reattach_parent(new_parent)
-                logger.debug(f"Reattaching cloned generator {gen} to new parent {new_parent}")
             else:
                 pass
 
         self.field_gens = spawned
 
-        logger.debug(f'Field generators attached to custom generator:')
+        logger.debug(f'Field generators attached to custom generator instance:')
         debug_print_dict(self.field_gens)
 
         #
@@ -208,7 +208,6 @@ def add_new_reset_method(obj):
             self.seed_generator.reset(seed)
             for name, gen in self.field_gens.items():
                 next_seed = next(self.seed_generator)
-                logger.debug(f'Resetting field generator {name}={gen} with seed={next_seed}')
                 gen.reset(next_seed)
 
         return self
