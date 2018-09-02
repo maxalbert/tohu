@@ -11,11 +11,11 @@ class ExtractAttribute(DependentGenerator):
     """
 
     def __init__(self, g, attr_name):
+        logger.debug(f"Extracting attribute '{attr_name}' from parent={g}")
         self.parent = g
-        self.gen = g._spawn()
+        self.gen = g.clone()
         self.attr_name = attr_name
         self.attrgetter = attrgetter(attr_name)
-        self.parent._dependent_generators.append(self)
 
     def __repr__(self):
         return f"<ExtractAttribute '{self.attr_name}' from {self.parent} >"
@@ -26,7 +26,3 @@ class ExtractAttribute(DependentGenerator):
 
     def __next__(self):
         return self.attrgetter(next(self.gen))
-
-    def reset_dependent_generator(self, seed):
-        logger.debug(f'Resetting dependent generator {self} (seed={seed})')
-        self.gen.reset(seed)
