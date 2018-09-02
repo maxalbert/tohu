@@ -26,7 +26,6 @@ def find_field_generators(obj):
 
     cls_dict = obj.__class__.__dict__
     obj_dict = obj.__dict__
-    logger.debug(f'[FFF]')
     #debug_print_dict(cls_dict, 'cls_dict')
     #debug_print_dict(obj_dict, 'obj_dict')
 
@@ -130,6 +129,8 @@ def add_new_init_method(obj):
     orig_init = obj.__init__
 
     def new_init(self, *args, **kwargs):
+        logger.debug(f"Initialising new {self}")
+
         # Call original __init__ function to ensure we pick up
         # any tohu generators that are defined there.
         orig_init(self, *args, **kwargs)
