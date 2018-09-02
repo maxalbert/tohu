@@ -86,6 +86,7 @@ class ClonedGenerator(DependentGenerator):
     def __init__(self, parent):
         self.parent = parent
         self.gen = parent._spawn()
+        self.parent.register_clone(self)
 
     def __repr__(self):
         return f'<ClonedGenerator: id={hex(id(self))}, gen={self.gen}, parent={self.parent} >'
@@ -158,7 +159,6 @@ def add_new_clone_method(cls):
 
     def make_clone(self):
         c = ClonedGenerator(parent=self)
-        self.register_clone(c)
         return c
 
     cls.clone = make_clone
