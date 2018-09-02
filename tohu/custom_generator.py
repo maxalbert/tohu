@@ -173,6 +173,7 @@ def add_new_init_method(obj):
                 pass
 
         self.field_gens = spawned
+        self.__dict__.update(self.field_gens)
 
         logger.debug(f'Field generators attached to custom generator instance:')
         debug_print_dict(self.field_gens)
