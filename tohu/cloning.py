@@ -49,8 +49,8 @@ def attach_new_init_method(cls):
     orig_init = cls.__init__
 
     def new_init(self, *args, **kwargs):
-        orig_init(self, *args, **kwargs)
         self._dependent_generators = []
+        orig_init(self, *args, **kwargs)
 
     cls.__init__ = new_init
 
