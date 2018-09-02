@@ -75,7 +75,6 @@ def attach_make_clone_method(cls):
 
     def make_clone(self):
         c = ClonedGenerator(parent=self)
-        logger.debug(f"Cloning generator {self} (new clone: {c})")
         self.register_clone(c)
         return c
 
@@ -90,6 +89,10 @@ def attach_register_clone_method(cls):
         """
         assert isinstance(clone, ClonedGenerator), f"Not a cloned generator: {clone}"
         self._dependent_generators.append(clone)
+        logger.debug(f"Registering new clone: ")
+        logger.debug(f"   - parent: {self}")
+        logger.debug(f"   - clone: {clone}")
+        logger.debug(f"     (total number of dependent generators is now: {len(self._dependent_generators)})")
 
     cls.register_clone = register_clone
 
