@@ -75,10 +75,22 @@ def attach_make_clone_method(cls):
 
     def make_clone(self):
         c = ClonedGenerator(parent=self)
-        self._dependent_generators.append(c)
+        self.register_clone(c)
         return c
 
     cls.clone = make_clone
+
+
+def attach_register_clone_method(cls):
+
+    def register_clone(self, clone):
+        """
+        Register
+        """
+        assert isinstance(clone, ClonedGenerator), f"Not a cloned generator: {clone}"
+        self._dependent_generators.append(clone)
+
+    cls.register_clone = register_clone
 
 
 class IndependentGeneratorMeta(type):
@@ -89,5 +101,6 @@ class IndependentGeneratorMeta(type):
         attach_new_init_method(new_cls)
         attach_new_reset_method(new_cls)
         attach_make_clone_method(new_cls)
+        attach_register_clone_method(new_cls)
 
         return new_cls
