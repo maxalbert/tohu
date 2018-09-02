@@ -75,6 +75,7 @@ def attach_make_clone_method(cls):
 
     def make_clone(self):
         c = ClonedGenerator(parent=self)
+        logger.debug(f"Cloning generator {self} (new clone: {c})")
         self.register_clone(c)
         return c
 
