@@ -1,7 +1,7 @@
 from operator import attrgetter
 from .base import logger, DependentGenerator
 
-__all__ = ['ExtractAttribute']
+__all__ = ['ExtractAttribute', 'Lookup']
 
 
 class ExtractAttribute(DependentGenerator):
@@ -26,3 +26,21 @@ class ExtractAttribute(DependentGenerator):
 
     def __next__(self):
         return self.attrgetter(next(self.gen))
+
+
+class Lookup(DependentGenerator):
+
+    def __init__(self, g, mapping):
+        self.parent = g
+        self.gen = g.clone()
+        self.mapping = mapping
+
+    def __repr__(self):
+        return f"<Lookup, parent={self.parent}, mapping={self.mapping}>"
+
+    def _spawn_and_reattach_parent(self, new_parent):
+        logger.debug(f'Spawning dependent generator {self} and re-attaching to new parent {new_parent}')
+        return Lookup(new_parent, self.mapping)
+
+    def __next__(self):
+        return self.mapping[next(self.gen)]
