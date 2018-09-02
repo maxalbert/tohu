@@ -1,6 +1,7 @@
 import logging
 
 from itertools import islice
+from types import WrapperDescriptorType
 from tqdm import tqdm
 
 from .item_list import ItemList
@@ -122,6 +123,19 @@ def add_new_init_method(cls):
     cls.__init__ = new_init
 
 
+def add_new_repr_method(cls):
+    """
+    Add default __repr__ method in case no user-defined one is present.
+    """
+
+    if isinstance(cls.__repr__, WrapperDescriptorType):
+        cls.__repr__ = lambda self: f"<{self.__class__.__name__}, id={hex(id(self))}>"
+    else:
+        # Keep the user-defined __repr__ method
+        pass
+
+
+
 def add_new_reset_method(cls):
     """
     Replace existing cls.reset() method with a new one which also
@@ -170,6 +184,7 @@ class IndependentGeneratorMeta(type):
         new_cls = super(IndependentGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
 
         add_new_init_method(new_cls)
+        add_new_repr_method(new_cls)
         add_new_reset_method(new_cls)
         add_new_clone_method(new_cls)
         add_new_register_clone_method(new_cls)
