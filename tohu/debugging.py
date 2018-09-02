@@ -1,17 +1,7 @@
 import logging
 from .generators import BaseGenerator
 
-#
-# Create debug logger
-#
-logger = logging.getLogger('tohu-debug')
-logger.setLevel(logging.INFO)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('{levelname}  {message}', datefmt='%Y-%m-%d %H:%M:%S', style='{')
-ch.setFormatter(formatter)
-logger.addHandler(ch)
-logger.setLevel('INFO')
+logger = logging.getLogger('tohu')
 
 
 def debug_print_dict(d, name=None):

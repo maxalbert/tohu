@@ -1,12 +1,15 @@
 import attr
+import logging
 import pandas as pd
 import re
 from .base import UltraBaseGenerator, IndependentGenerator, DependentGenerator
 from .cloning import IndependentGeneratorMeta, ClonedGenerator
-from .debugging import debug_print_dict, logger
+from .debugging import debug_print_dict
 from .generators import BaseGenerator, SeedGenerator
 
 __all__ = ['CustomGenerator']
+
+logger = logging.getLogger('tohu')
 
 
 def add_field_generators(field_gens, dct):
