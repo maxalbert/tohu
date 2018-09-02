@@ -107,7 +107,7 @@ class ClonedGenerator(DependentGenerator):
         self.gen.reset(seed)
 
 
-def attach_new_init_method(cls):
+def add_new_init_method(cls):
     """
     Replace the existing cls.__init__() method with a new one which
     also initialises the _dependent_generators attribute to an empty list.
@@ -122,7 +122,7 @@ def attach_new_init_method(cls):
     cls.__init__ = new_init
 
 
-def attach_new_reset_method(cls):
+def add_new_reset_method(cls):
     """
     Replace existing cls.reset() method with a new one which also
     calls reset() on any clones.
@@ -138,7 +138,7 @@ def attach_new_reset_method(cls):
     cls.reset = new_reset
 
 
-def attach_make_clone_method(cls):
+def add_new_clone_method(cls):
 
     def make_clone(self):
         c = ClonedGenerator(parent=self)
@@ -148,7 +148,7 @@ def attach_make_clone_method(cls):
     cls.clone = make_clone
 
 
-def attach_register_clone_method(cls):
+def add_new_register_clone_method(cls):
 
     def register_clone(self, clone):
         """
@@ -169,10 +169,10 @@ class IndependentGeneratorMeta(type):
     def __new__(metacls, cg_name, bases, clsdict):
         new_cls = super(IndependentGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
 
-        attach_new_init_method(new_cls)
-        attach_new_reset_method(new_cls)
-        attach_make_clone_method(new_cls)
-        attach_register_clone_method(new_cls)
+        add_new_init_method(new_cls)
+        add_new_reset_method(new_cls)
+        add_new_clone_method(new_cls)
+        add_new_register_clone_method(new_cls)
 
         return new_cls
 

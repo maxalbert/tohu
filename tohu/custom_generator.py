@@ -116,7 +116,7 @@ def make_item_class_for_custom_generator(obj):
     return make_item_class(clsname, attr_names)
 
 
-def attach_new_init_method(obj):
+def add_new_init_method(obj):
     """
     Replace the existing obj.__init__() method with a new one
     which calls the original one and in addition performs the
@@ -190,7 +190,7 @@ def attach_new_init_method(obj):
     obj.__init__ = new_init
 
 
-def attach_new_reset_method(obj):
+def add_new_reset_method(obj):
     """
     Attach a new `reset()` method to `obj` which resets the internal
     seed generator of `obj` and then resets each of its constituent
@@ -216,7 +216,7 @@ def attach_new_reset_method(obj):
     obj.reset = new_reset
 
 
-def attach_new_next_method(obj):
+def add_new_next_method(obj):
     """
     TODO
     """
@@ -228,7 +228,7 @@ def attach_new_next_method(obj):
     obj.__next__ = new_next
 
 
-def attach_new_spawn_method(obj):
+def add_new_spawn_method(obj):
     """
     TODO
     """
@@ -260,10 +260,10 @@ class CustomGeneratorMeta(IndependentGeneratorMeta):
         logger.debug(f'   - new_obj={new_obj}')
 
         set_item_class_name(new_obj)
-        attach_new_init_method(new_obj)
-        attach_new_reset_method(new_obj)
-        attach_new_next_method(new_obj)
-        attach_new_spawn_method(new_obj)
+        add_new_init_method(new_obj)
+        add_new_reset_method(new_obj)
+        add_new_next_method(new_obj)
+        add_new_spawn_method(new_obj)
 
         return new_obj
 
