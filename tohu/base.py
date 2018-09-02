@@ -88,7 +88,7 @@ class ClonedGenerator(DependentGenerator):
         self.gen = parent._spawn()
 
     def __repr__(self):
-        return f'<ClonedGenerator: id={id(self)}, parent={self.parent} >'
+        return f'<ClonedGenerator: id={hex(id(self))}, gen={self.gen}, parent={self.parent} >'
 
     # def clone(self):
     #     return ClonedGenerator(self.parent)

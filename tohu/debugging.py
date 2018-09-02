@@ -23,7 +23,7 @@ class DummyGenerator(BaseGenerator):
         self.spawned_from = spawned_from
 
     def __repr__(self):
-        descr = f' (id={id(self)})' if self.spawned_from is None else f' (spawned from {id(self.spawned_from)})'
+        descr = f' (id={hex(id(self))})' if self.spawned_from is None else f' (spawned from {hex(id(self.spawned_from))})'
         return f"<DummyGenerator: '{self.name}'{descr}>"
 
     def _spawn(self):
