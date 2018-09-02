@@ -13,7 +13,8 @@ from itertools import count, islice
 from queue import Queue, Full
 from random import Random
 from shapely.geometry import Point, Polygon, MultiPolygon
-from .base import IndependentGenerator, ExtractAttribute
+from .base import IndependentGenerator
+from .derived_generators import ExtractAttribute
 from .cloning import IndependentGeneratorMeta
 from .item_list import ItemList
 
