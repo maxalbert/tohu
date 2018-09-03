@@ -292,6 +292,10 @@ class SelectOne(BaseGenerator):
         self.randgen = np.random.RandomState()
 
     def __getattr__(self, name):
+        if name == '_ipython_canary_method_should_not_exist_':
+            raise NotImplementedError("Ignoring this attribute because it is only used by IPython")
+
+        logger.debug(f"Creating new generator to extract attribute '{name}' from elements produced by {self}")
         return ExtractAttribute(self, name)
 
     def __next__(self):
