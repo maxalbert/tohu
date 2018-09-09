@@ -1,3 +1,4 @@
+from abc import ABCMeta, abstractmethod
 from itertools import islice
 from random import Random
 from tqdm import tqdm
@@ -33,9 +34,6 @@ class SeedGenerator:
         return self.randgen.randint(self.minval, self.maxval)
 
 
-#
-# TODO: Make `TohuUltraBaseGenerator` an abstract base class to ensure that the expected API methods are implemented.
-#
 class TohuUltraBaseGenerator(metaclass=ABCMeta):
     """
     This is the base class for all tohu generators.
@@ -44,9 +42,11 @@ class TohuUltraBaseGenerator(metaclass=ABCMeta):
     def __iter__(self):
         return self
 
+    @abstractmethod
     def __next__(self):
         raise NotImplementedError("Class {} does not implement method '__next__'.".format(self.__class__.__name__))
 
+    @abstractmethod
     def reset(self, seed):
         raise NotImplementedError("Class {} does not implement method 'reset'.".format(self.__class__.__name__))
 
