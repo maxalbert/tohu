@@ -23,6 +23,9 @@ class Constant(TohuUltraBaseGenerator):
         """
         self.value = value
 
+    def spawn(self):
+        return Constant(self, self.value)
+
     def reset(self, seed=None):
         return self
 
@@ -47,6 +50,9 @@ class Integer(TohuUltraBaseGenerator):
         self.low = low
         self.high = high
         self.randgen = Random()
+
+    def spawn(self):
+        return Integer(self.low, self.high)
 
     def reset(self, seed):
         self.randgen.seed(seed)
@@ -85,6 +91,9 @@ class FakerGenerator(TohuUltraBaseGenerator):
         self.fake = Faker(locale=locale)
         self.randgen = getattr(self.fake, method)
 
+    def spawn(self):
+        return FakerGenerator(self.method, locale=self.locale, **self.faker_args)
+
     def reset(self, seed):
         self.fake.seed_instance(seed)
         return self
@@ -112,6 +121,9 @@ class SelectOne(TohuUltraBaseGenerator):
         self.p = p
         self.num_values = len(values)
         self.randgen = np.random.RandomState()
+
+    def spawn(self):
+        return SelectOne(self.values, p=self.p)
 
     def __next__(self):
         """
