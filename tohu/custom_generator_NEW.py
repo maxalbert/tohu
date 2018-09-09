@@ -167,7 +167,13 @@ def _add_new_init_method(cls):
         logger.debug(f'Found {len(field_gens_templates)} field generator template(s):')
         debug_print_dict(field_gens_templates)
 
-        spawned = {name: gen.spawn() for (name, gen) in field_gens_templates.items()}
+        logger.debug('Spawning field generator templates...')
+        origs = {}
+        spawned = {}
+        for (name, gen) in field_gens_templates.items():
+            origs[name] = gen
+            spawned[name] = gen.spawn()
+
         self.field_gens = spawned
         self.__dict__.update(self.field_gens)
 
