@@ -4,9 +4,9 @@ from tqdm import tqdm
 from .item_list import ItemList
 
 #
-# TODO: Make `UltraBaseGenerator` an abstract base class to ensure that the expected API methods are implemented.
+# TODO: Make `TohuUltraBaseGenerator` an abstract base class to ensure that the expected API methods are implemented.
 #
-class UltraBaseGenerator:
+class TohuUltraBaseGenerator(metaclass=ABCMeta):
     """
     This is the base class for all tohu generators.
     """

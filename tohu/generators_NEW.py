@@ -2,14 +2,14 @@ import logging
 import numpy as np
 from faker import Faker
 from random import Random
-from .base_NEW import UltraBaseGenerator
+from .base_NEW import TohuUltraBaseGenerator
 
 __all__ = ['Constant', 'Integer', 'FakerGenerator', 'SelectOne']
 
 logger = logging.getLogger('tohu')
 
 
-class Constant(UltraBaseGenerator):
+class Constant(TohuUltraBaseGenerator):
     """
     Generator which produces a constant sequence (repeating the same value indefinitely).
     """
@@ -30,7 +30,7 @@ class Constant(UltraBaseGenerator):
         return self.value
 
 
-class Integer(UltraBaseGenerator):
+class Integer(TohuUltraBaseGenerator):
     """
     Generator which produces random integers k in the range low <= k <= high.
     """
@@ -56,7 +56,7 @@ class Integer(UltraBaseGenerator):
         return self.randgen.randint(self.low, self.high)
 
 
-class FakerGenerator(UltraBaseGenerator):
+class FakerGenerator(TohuUltraBaseGenerator):
     """
     Generator which produces random elements using one of the methods supported by faker. [1]
 
@@ -93,7 +93,7 @@ class FakerGenerator(UltraBaseGenerator):
         return self.randgen(**self.faker_args)
 
 
-class SelectOne(UltraBaseGenerator):
+class SelectOne(TohuUltraBaseGenerator):
     """
     Generator which produces a sequence of items taken from a given set of elements.
     """
