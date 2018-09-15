@@ -50,7 +50,7 @@ class TohuUltraBaseMeta(ABCMeta):
 
     def __new__(metacls, cg_name, bases, clsdict):
         new_cls = super(TohuUltraBaseMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
-        logger.debug('Inside TohuUltraBaseMeta.__new__()')
+        #logger.debug('Inside TohuUltraBaseMeta.__new__()')
         # logger.debug(f'   - metacls={metacls}')
         # logger.debug(f'   - cg_name={cg_name}')
         # logger.debug(f'   - bases={bases}')
