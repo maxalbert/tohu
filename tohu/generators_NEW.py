@@ -24,7 +24,7 @@ class Constant(TohuUltraBaseGenerator):
         self.value = value
 
     def spawn(self):
-        return Constant(self, self.value)
+        return Constant(self.value)
 
     def reset(self, seed=None):
         return self
