@@ -58,6 +58,7 @@ class TohuUltraBaseMeta(ABCMeta):
         # logger.debug(f'   - clsdict=<...>')
 
         orig_init = get_init_method_or_empty_placeholder(new_cls)
+        orig_reset = new_cls.reset
 
         def new_init_method(self, *args, **kwargs):
             orig_init(self, *args, **kwargs)
@@ -66,7 +67,21 @@ class TohuUltraBaseMeta(ABCMeta):
             logger.debug(f'   - Adding seed_generator')
             self.seed_generator = SeedGenerator()
 
+            logger.debug(f'   - Initialising _clones to empty list')
+            self._clones = []
+
+        def new_reset_method(self, seed=None):
+            logger.debug(f'Resetting {self} (seed={seed})')
+            orig_reset(self, seed)
+
+            if self._clones != []:
+                logger.debug(f'Resetting clones of {self} (using the same seed={seed})')
+                for c in self._clones:
+                    logger.debug(f'    Automatically resetting {c} (seed={seed})')
+                    c.reset(seed)
+
         new_cls.__init__ = new_init_method
+        new_cls.reset = new_reset_method
 
         return new_cls
 
@@ -93,6 +108,12 @@ class TohuUltraBaseGenerator(metaclass=TohuUltraBaseMeta):
     @abstractmethod
     def spawn(self):
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
+
+    def clone(self):
+        c = self.spawn()
+
+        self._clones.append(c)
+        return c
 
     def generate(self, N, *, seed=None, progressbar=False):
         """
