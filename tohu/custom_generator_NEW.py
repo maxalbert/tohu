@@ -2,8 +2,7 @@ import attr
 import logging
 import pandas as pd
 import re
-from abc import ABCMeta
-from .base_NEW import SeedGenerator, TohuUltraBaseGenerator
+from .base_NEW import SeedGenerator, TohuUltraBaseGenerator, TohuUltraBaseMeta
 #from .debugging import debug_print_dict
 
 __all__ = ['CustomGeneratorMeta']
@@ -182,7 +181,7 @@ def _add_new_init_method(cls):
 
         # Add seed generator
         #
-        self.seed_generator = SeedGenerator()
+        #self.seed_generator = SeedGenerator()
 
         # Create class for the items produced by this generator
         #
@@ -236,7 +235,7 @@ def _add_new_reset_method(cls):
     cls.reset = new_reset_method
 
 
-class CustomGeneratorMeta(ABCMeta):
+class CustomGeneratorMeta(TohuUltraBaseMeta):
 
     def __new__(metacls, cg_name, bases, clsdict):
         #

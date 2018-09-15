@@ -1,9 +1,12 @@
+import logging
 from abc import ABCMeta, abstractmethod
 from itertools import islice
 from random import Random
 from tqdm import tqdm
 
 from .item_list import ItemList
+
+logger = logging.getLogger('tohu')
 
 
 class SeedGenerator:
@@ -34,10 +37,47 @@ class SeedGenerator:
         return self.randgen.randint(self.minval, self.maxval)
 
 
-class TohuUltraBaseGenerator(metaclass=ABCMeta):
+def get_init_method_or_empty_placeholder(cls):
+    """
+    Return the original __init__ method on `cls` if one is defined,
+    otherwise return an "empty" __init__ method. (TODO: explain what this means)
+    """
+    # TODO: return an appropriate "empty" init method if the original class doesn't have one!
+    return cls.__init__
+
+
+class TohuUltraBaseMeta(ABCMeta):
+
+    def __new__(metacls, cg_name, bases, clsdict):
+        new_cls = super(TohuUltraBaseMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
+        logger.debug('Inside TohuUltraBaseMeta.__new__()')
+        # logger.debug(f'   - metacls={metacls}')
+        # logger.debug(f'   - cg_name={cg_name}')
+        # logger.debug(f'   - bases={bases}')
+        # #logger.debug(f'   - clsdict={clsdict}')
+        # logger.debug(f'   - clsdict=<...>')
+
+        orig_init = get_init_method_or_empty_placeholder(new_cls)
+
+        def new_init_method(self, *args, **kwargs):
+            orig_init(self, *args, **kwargs)
+            logger.debug(f'Inside auto-generated __init__ method for {self}:')
+
+            logger.debug(f'   - Adding seed_generator')
+            self.seed_generator = SeedGenerator()
+
+        new_cls.__init__ = new_init_method
+
+        return new_cls
+
+
+class TohuUltraBaseGenerator(metaclass=TohuUltraBaseMeta):
     """
     This is the base class for all tohu generators.
     """
+    def __init__(self):
+        super().__init__()
+        logger.debug('Inside TohuUltraBaseGenerator.__init__')
 
     def __iter__(self):
         return self
