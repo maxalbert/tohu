@@ -235,6 +235,22 @@ def _add_new_reset_method(cls):
     cls.reset = new_reset_method
 
 
+def _add_new_spawn_method(cls):
+    """
+    TODO
+    """
+
+    def new_spawn_method(self):
+        # TODO/FIXME: Check that this does the right thing:
+        # (i) the spawned generator is independent of the original one (i.e. they can be reset independently without altering the other's behaviour)
+        # (ii) ensure that it also works if this custom generator's __init__ requires additional arguments
+        #new_instance = self.__class__()
+        new_instance = cls()
+        return new_instance
+
+    cls.spawn = new_spawn_method
+
+
 class CustomGeneratorMeta(TohuUltraBaseMeta):
 
     def __new__(metacls, cg_name, bases, clsdict):
@@ -253,7 +269,7 @@ class CustomGeneratorMeta(TohuUltraBaseMeta):
         _add_new_init_method(new_cls)
         _add_new_reset_method(new_cls)
         _add_new_next_method(new_cls)
-        # add_new_spawn_method(new_cls)
+        _add_new_spawn_method(new_cls)
 
         return new_cls
 
