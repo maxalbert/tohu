@@ -239,17 +239,15 @@ def _add_new_reset_method(cls):
 class CustomGeneratorMeta(ABCMeta):
 
     def __new__(metacls, cg_name, bases, clsdict):
-        logger.debug('[DDD]')
-        logger.debug('CustomGeneratorMeta.__new__')
-        # logger.debug(f'   - metacls={metacls}')
-        # logger.debug(f'   - cg_name={cg_name}')
-        # logger.debug(f'   - bases={bases}')
-        # logger.debug(f'   - clsdict={clsdict}')
-
         #
         # Create new custom generator class
         #
         new_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
+        logger.debug('Inside CustomGeneratorMeta.__new__')
+        # logger.debug(f'   - metacls={metacls}')
+        # logger.debug(f'   - cg_name={cg_name}')
+        # logger.debug(f'   - bases={bases}')
+        # logger.debug(f'   - clsdict={clsdict}')
         logger.debug(f'   - new_cls={new_cls} (type: {type(new_cls)})')
 
         set_item_class_name_on_custom_generator_class(new_cls)
