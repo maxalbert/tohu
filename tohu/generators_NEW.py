@@ -175,8 +175,13 @@ class SelectOne(TohuUltraBaseGenerator):
         return cur_values[idx]
 
     def reset(self, seed):
+        logger.debug(f"Ignoring explicit reset() on derived generator: {self}")
+
+    def reset_clone(self, seed):
+        logger.warning("TODO: rename method reset_clone() to reset_dependent_generator() because ExtractAttribute is not a direct clone")
         if seed is not None:
             self.randgen.seed(seed)
+            #self.gen.reset(seed)
         return self
 
 
