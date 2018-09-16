@@ -24,8 +24,16 @@ class ExtractAttribute(TohuUltraBaseGenerator):
         return f"<ExtractAttribute '{self.attr_name}' from {self.parent} >"
 
     def spawn(self, dependency_mapping):
-        logger.warning(f'ExtractAttribute.spawn(): dependency_mapping={dependency_mapping}')
-        raise NotImplementedError()
+
+        try:
+            new_parent = dependency_mapping[self.parent]
+        except KeyError:
+            logger.warning(f'ExtractAttribute.spawn():')
+            logger.warning(f'   self={self}')
+            logger.warning(f'   dependency_mapping={dependency_mapping}')
+            raise NotImplementedError("Cannot spawn ExtractAttribute because parent generator is not present in dependency mapping.")
+
+        return ExtractAttribute(new_parent, self.attr_name)
 
     def __next__(self):
         return self.attrgetter(next(self.gen))
