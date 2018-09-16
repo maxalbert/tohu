@@ -1,6 +1,5 @@
 import hashlib
 import logging
-import textwrap
 
 from abc import ABCMeta, abstractmethod
 from itertools import islice
