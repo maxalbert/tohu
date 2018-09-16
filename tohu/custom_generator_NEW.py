@@ -169,9 +169,10 @@ def _add_new_init_method(cls):
         logger.debug('Spawning field generator templates...')
         origs = {}
         spawned = {}
+        dependency_mapping = {}
         for (name, gen) in field_gens_templates.items():
             origs[name] = gen
-            spawned[name] = gen.spawn()
+            spawned[name] = gen.spawn(dependency_mapping)
 
         self.field_gens = spawned
         self.__dict__.update(self.field_gens)
@@ -240,7 +241,7 @@ def _add_new_spawn_method(cls):
     TODO
     """
 
-    def new_spawn_method(self):
+    def new_spawn_method(self, dependency_mapping):
         # TODO/FIXME: Check that this does the right thing:
         # (i) the spawned generator is independent of the original one (i.e. they can be reset independently without altering the other's behaviour)
         # (ii) ensure that it also works if this custom generator's __init__ requires additional arguments

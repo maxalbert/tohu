@@ -106,7 +106,7 @@ class TohuUltraBaseGenerator(metaclass=TohuUltraBaseMeta):
         raise NotImplementedError("Class {} does not implement method 'reset'.".format(self.__class__.__name__))
 
     @abstractmethod
-    def spawn(self):
+    def spawn(self, dependency_mapping):
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
 
     def clone(self):
