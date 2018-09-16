@@ -6,7 +6,7 @@ import numpy as np
 from .base_NEW import TohuUltraBaseGenerator
 from .generators_NEW import Constant, logger
 
-__all__ = ['ExtractAttribute', 'Lookup']
+__all__ = ['ExtractAttribute', 'Lookup', 'SelectOne']
 
 logger = logging.getLogger('tohu')
 
