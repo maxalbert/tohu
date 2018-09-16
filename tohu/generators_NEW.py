@@ -4,8 +4,10 @@ from faker import Faker
 from random import Random
 from .base_NEW import TohuUltraBaseGenerator
 from .derived_generators_NEW import ExtractAttribute
+from .utils import identity
 
-__all__ = ['Constant', 'Integer', 'FakerGenerator', 'SelectOne']
+
+__all__ = ['Constant', 'HashDigest', 'Integer', 'FakerGenerator', 'SelectOne']
 
 logger = logging.getLogger('tohu')
 
@@ -155,3 +157,48 @@ class SelectOne(TohuUltraBaseGenerator):
         if seed is not None:
             self.randgen.seed(seed)
         return self
+
+
+class HashDigest(TohuUltraBaseGenerator):
+    """
+    Generator which produces a sequence of hex strings representing hash digest values.
+    """
+
+    def __init__(self, *, length=None, as_bytes=False, uppercase=True):
+        """
+        Parameters
+        ----------
+        length: integer
+            Length of the character strings produced by this generator.
+        as_bytes: bool
+            If True, return `length` random bytes. If False, return a string of `length`
+            characters with a hexadecimal representation of `length/2` random bytes.
+            Note that in the second case `length` must be an even number.
+        uppercase: bool
+            If True (the default), return hex string using uppercase letters, otherwise lowercase.
+            This only has an effect if `as_bytes=False`.
+        """
+        self.length = length
+        self._internal_length = length if as_bytes else length / 2
+        if not as_bytes and (length % 2) != 0:
+            raise ValueError(
+                f"Length must be an even number if as_bytes=False because it "
+                f"represents length = 2 * num_random_bytes. Got: length={length})")
+        self.as_bytes = as_bytes
+        self.uppercase = uppercase
+        self.randgen = np.random.RandomState()
+        self._maybe_convert_to_hex = identity if self.as_bytes else bytes.hex
+        self._maybe_convert_to_uppercase = identity if (self.as_bytes or not uppercase) else str.upper
+
+    def reset(self, seed):
+        if seed is not None:
+            self.randgen.seed(seed)
+
+    def __next__(self):
+        val = self.randgen.bytes(self._internal_length)
+        return self._maybe_convert_to_uppercase(self._maybe_convert_to_hex(val))
+
+    def spawn(self, dependency_mapping):
+        new_instance = HashDigest(length=self.length, as_bytes=self.as_bytes, uppercase=self.uppercase)
+        new_instance.randgen.set_state(self.randgen.get_state())
+        return new_instance
