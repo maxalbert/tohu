@@ -226,12 +226,12 @@ def _add_new_reset_method(cls):
                 next_seed = next(self.seed_generator)
                 gen.reset(next_seed)
 
-            # # TODO: the following should be covered by the newly added
-            # # reset() method in IndependentGeneratorMeta. However, for
-            # # some reason we can't call this via the usual `orig_reset()`
-            # # pattern, so we have to duplicate this here. Not ideal...
-            # for c in self._dependent_generators:
-            #     c.reset_dependent_generator(seed)
+            # TODO: the following should be covered by the newly added
+            # reset() method in IndependentGeneratorMeta. However, for
+            # some reason we can't call this via the usual `orig_reset()`
+            # pattern, so we have to duplicate this here. Not ideal...
+            for c in self._clones:
+                c.reset_clone(seed)
 
         return self
 

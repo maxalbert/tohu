@@ -79,7 +79,7 @@ class TohuUltraBaseMeta(ABCMeta):
                 logger.debug(f'Resetting clones of {self} (using the same seed={seed})')
                 for c in self._clones:
                     logger.debug(f'    Automatically resetting {c} (seed={seed})')
-                    c.reset(seed)
+                    c.reset_clone(seed)
 
         def new_spawn_method(self, dependency_mapping):
             if self in dependency_mapping:
@@ -153,6 +153,9 @@ class ClonedGenerator(TohuUltraBaseGenerator):
         return next(self.gen)
 
     def reset(self, seed):
+        logger.debug(f"Ignoring explicit reset() on cloned generator: {self}")
+
+    def reset_clone(self, seed):
         self.gen.reset(seed)
 
     def spawn(self, dependency_mapping):
