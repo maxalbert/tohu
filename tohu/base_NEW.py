@@ -65,7 +65,7 @@ class TohuUltraBaseMeta(ABCMeta):
 
         def new_init_method(self, *args, **kwargs):
             orig_init(self, *args, **kwargs)
-            logger.debug(f'Inside auto-generated __init__ method for {self}:')
+            #logger.debug(f'Inside auto-generated __init__ method for {self}:')
 
             #logger.debug(f'   - Adding seed_generator')
             self.seed_generator = SeedGenerator()
