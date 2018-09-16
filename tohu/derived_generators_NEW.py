@@ -21,7 +21,7 @@ class ExtractAttribute(TohuUltraBaseGenerator):
         self.attrgetter = attrgetter(attr_name)
 
     def __repr__(self):
-        return f"<ExtractAttribute '{self.attr_name}' from {self.parent} >"
+        return f"<ExtractAttribute '{self.attr_name}' from {self.parent} (id={id(self)}) >"
 
     def spawn(self, dependency_mapping):
 
