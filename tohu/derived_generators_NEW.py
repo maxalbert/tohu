@@ -35,6 +35,10 @@ class ExtractAttribute(TohuUltraBaseGenerator):
 
         return ExtractAttribute(new_parent, self.attr_name)
 
+    def clone(self):
+        logger.debug('Cloning {self}')
+        return ExtractAttribute(self.parent, self.attr_name)
+
     def __next__(self):
         return self.attrgetter(next(self.gen))
 
