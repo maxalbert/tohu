@@ -136,7 +136,7 @@ class SelectOne(TohuUltraBaseGenerator):
 
     def __getattr__(self, name):
 
-        if name != '__isabstractmethod__':
+        if name == '__isabstractmethod__':
             # Special case which is needed because TohuUltraBaseMeta is
             # derived from ABCMeta and it uses '__isabstractmethod__'
             # to check for abstract methods.
