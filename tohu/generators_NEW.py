@@ -124,13 +124,29 @@ class SelectOne(TohuUltraBaseGenerator):
             The probabilities associated with each element in `values`.
             If not given the assumes a uniform distribution over all values.
         """
-        self.values = values
+        self.orig_values = values
+        self.parent = self.orig_values if isinstance(self.orig_values, TohuUltraBaseGenerator) else Constant(self.orig_values)
+        self.values_gen = self.parent.clone()
         self.p = p
-        self.num_values = len(values)
         self.randgen = np.random.RandomState()
 
     def spawn(self, dependency_mapping):
-        new_instance = SelectOne(self.values, p=self.p)
+
+        if not isinstance(self.orig_values, TohuUltraBaseGenerator):
+            new_values = self.orig_values
+        else:
+            try:
+                # If the original `values` parameter was a tohu generator, check
+                # if it was spawned before and if so use it as the new parent.
+                new_values = dependency_mapping[self.parent]
+            except KeyError:
+                logger.debug(f'While spawning {self}:')
+                logger.debug(f'Could not find parent generator in dependency mapping. ')
+                logger.debug(f'Using original parent: {self.parent}')
+                logger.debug(f'Please check that this is ok.')
+                new_values = self.orig_values
+
+        new_instance = SelectOne(new_values, p=self.p)
         new_instance.randgen.set_state(self.randgen.get_state())
         return new_instance
 
@@ -154,8 +170,9 @@ class SelectOne(TohuUltraBaseGenerator):
         """
         Return random element from the list of values provided during initialisation.
         """
-        idx = self.randgen.choice(self.num_values, p=self.p)
-        return self.values[idx]
+        cur_values = next(self.values_gen)
+        idx = self.randgen.choice(len(cur_values), p=self.p)
+        return cur_values[idx]
 
     def reset(self, seed):
         if seed is not None:
