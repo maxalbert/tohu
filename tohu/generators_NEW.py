@@ -126,7 +126,7 @@ class SelectOne(TohuUltraBaseGenerator):
         """
         self.orig_values = values
         self.parent = self.orig_values if isinstance(self.orig_values, TohuUltraBaseGenerator) else Constant(self.orig_values)
-        self.values_gen = self.parent.clone()
+        self.gen = self.parent.clone()
         self.p = p
         self.randgen = np.random.RandomState()
 
@@ -170,7 +170,7 @@ class SelectOne(TohuUltraBaseGenerator):
         """
         Return random element from the list of values provided during initialisation.
         """
-        cur_values = next(self.values_gen)
+        cur_values = next(self.gen)
         idx = self.randgen.choice(len(cur_values), p=self.p)
         return cur_values[idx]
 
