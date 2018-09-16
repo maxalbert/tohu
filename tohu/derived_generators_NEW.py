@@ -29,3 +29,10 @@ class ExtractAttribute(TohuUltraBaseGenerator):
 
     def __next__(self):
         return self.attrgetter(next(self.gen))
+
+    def reset(self, seed):
+        logger.debug(f"Ignoring explicit reset() on derived generator: {self}")
+
+    def reset_clone(self, seed):
+        logger.warning("TODO: rename method reset_clone() to reset_dependent_generator() because ExtractAttribute is not a direct clone")
+        self.gen.reset(seed)
