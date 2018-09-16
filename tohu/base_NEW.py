@@ -176,13 +176,13 @@ class ClonedGenerator(TohuUltraBaseGenerator):
         self.parent = parent
         self.gen = parent.spawn(dependency_mapping=dict())
 
-    def __repr__(self):
-        return textwrap.dedent(f"""
-            <ClonedGenerator (id={id(self)}):
-                 parent generator: {self.parent}
-                 internal clone:   {self.gen}
-             >
-            """).strip()
+    def __format__(self, fmt):
+        if fmt == 'long':
+            return f'ClonedGenerator(parent={self.parent}) (id={self.tohu_id})'
+        elif fmt == '' or fmt == 'short':
+            return f'ClonedGenerator (id={self.tohu_id})'
+        else:
+            raise ValueError(f"Invalid format spec: '{fmt}'. Valid values are: 'short', 'long'")
 
     def __next__(self):
         return next(self.gen)
