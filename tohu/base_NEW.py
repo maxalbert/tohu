@@ -1,4 +1,6 @@
 import logging
+import textwrap
+
 from abc import ABCMeta, abstractmethod
 from itertools import islice
 from random import Random
@@ -148,6 +150,14 @@ class ClonedGenerator(TohuUltraBaseGenerator):
     def __init__(self, parent):
         self.parent = parent
         self.gen = parent.spawn(dependency_mapping=dict())
+
+    def __repr__(self):
+        return textwrap.dedent(f"""
+            <ClonedGenerator (id={id(self)}):
+                 parent generator: {self.parent}
+                 internal clone:   {self.gen}
+             >
+            """).strip()
 
     def __next__(self):
         return next(self.gen)
