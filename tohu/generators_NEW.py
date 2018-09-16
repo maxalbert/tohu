@@ -3,6 +3,7 @@ import numpy as np
 from faker import Faker
 from random import Random
 from .base_NEW import TohuUltraBaseGenerator
+from .derived_generators_NEW import ExtractAttribute
 
 __all__ = ['Constant', 'Integer', 'FakerGenerator', 'SelectOne']
 
@@ -131,6 +132,17 @@ class SelectOne(TohuUltraBaseGenerator):
         new_instance.randgen.set_state(self.randgen.get_state())
         return new_instance
 
+    def __getattr__(self, name):
+
+        if name != '__isabstractmethod__':
+            # Special case which is needed because TohuUltraBaseMeta is
+            # derived from ABCMeta and it uses '__isabstractmethod__'
+            # to check for abstract methods.
+            #
+            # TODO: This check should probably be moved to TohuUltraBaseGenerator somewhere.
+            return
+
+        return ExtractAttribute(self, name)
 
     def __next__(self):
         """
