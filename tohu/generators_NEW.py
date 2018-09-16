@@ -144,6 +144,10 @@ class SelectOne(TohuUltraBaseGenerator):
             # TODO: This check should probably be moved to TohuUltraBaseGenerator somewhere.
             return
 
+        if name == '_ipython_canary_method_should_not_exist_':
+            # Special case which is needed because IPython uses this attribute internally.
+            raise NotImplementedError("Special case needed for IPython")
+
         return ExtractAttribute(self, name)
 
     def __next__(self):
