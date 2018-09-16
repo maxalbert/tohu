@@ -86,9 +86,14 @@ class TohuUltraBaseMeta(ABCMeta):
         def new_spawn_method(self, dependency_mapping):
             if self in dependency_mapping:
                 logger.debug(f'{self} was already spawned before. Returning a clone of the previously spawned generator.')
-                return dependency_mapping[self].clone()
+                new_gen = dependency_mapping[self].clone()
             else:
-                return orig_spawn(self, dependency_mapping)
+                new_gen = orig_spawn(self, dependency_mapping)
+
+            logger.debug(f'Adding entry to dependency mapping:')
+            logger.debug(f'    {self}  -->  {new_gen}')
+            dependency_mapping[self] = new_gen
+            return new_gen
 
         new_cls.__init__ = new_init_method
         new_cls.reset = new_reset_method
