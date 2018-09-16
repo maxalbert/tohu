@@ -65,10 +65,10 @@ class TohuUltraBaseMeta(ABCMeta):
             orig_init(self, *args, **kwargs)
             logger.debug(f'Inside auto-generated __init__ method for {self}:')
 
-            logger.debug(f'   - Adding seed_generator')
+            #logger.debug(f'   - Adding seed_generator')
             self.seed_generator = SeedGenerator()
 
-            logger.debug(f'   - Initialising _clones to empty list')
+            #logger.debug(f'   - Initialising _clones to empty list')
             self._clones = []
 
         def new_reset_method(self, seed=None):
