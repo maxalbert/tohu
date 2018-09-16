@@ -59,6 +59,7 @@ class TohuUltraBaseMeta(ABCMeta):
 
         orig_init = get_init_method_or_empty_placeholder(new_cls)
         orig_reset = new_cls.reset
+        orig_spawn = new_cls.spawn
 
         def new_init_method(self, *args, **kwargs):
             orig_init(self, *args, **kwargs)
@@ -80,8 +81,16 @@ class TohuUltraBaseMeta(ABCMeta):
                     logger.debug(f'    Automatically resetting {c} (seed={seed})')
                     c.reset(seed)
 
+        def new_spawn_method(self, dependency_mapping):
+            if self in dependency_mapping:
+                logger.debug(f'{self} was already spawned before. Returning a clone of the previously spawned generator.')
+                return dependency_mapping[self].clone()
+            else:
+                return orig_spawn(self, dependency_mapping)
+
         new_cls.__init__ = new_init_method
         new_cls.reset = new_reset_method
+        new_cls.spawn = new_spawn_method
 
         return new_cls
 
@@ -110,8 +119,7 @@ class TohuUltraBaseGenerator(metaclass=TohuUltraBaseMeta):
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
 
     def clone(self):
-        c = self.spawn()
-
+        c = ClonedGenerator(self)
         self._clones.append(c)
         return c
 
@@ -133,3 +141,22 @@ class TohuUltraBaseGenerator(metaclass=TohuUltraBaseMeta):
 
         #logger.warning("TODO: initialise ItemList with random seed!")
         return ItemList(item_list, N)
+
+
+class ClonedGenerator(TohuUltraBaseGenerator):
+
+    def __init__(self, parent):
+        self.parent = parent
+        self.gen = parent.spawn(dependency_mapping=dict())
+
+    def __next__(self):
+        return next(self.gen)
+
+    def reset(self, seed):
+        self.gen.reset(seed)
+
+    def spawn(self, dependency_mapping):
+        if self.parent in dependency_mapping:
+            return dependency_mapping[self.parent].clone()
+        else:
+            raise NotImplementedError("Cannot currently spawn a ClonedGenerator whose parent is not in the dependency mapping")

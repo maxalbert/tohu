@@ -173,6 +173,8 @@ def _add_new_init_method(cls):
         for (name, gen) in field_gens_templates.items():
             origs[name] = gen
             spawned[name] = gen.spawn(dependency_mapping)
+            dependency_mapping[gen] = spawned[name]
+            logger.debug(f'Adding dependency mapping: {gen} -> {spawned[name]}')
 
         self.field_gens = spawned
         self.__dict__.update(self.field_gens)
