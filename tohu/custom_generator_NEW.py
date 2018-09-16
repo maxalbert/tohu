@@ -5,7 +5,7 @@ import re
 from .base_NEW import SeedGenerator, TohuUltraBaseGenerator, TohuUltraBaseMeta
 #from .debugging import debug_print_dict
 
-__all__ = ['CustomGeneratorMeta']
+__all__ = ['CustomGenerator', 'CustomGeneratorMeta']
 
 logger = logging.getLogger('tohu')
 
