@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import textwrap
 
@@ -109,6 +110,25 @@ class TohuUltraBaseGenerator(metaclass=TohuUltraBaseMeta):
     def __init__(self):
         super().__init__()
         logger.debug('Inside TohuUltraBaseGenerator.__init__')
+
+    def __repr__(self):
+        clsname = self.__class__.__name__
+        return f'<{clsname} (id={self.tohu_id})>'
+
+    def __format__(self, fmt):
+        clsname = self.__class__.__name__
+        return f'{clsname} (id={self.tohu_id})'
+
+    @property
+    def tohu_id(self):
+        """
+        Return (truncated) md5 hash representing this generator.
+        We truncate the hash simply for readability, as this is
+        purely intended for debugging purposes and the risk of
+        any collisions will be negligible.
+        """
+        myhash = hashlib.md5(str(id(self)).encode()).hexdigest()
+        return myhash[:12]
 
     def __iter__(self):
         return self
