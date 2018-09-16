@@ -158,6 +158,9 @@ class ClonedGenerator(TohuUltraBaseGenerator):
     def reset_clone(self, seed):
         self.gen.reset(seed)
 
+    def clone(self):
+        return self.parent.clone()
+
     def spawn(self, dependency_mapping):
         if self.parent in dependency_mapping:
             return dependency_mapping[self.parent].clone()
