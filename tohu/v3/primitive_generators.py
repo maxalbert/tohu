@@ -4,7 +4,9 @@ from random import Random
 from .utils import identity
 from ..item_list import ItemList
 
-__all__ = ['Constant', 'FakerGenerator', 'HashDigest', 'Integer', 'IterateOver', 'SelectOne']
+PRIMITIVE_GENERATORS = ['Constant', 'FakerGenerator', 'HashDigest', 'Integer', 'IterateOver', 'SelectOne']
+
+__all__ = PRIMITIVE_GENERATORS + ['PRIMITIVE_GENERATORS']
 
 
 class Constant:
