@@ -38,6 +38,11 @@ class PrimitiveGenerator(metaclass=ABCMeta):
     def spawn(self):
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
 
+    def clone(self):
+        c = self.spawn()
+        self.register_clone(c)
+        return c
+
     def generate(self, N, *, seed=None, progressbar=False):
         """
         Return sequence of `N` elements.
