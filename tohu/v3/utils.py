@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 __all__ = ['identity', 'print_generated_sequence']
 
 
@@ -20,3 +22,9 @@ def print_generated_sequence(gen, num, *, sep=", ", seed=None):
     elems = [str(next(gen)) for _ in range(num)]
     sep_initial = "\n\n" if '\n' in sep else " "
     print("Generated sequence:{}{}".format(sep_initial, sep.join(elems)))
+
+
+def make_dummy_tuples(chars='abcde'):
+    Quux = namedtuple('Quux', ['x', 'y'])
+    some_tuples = [Quux((c*2).upper(), c*2) for c in chars]
+    return some_tuples
