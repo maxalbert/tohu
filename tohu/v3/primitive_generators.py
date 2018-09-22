@@ -1,9 +1,8 @@
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 import numpy as np
 from faker import Faker
-from itertools import islice
 from random import Random
-from tqdm import tqdm
+from .base import TohuBaseGenerator
 from .utils import identity
 from ..item_list import ItemList
 
@@ -12,22 +11,15 @@ PRIMITIVE_GENERATORS = ['Constant', 'FakerGenerator', 'HashDigest', 'Integer', '
 __all__ = PRIMITIVE_GENERATORS + ['PRIMITIVE_GENERATORS']
 
 
-class PrimitiveGenerator(metaclass=ABCMeta):
+class PrimitiveGenerator(TohuBaseGenerator):
     """
     Base class for all primitive generators
     """
     def __init__(self):
         self._clones = []
 
-    def __iter__(self):
-        return self
-
     def register_clone(self, clone):
         self._clones.append(clone)
-
-    @abstractmethod
-    def __next__(self):
-        raise NotImplementedError("Class {} does not implement method '__next__'.".format(self.__class__.__name__))
 
     @abstractmethod
     def reset(self, seed):
@@ -42,25 +34,6 @@ class PrimitiveGenerator(metaclass=ABCMeta):
         c = self.spawn()
         self.register_clone(c)
         return c
-
-    def generate(self, N, *, seed=None, progressbar=False):
-        """
-        Return sequence of `N` elements.
-
-        If `seed` is not None, the generator is reset
-        using this seed before generating the elements.
-        """
-        if seed is not None:
-            self.reset(seed)
-
-        items = islice(self, N)
-        if progressbar:
-            items = tqdm(items, total=N)
-
-        item_list = [x for x in items]
-
-        #logger.warning("TODO: initialise ItemList with random seed!")
-        return ItemList(item_list, N)
 
 
 class Constant(PrimitiveGenerator):
