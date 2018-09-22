@@ -47,13 +47,19 @@ class Integer:
         self.low = low
         self.high = high
         self.randgen = Random()
+        self._clones = []
 
     def reset(self, seed):
         self.randgen.seed(seed)
+        for c in self._clones:
+            c.reset(seed)
         return self
 
     def __next__(self):
         return self.randgen.randint(self.low, self.high)
+
+    def register_clone(self, clone):
+        self._clones.append(clone)
 
 
 class HashDigest:
