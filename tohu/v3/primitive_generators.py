@@ -2,8 +2,9 @@ import numpy as np
 from faker import Faker
 from random import Random
 from .utils import identity
+from ..item_list import ItemList
 
-__all__ = ['Constant', 'FakerGenerator', 'HashDigest', 'Integer']
+__all__ = ['Constant', 'FakerGenerator', 'HashDigest', 'Integer', 'IterateOver']
 
 
 class Constant:
@@ -128,3 +129,28 @@ class FakerGenerator:
 
     def __next__(self):
         return self.randgen(**self.faker_args)
+
+
+class IterateOver:
+    """
+    Generator which simply iterates over all items in a given iterable
+    """
+
+    def __init__(self, seq):
+        assert isinstance(seq, (list, tuple, ItemList, str)), \
+            "For the time being we enforce g being a list, tuple, ItemList or string so that we can spawn and reset this generator."
+        self.seq = seq
+        self.gen = None
+        self.reset()
+
+    def __repr__(self):
+        return f"<IterateOver, list with {len(self.seq)} items>"
+
+    def __next__(self):
+        return next(self.gen)
+
+    def __iter__(self):
+        return self
+
+    def reset(self, seed=None):
+        self.gen = iter(self.seq)
