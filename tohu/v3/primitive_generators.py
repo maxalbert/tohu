@@ -1,6 +1,6 @@
 import numpy as np
 from random import Random
-from ..utils import identity
+from .utils import identity
 
 __all__ = ['Constant', 'HashDigest', 'Integer']
 
