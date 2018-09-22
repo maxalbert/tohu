@@ -15,25 +15,6 @@ class PrimitiveGenerator(TohuBaseGenerator):
     """
     Base class for all primitive generators
     """
-    def __init__(self):
-        self._clones = []
-
-    def register_clone(self, clone):
-        self._clones.append(clone)
-
-    @abstractmethod
-    def reset(self, seed):
-        for c in self._clones:
-            c.reset(seed)
-
-    @abstractmethod
-    def spawn(self):
-        raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
-
-    def clone(self):
-        c = self.spawn()
-        self.register_clone(c)
-        return c
 
 
 class Constant(PrimitiveGenerator):

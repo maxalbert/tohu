@@ -9,8 +9,14 @@ class TohuBaseGenerator(metaclass=ABCMeta):
     Base class for all of tohu's generators.
     """
 
+    def __init__(self):
+        self._clones = []
+
     def __iter__(self):
         return self
+
+    def register_clone(self, clone):
+        self._clones.append(clone)
 
     @abstractmethod
     def __next__(self):
@@ -18,7 +24,17 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     @abstractmethod
     def reset(self, seed):
-        raise NotImplementedError("Class {} does not implement method 'reset'.".format(self.__class__.__name__))
+        for c in self._clones:
+            c.reset(seed)
+
+    @abstractmethod
+    def spawn(self):
+        raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
+
+    def clone(self):
+        c = self.spawn()
+        self.register_clone(c)
+        return c
 
     def generate(self, num, *, seed=None, progressbar=False):
         """
