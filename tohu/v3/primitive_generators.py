@@ -4,7 +4,7 @@ from random import Random
 from .utils import identity
 from ..item_list import ItemList
 
-__all__ = ['Constant', 'FakerGenerator', 'HashDigest', 'Integer', 'IterateOver']
+__all__ = ['Constant', 'FakerGenerator', 'HashDigest', 'Integer', 'IterateOver', 'SelectOne']
 
 
 class Constant:
@@ -154,3 +154,33 @@ class IterateOver:
 
     def reset(self, seed=None):
         self.gen = iter(self.seq)
+        return self
+
+
+class SelectOne:
+    """
+    Generator which produces a sequence of items taken from a given set of elements.
+    """
+
+    def __init__(self, values, p=None):
+        """
+        Parameters
+        ----------
+        values: list
+            List of options from which to choose elements.
+        p: list, optional
+            The probabilities associated with each element in `values`.
+            If not given the assumes a uniform distribution over all values.
+        """
+        self.values = values
+        self.p = p
+        self.randgen = np.random.RandomState()
+        self.num_values = len(values)
+
+    def __next__(self):
+        idx = self.randgen.choice(self.num_values, p=self.p)
+        return self.values[idx]
+
+    def reset(self, seed):
+        self.randgen.seed(seed)
+        return self
