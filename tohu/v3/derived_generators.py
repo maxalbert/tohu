@@ -1,5 +1,9 @@
 from .base import TohuBaseGenerator
 
+DERIVED_GENERATORS = ['Apply']
+
+__all__ = DERIVED_GENERATORS + ['DERIVED_GENERATORS']
+
 
 class Apply(TohuBaseGenerator):
 
@@ -15,3 +19,6 @@ class Apply(TohuBaseGenerator):
         next_args = (next(g) for g in self.arg_gens)
         next_kwargs = {name: next(g) for name, g in self.kwarg_gens.items()}
         return self.func(*next_args, **next_kwargs)
+
+    def reset(self, seed=None):
+        pass
