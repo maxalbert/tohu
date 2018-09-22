@@ -1,4 +1,6 @@
-__all__ = ['Constant']
+from random import Random
+
+__all__ = ['Constant', 'Integer']
 
 
 class Constant:
@@ -20,3 +22,29 @@ class Constant:
 
     def __next__(self):
         return self.value
+
+
+class Integer:
+    """
+    Generator which produces random integers k in the range low <= k <= high.
+    """
+
+    def __init__(self, low, high):
+        """
+        Parameters
+        ----------
+        low: integer
+            Lower bound (inclusive).
+        high: integer
+            Upper bound (inclusive).
+        """
+        self.low = low
+        self.high = high
+        self.randgen = Random()
+
+    def reset(self, seed):
+        self.randgen.seed(seed)
+        return self
+
+    def __next__(self):
+        return self.randgen.randint(self.low, self.high)
