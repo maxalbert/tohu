@@ -1,7 +1,9 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 from faker import Faker
+from itertools import islice
 from random import Random
+from tqdm import tqdm
 from .utils import identity
 from ..item_list import ItemList
 
@@ -17,6 +19,9 @@ class PrimitiveGenerator(metaclass=ABCMeta):
     def __init__(self):
         self._clones = []
 
+    def __iter__(self):
+        return self
+
     def register_clone(self, clone):
         self._clones.append(clone)
 
@@ -28,6 +33,29 @@ class PrimitiveGenerator(metaclass=ABCMeta):
     def reset(self, seed):
         for c in self._clones:
             c.reset(seed)
+
+    @abstractmethod
+    def spawn(self):
+        raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
+
+    def generate(self, N, *, seed=None, progressbar=False):
+        """
+        Return sequence of `N` elements.
+
+        If `seed` is not None, the generator is reset
+        using this seed before generating the elements.
+        """
+        if seed is not None:
+            self.reset(seed)
+
+        items = islice(self, N)
+        if progressbar:
+            items = tqdm(items, total=N)
+
+        item_list = [x for x in items]
+
+        #logger.warning("TODO: initialise ItemList with random seed!")
+        return ItemList(item_list, N)
 
 
 class Constant(PrimitiveGenerator):
@@ -51,6 +79,9 @@ class Constant(PrimitiveGenerator):
 
     def __next__(self):
         return self.value
+
+    def spawn(self):
+        return Constant(self.value)
 
 
 class Integer(PrimitiveGenerator):
@@ -82,6 +113,11 @@ class Integer(PrimitiveGenerator):
 
     def register_clone(self, clone):
         self._clones.append(clone)
+
+    def spawn(self):
+        new_obj = Integer(self.low, self.high)
+        new_obj.randgen.setstate(self.randgen.getstate())
+        return new_obj
 
 
 class HashDigest(PrimitiveGenerator):
@@ -125,6 +161,11 @@ class HashDigest(PrimitiveGenerator):
         val = self.randgen.bytes(self._internal_length)
         return self._maybe_convert_to_uppercase(self._maybe_convert_to_hex(val))
 
+    def spawn(self):
+        new_obj = HashDigest(length=self.length, as_bytes=self.as_bytes, uppercase=self.uppercase)
+        new_obj.randgen.set_state(self.randgen.get_state())
+        return new_obj
+
 
 class FakerGenerator(PrimitiveGenerator):
     """
@@ -164,6 +205,11 @@ class FakerGenerator(PrimitiveGenerator):
     def __next__(self):
         return self.randgen(**self.faker_args)
 
+    def spawn(self):
+        new_obj = FakerGenerator(self.method, locale=self.locale, **self.faker_args)
+        new_obj.fake.random.setstate(self.fake.random.getstate())
+        return new_obj
+
 
 class IterateOver(PrimitiveGenerator):
     """
@@ -171,26 +217,38 @@ class IterateOver(PrimitiveGenerator):
     """
 
     def __init__(self, seq):
-        assert isinstance(seq, (list, tuple, ItemList, str)), \
-            "For the time being we enforce g being a list, tuple, ItemList or string so that we can spawn and reset this generator."
+        if not isinstance(seq, (list, tuple, ItemList, str)):
+            raise TypeError(
+                f"For the time being 'seq' must be a list, tuple, ItemList or string "
+                f"so that we can reproducibly spawn and reset this generator. Got: {seq}")
+
         super().__init__()
         self.seq = seq
-        self.gen = None
+        # Note: iterating using an explicit index isn't ideal but it allows
+        # to transfer the internal state when spawning (for reproducibility)
+        self.idx = 0
         self.reset()
 
     def __repr__(self):
         return f"<IterateOver, list with {len(self.seq)} items>"
 
     def __next__(self):
-        return next(self.gen)
+        val = self.seq[self.idx]
+        self.idx += 1
+        return val
 
     def __iter__(self):
         return self
 
     def reset(self, seed=None):
         super().reset(seed)
-        self.gen = iter(self.seq)
+        self.idx = 0
         return self
+
+    def spawn(self):
+        new_obj = IterateOver(self.seq)
+        new_obj.idx = self.idx
+        return new_obj
 
 
 class SelectOne(PrimitiveGenerator):
@@ -222,3 +280,8 @@ class SelectOne(PrimitiveGenerator):
         super().reset(seed)
         self.randgen.seed(seed)
         return self
+
+    def spawn(self):
+        new_obj = SelectOne(self.values, p=self.p)
+        new_obj.randgen.set_state(self.randgen.get_state())
+        return new_obj
