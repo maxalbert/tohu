@@ -8,6 +8,7 @@ __all__ = DERIVED_GENERATORS + ['DERIVED_GENERATORS']
 class Apply(TohuBaseGenerator):
 
     def __init__(self, func, *arg_gens, **kwarg_gens):
+        super().__init__()
         self.func = func
         self.orig_arg_gens = arg_gens
         self.orig_kwarg_gens = kwarg_gens
@@ -21,4 +22,7 @@ class Apply(TohuBaseGenerator):
         return self.func(*next_args, **next_kwargs)
 
     def reset(self, seed=None):
-        pass
+        super().reset(seed)
+
+    def spawn(self):
+        return Apply(self.func, *self.orig_arg_gens, **self.orig_kwarg_gens)
