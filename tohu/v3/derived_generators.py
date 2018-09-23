@@ -1,6 +1,9 @@
+from functools import partial
+from operator import attrgetter, getitem
+from random import Random
 from .base import TohuBaseGenerator
 
-DERIVED_GENERATORS = ['Apply']
+DERIVED_GENERATORS = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator']
 
 __all__ = DERIVED_GENERATORS + ['DERIVED_GENERATORS']
 
@@ -26,3 +29,43 @@ class Apply(TohuBaseGenerator):
 
     def spawn(self):
         return Apply(self.func, *self.orig_arg_gens, **self.orig_kwarg_gens)
+
+
+class GetAttribute(Apply):
+
+    def __init__(self, parent, name):
+        self.parent = parent  # no need to clone here because this happens in the superclass
+        self.name = name
+        func = attrgetter(name)
+        super().__init__(func, parent)
+
+    def spawn(self):
+        return GetAttribute(self.parent, self.name)
+
+
+class Lookup(Apply):
+
+    def __init__(self, parent, mapping):
+        self.parent = parent  #  no need to clone here because this happens in the superclass
+        self.mapping = mapping
+        func = partial(getitem, self.mapping)
+        super().__init__(func, parent)
+
+    def spawn(self):
+        return Lookup(self.parent, self.mapping)
+
+
+# TODO: find a better name for this class!
+class SelectOneFromGenerator(Apply):
+
+    def __init__(self, parent):
+        self.parent = parent
+        self.randgen = Random()
+        func = self.randgen.choice
+        super().__init__(func, parent)
+
+    def reset(self, seed):
+        self.randgen.seed(seed)
+
+    def spawn(self):
+        return SelectOneFromGenerator(self.parent)
