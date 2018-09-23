@@ -47,26 +47,6 @@ class Apply(TohuBaseGenerator):
     def orig_kwarg_gens_rewired(self, gen_mapping):
         return {name: gen_mapping.get(g, g) for name, g in self.orig_kwarg_gens.items()}
 
-    def rewire(self, gen_mapping):
-        """
-
-        """
-        for i, g in enumerate(self.orig_arg_gens):
-            try:
-                g_new = gen_mapping[g]
-                self.orig_arg_gens[i] = g_new
-                self.arg_gens[i] = g_new.clone(gen_mapping=gen_mapping)
-            except KeyError:
-                pass
-
-        for name, g in self.orig_kwarg_gens.items():
-            try:
-                g_new = gen_mapping[g]
-                self.orig_kwarg_gens[name] = g_new
-                self.kwarg_gens[name] = g_new.clone(gen_mapping=gen_mapping)
-            except KeyError:
-                pass
-
     def add_to_dependency_graph(self, graph):
         sg_attr = dict(style='filled', fillcolor='/blues3/1', pencolor='gray')
         sg = DependencyGraph(name=f'cluster_{self.tohu_id}', graph_attr=sg_attr)
