@@ -96,18 +96,7 @@ class CustomGenerator(TohuBaseGenerator):
         self.orig_kwargs = kwargs
 
         self.seed_generator = SeedGenerator()
-        self.field_gen_templates = {}
-
-        # Extract field generators from class dict
-        for name, g in self.__class__.__dict__.items():
-            if isinstance(g, TohuBaseGenerator):
-                self.field_gen_templates[name] = g
-
-        # Extract field generators from instance dict
-        for name, g in self.__dict__.items():
-            if isinstance(g, TohuBaseGenerator):
-                self.field_gen_templates[name] = g
-
+        self.field_gen_templates = self._find_field_generator_templates()
         self.field_gens = {name: g.spawn() for (name, g) in self.field_gen_templates.items()}
         self.__dict__.update(self.field_gens)
 
@@ -126,6 +115,26 @@ class CustomGenerator(TohuBaseGenerator):
     def __next__(self):
         field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
+
+    def _find_field_generator_templates(self):
+        """
+        Return a dictionary of the form {name: field_generator} containing
+        all tohu generators defined in the class and instance namespace
+        of this custom generator.
+        """
+        field_gen_templates = {}
+
+        # Extract field generators from class dict
+        for name, g in self.__class__.__dict__.items():
+            if isinstance(g, TohuBaseGenerator):
+                field_gen_templates[name] = g
+
+        # Extract field generators from instance dict
+        for name, g in self.__dict__.items():
+            if isinstance(g, TohuBaseGenerator):
+                field_gen_templates[name] = g
+
+        return field_gen_templates
 
     def reset(self, seed):
         super().reset(seed)
