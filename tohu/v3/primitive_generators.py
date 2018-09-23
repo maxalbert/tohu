@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from faker import Faker
 from random import Random
@@ -8,6 +9,8 @@ from ..item_list import ItemList
 PRIMITIVE_GENERATORS = ['Constant', 'FakerGenerator', 'HashDigest', 'Integer', 'IterateOver', 'SelectOne']
 
 __all__ = PRIMITIVE_GENERATORS + ['PRIMITIVE_GENERATORS']
+
+logger = logging.getLogger('tohu')
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -38,8 +41,11 @@ class Constant(PrimitiveGenerator):
     def __next__(self):
         return self.value
 
-    def spawn(self, gen_mapping=None):
-        return Constant(self.value)
+    def spawn(self, gen_mapping):
+        new_obj = Constant(self.value)
+        logger.debug(f'[DDD] Adding mapping: {self}  -->  {new_obj}')
+        gen_mapping[self] = new_obj
+        return new_obj
 
 
 class Integer(PrimitiveGenerator):
@@ -73,9 +79,11 @@ class Integer(PrimitiveGenerator):
     def register_clone(self, clone):
         self._clones.append(clone)
 
-    def spawn(self, gen_mapping=None):
+    def spawn(self, gen_mapping):
         new_obj = Integer(self.low, self.high)
         new_obj.randgen.setstate(self.randgen.getstate())
+        logger.debug(f'[DDD] Adding mapping: {self}  -->  {new_obj}')
+        gen_mapping[self] = new_obj
         return new_obj
 
 
@@ -120,9 +128,11 @@ class HashDigest(PrimitiveGenerator):
         val = self.randgen.bytes(self._internal_length)
         return self._maybe_convert_to_uppercase(self._maybe_convert_to_hex(val))
 
-    def spawn(self, gen_mapping=None):
+    def spawn(self, gen_mapping):
         new_obj = HashDigest(length=self.length, as_bytes=self.as_bytes, uppercase=self.uppercase)
         new_obj.randgen.set_state(self.randgen.get_state())
+        logger.debug(f'[DDD] Adding mapping: {self}  -->  {new_obj}')
+        gen_mapping[self] = new_obj
         return new_obj
 
 
@@ -164,9 +174,11 @@ class FakerGenerator(PrimitiveGenerator):
     def __next__(self):
         return self.randgen(**self.faker_args)
 
-    def spawn(self, gen_mapping=None):
+    def spawn(self, gen_mapping):
         new_obj = FakerGenerator(self.method, locale=self.locale, **self.faker_args)
         new_obj.fake.random.setstate(self.fake.random.getstate())
+        logger.debug(f'[DDD] Adding mapping: {self}  -->  {new_obj}')
+        gen_mapping[self] = new_obj
         return new_obj
 
 
@@ -204,9 +216,11 @@ class IterateOver(PrimitiveGenerator):
         self.idx = 0
         return self
 
-    def spawn(self, gen_mapping=None):
+    def spawn(self, gen_mapping):
         new_obj = IterateOver(self.seq)
         new_obj.idx = self.idx
+        logger.debug(f'[DDD] Adding mapping: {self}  -->  {new_obj}')
+        gen_mapping[self] = new_obj
         return new_obj
 
 
@@ -240,7 +254,9 @@ class SelectOne(PrimitiveGenerator):
         self.randgen.seed(seed)
         return self
 
-    def spawn(self, gen_mapping=None):
+    def spawn(self, gen_mapping):
         new_obj = SelectOne(self.values, p=self.p)
         new_obj.randgen.set_state(self.randgen.get_state())
+        logger.debug(f'[DDD] Adding mapping: {self}  -->  {new_obj}')
+        gen_mapping[self] = new_obj
         return new_obj
