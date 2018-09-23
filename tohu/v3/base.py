@@ -64,8 +64,13 @@ class TohuBaseGenerator(metaclass=ABCMeta):
     @abstractmethod
     def reset(self, seed):
         logger.debug(f'Resetting {self} (seed={seed})')
+
+        if self._clones != []:
+            logger.debug('  Will also reset the following clones:')
+            for c in self._clones:
+                logger.debug(f'   - {c}')
+
         for c in self._clones:
-            logger.debug(f'   - Resetting clone: {c} (seed={seed})')
             c.reset(seed)
 
     @abstractmethod
