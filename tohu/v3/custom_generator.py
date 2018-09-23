@@ -97,11 +97,15 @@ class CustomGenerator(TohuBaseGenerator):
         self.seed_generator = SeedGenerator()
         self.field_gen_templates = {}
 
+        # Extract field generators from class dict
         for name, g in self.__class__.__dict__.items():
             if isinstance(g, TohuBaseGenerator):
                 self.field_gen_templates[name] = g
 
-        # TODO: extract field generators from instance dict too
+        # Extract field generators from instance dict
+        for name, g in self.__dict__.items():
+            if isinstance(g, TohuBaseGenerator):
+                self.field_gen_templates[name] = g
 
         self.field_gens = {name: g.spawn() for (name, g) in self.field_gen_templates.items()}
 
