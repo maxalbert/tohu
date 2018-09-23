@@ -26,7 +26,7 @@ def set_item_class_name_on_custom_generator_class(cls):
         class Quux(CustomGenerator):
             __tohu_items_name__ = 'MyQuuxItem'
     """
-    if '__tohu__items__name__' in cls.__dict__:
+    if '__tohu_items_name__' in cls.__dict__:
         logger.debug(
             f"Using item class name '{cls.__tohu_items_name__}' (derived from attribute '__tohu_items_name__')")
     else:
