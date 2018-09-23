@@ -27,16 +27,23 @@ class Apply(TohuBaseGenerator):
     def reset(self, seed=None):
         super().reset(seed)
 
-    def spawn(self):
-        return Apply(self.func, *self.orig_arg_gens, **self.orig_kwarg_gens)
+    def spawn(self, gen_mapping=None):
+        gen_mapping = gen_mapping or dict()
+        return Apply(self.func, *self.orig_arg_gens_rewired(gen_mapping), **self.orig_kwarg_gens_rewired(gen_mapping))
 
-    def rewire(self, mapping):
+    def orig_arg_gens_rewired(self, gen_mapping):
+        return [gen_mapping.get(g, g) for g in self.orig_arg_gens]
+
+    def orig_kwarg_gens_rewired(self, gen_mapping):
+        return {name: gen_mapping.get(g, g) for name, g in self.orig_kwarg_gens.items()}
+
+    def rewire(self, gen_mapping):
         """
 
         """
         for i, g in enumerate(self.orig_arg_gens):
             try:
-                g_new = mapping[g]
+                g_new = gen_mapping[g]
                 self.orig_arg_gens[i] = g_new
                 self.arg_gens[i] = g_new.clone()
             except KeyError:
@@ -44,7 +51,7 @@ class Apply(TohuBaseGenerator):
 
         for name, g in self.orig_kwarg_gens.items():
             try:
-                g_new = mapping[g]
+                g_new = gen_mapping[g]
                 self.orig_kwarg_gens[name] = g_new
                 self.kwarg_gens[name] = g_new.clone()
             except KeyError:
@@ -59,8 +66,10 @@ class GetAttribute(Apply):
         func = attrgetter(name)
         super().__init__(func, parent)
 
-    def spawn(self):
-        return GetAttribute(self.parent, self.name)
+    def spawn(self, gen_mapping=None):
+        gen_mapping = gen_mapping or dict()
+        new_parent = gen_mapping.get(self.parent, self.parent)
+        return GetAttribute(new_parent, self.name)
 
 
 class Lookup(Apply):
@@ -71,8 +80,10 @@ class Lookup(Apply):
         func = partial(getitem, self.mapping)
         super().__init__(func, parent)
 
-    def spawn(self):
-        return Lookup(self.parent, self.mapping)
+    def spawn(self, gen_mapping):
+        gen_mapping = gen_mapping or dict()
+        new_parent = gen_mapping.get(self.parent, self.parent)
+        return Lookup(new_parent, self.mapping)
 
 
 # TODO: find a better name for this class!
@@ -87,5 +98,7 @@ class SelectOneFromGenerator(Apply):
     def reset(self, seed):
         self.randgen.seed(seed)
 
-    def spawn(self):
-        return SelectOneFromGenerator(self.parent)
+    def spawn(self, gen_mapping=None):
+        gen_mapping = gen_mapping or dict()
+        new_parent = gen_mapping.get(self.parent, self.parent)
+        return SelectOneFromGenerator(new_parent)
