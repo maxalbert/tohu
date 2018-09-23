@@ -56,6 +56,7 @@ class Integer(PrimitiveGenerator):
         high: integer
             Upper bound (inclusive).
         """
+        super().__init__()
         self.low = low
         self.high = high
         self.randgen = Random()
