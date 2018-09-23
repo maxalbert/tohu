@@ -13,7 +13,7 @@ class Apply(TohuBaseGenerator):
     def __init__(self, func, *arg_gens, **kwarg_gens):
         super().__init__()
         self.func = func
-        self.orig_arg_gens = arg_gens
+        self.orig_arg_gens = list(arg_gens)
         self.orig_kwarg_gens = kwarg_gens
 
         self.arg_gens = [g.clone() for g in arg_gens]
@@ -29,6 +29,26 @@ class Apply(TohuBaseGenerator):
 
     def spawn(self):
         return Apply(self.func, *self.orig_arg_gens, **self.orig_kwarg_gens)
+
+    def rewire(self, mapping):
+        """
+
+        """
+        for i, g in enumerate(self.orig_arg_gens):
+            try:
+                g_new = mapping[g]
+                self.orig_arg_gens[i] = g_new
+                self.arg_gens[i] = g_new.clone()
+            except KeyError:
+                pass
+
+        for name, g in self.orig_kwarg_gens.items():
+            try:
+                g_new = mapping[g]
+                self.orig_kwarg_gens[name] = g_new
+                self.kwarg_gens[name] = g_new.clone()
+            except KeyError:
+                pass
 
 
 class GetAttribute(Apply):

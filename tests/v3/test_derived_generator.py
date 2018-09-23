@@ -6,6 +6,9 @@ from tohu.v3.derived_generators import *
 def add(x, y):
     return x + y
 
+def square(x):
+    return x * x
+
 
 def test_apply_sum_operator():
     g1 = Integer(100, 200)
@@ -47,3 +50,27 @@ def test_chained_apply_sum_operator():
     items7 = list(h7.generate(num=10))
 
     assert items7 == items_summed
+
+
+def test_reattach_parent():
+    g1 = Integer(0, 9)
+    g2 = Integer(0, 9)
+
+    h = Apply(square, g1)
+
+    g1.reset(seed=12345)
+    g2.reset(seed=99999)
+    items_g1 = list(g1.generate(num=10))
+    items_h1 = list(h.generate(num=10))
+
+    h.rewire({g1: g2})
+
+    g1.reset(seed=12345)
+    g2.reset(seed=99999)
+    items_g2 = list(g2.generate(num=10))
+    items_h2 = list(h.generate(num=10))
+
+    assert items_g1 == [6, 0, 4, 5, 3, 4, 9, 6, 2, 5]
+    assert items_h1 == [36, 0, 16, 25, 9, 16, 81, 36, 4, 25]
+    assert items_g2 == [1, 4, 8, 3, 5, 6, 3, 4, 6, 9]
+    assert items_h2 == [1, 16, 64, 9, 25, 36, 9, 16, 36, 81]
