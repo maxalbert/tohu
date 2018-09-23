@@ -1,4 +1,3 @@
-from abc import abstractmethod
 import numpy as np
 from faker import Faker
 from random import Random
