@@ -108,6 +108,7 @@ class CustomGenerator(TohuBaseGenerator):
                 self.field_gen_templates[name] = g
 
         self.field_gens = {name: g.spawn() for (name, g) in self.field_gen_templates.items()}
+        self.__dict__.update(self.field_gens)
 
         set_item_class_name_on_custom_generator_class(self.__class__)
         self._set_item_class()
