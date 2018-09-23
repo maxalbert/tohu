@@ -101,6 +101,12 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         #logger.warning("TODO: initialise ItemList with random seed!")
         return ItemList(item_list, num)
 
+    def add_to_dependency_graph(self, graph):
+        graph.add_node(self)
+        for c in self._clones:
+            graph.add_node(c)
+            graph.add_edge(self, c, color='darkgreen', style='dashed')
+
 
 class SeedGenerator:
     """
