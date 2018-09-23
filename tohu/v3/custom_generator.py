@@ -1,7 +1,7 @@
 import attr
 import logging
 import re
-from .base import TohuBaseGenerator
+from .base import TohuBaseGenerator, SeedGenerator
 
 __all__ = ['CustomGenerator']
 
@@ -89,13 +89,15 @@ def make_item_class(clsname, attr_names):
 class CustomGenerator(TohuBaseGenerator):
 
     def __init__(self, *args, **kwargs):
+        super().__init__()
+
         self.orig_args = args
         self.orig_kwargs = kwargs
 
+        self.seed_generator = SeedGenerator()
         self.field_gen_templates = {}
 
         for name, g in self.__class__.__dict__.items():
-            logger.warning(f'{name}={g}')
             if isinstance(g, TohuBaseGenerator):
                 self.field_gen_templates[name] = g
 
@@ -116,10 +118,15 @@ class CustomGenerator(TohuBaseGenerator):
         self.item_cls = make_item_class(clsname, attr_names)
 
     def __next__(self):
-        pass
+        field_values = [next(g) for g in self.field_gens.values()]
+        return self.item_cls(*field_values)
 
     def reset(self, seed):
-        pass
+        super().reset(seed)
+        self.seed_generator.reset(seed)
+        for name, gen in self.field_gens.items():
+            next_seed = next(self.seed_generator)
+            gen.reset(next_seed)
 
     def spawn(self):
         return self.__class__(*self.orig_args, **self.orig_kwargs)
