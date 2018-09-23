@@ -2,6 +2,7 @@ import attr
 import logging
 import re
 from .base import TohuBaseGenerator, SeedGenerator
+from .dependency_graph import DependencyGraph
 
 __all__ = ['CustomGenerator']
 
@@ -135,3 +136,14 @@ class CustomGenerator(TohuBaseGenerator):
 
     def spawn(self):
         return self.__class__(*self.orig_args, **self.orig_kwargs)
+
+    def add_to_dependency_graph(self, graph):
+        sg_attr = dict(style='filled', fillcolor='/greens3/1', pencolor='gray')
+        sg = DependencyGraph(name='cluster_{self.tohu_id}', graph_attr=sg_attr)
+
+        sg.add_node(self)
+        for g in self.field_gens.values():
+            g.add_to_dependency_graph(sg)
+            sg.add_edge(self, g)
+
+        graph.add_subgraph(sg)
