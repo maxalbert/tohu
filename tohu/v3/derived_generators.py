@@ -1,3 +1,4 @@
+import logging
 from functools import partial
 from operator import attrgetter, getitem
 from random import Random
@@ -7,6 +8,8 @@ from .dependency_graph import DependencyGraph
 DERIVED_GENERATORS = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator']
 
 __all__ = DERIVED_GENERATORS + ['DERIVED_GENERATORS']
+
+logger = logging.getLogger('tohu')
 
 
 class Apply(TohuBaseGenerator):
@@ -72,10 +75,10 @@ class GetAttribute(Apply):
         func = attrgetter(name)
         super().__init__(func, parent)
 
-    def spawn(self, gen_mapping=None):
-        gen_mapping = gen_mapping or dict()
+    def spawn(self, gen_mapping):
         new_parent = gen_mapping.get(self.parent, self.parent)
         g_new = GetAttribute(new_parent, self.name)
+        logger.debug(f'[DDD] Adding mapping: {self}  -->  {g_new}')
         gen_mapping[self] = g_new
         return g_new
 
@@ -89,9 +92,11 @@ class Lookup(Apply):
         super().__init__(func, parent)
 
     def spawn(self, gen_mapping):
-        gen_mapping = gen_mapping or dict()
         new_parent = gen_mapping.get(self.parent, self.parent)
+        logger.debug(f'[EEE] Lookup.spawn(): gen_mapping={gen_mapping}')
+        logger.debug(f'[EEE] Lookup.spawn(): new_parent={new_parent}')
         g_new = Lookup(new_parent, self.mapping)
+        logger.debug(f'[DDD] Adding mapping: {self}  -->  {g_new}')
         gen_mapping[self] = g_new
         return g_new
 
@@ -108,9 +113,9 @@ class SelectOneFromGenerator(Apply):
     def reset(self, seed):
         self.randgen.seed(seed)
 
-    def spawn(self, gen_mapping=None):
-        gen_mapping = gen_mapping or dict()
+    def spawn(self, gen_mapping):
         new_parent = gen_mapping.get(self.parent, self.parent)
         g_new = SelectOneFromGenerator(new_parent)
+        logger.debug(f'[DDD] Adding mapping: {self}  -->  {g_new}')
         gen_mapping[self] = g_new
         return g_new
