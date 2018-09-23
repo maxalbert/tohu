@@ -31,6 +31,13 @@ class Apply(TohuBaseGenerator):
         gen_mapping = gen_mapping or dict()
         return Apply(self.func, *self.orig_arg_gens_rewired(gen_mapping), **self.orig_kwarg_gens_rewired(gen_mapping))
 
+    @property
+    def input_generators(self):
+        """
+        Return list of all (original) input generators which feed into this derived generator.
+        """
+        return self.orig_arg_gens + list(self.orig_kwarg_gens.values())
+
     def orig_arg_gens_rewired(self, gen_mapping):
         return [gen_mapping.get(g, g) for g in self.orig_arg_gens]
 
