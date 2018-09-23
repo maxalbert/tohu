@@ -16,14 +16,29 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     def __init__(self):
         self._clones = []
+        self.tohu_name = None
 
     def __repr__(self):
         clsname = self.__class__.__name__
-        return f'<{clsname} (id={self.tohu_id})>'
+        name = '' if self.tohu_name is None else f'{self.tohu_name}: '
+        return f'<{name}{clsname} (id={self.tohu_id})>'
 
     def __format__(self, fmt):
-        clsname = self.__class__.__name__
-        return f'<{clsname} (id={self.tohu_id})>'
+        return self.__repr__()
+
+    def set_tohu_name(self, tohu_name):
+        """
+        Set this generator's `tohu_name` attribute.
+
+        This is mainly useful for debugging where one can temporarily
+        use this at the end of generator definitions to set a name
+        that will be displayed in debugging messages. For example:
+
+            g1 = SomeGeneratorClass().set_tohu_name('g1')
+            g2 = SomeGeneratorClass().set_tohu_name('g2')
+        """
+        self.tohu_name = tohu_name
+        return self
 
     @property
     def tohu_id(self):
