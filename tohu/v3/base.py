@@ -1,3 +1,4 @@
+import hashlib
 from abc import ABCMeta, abstractmethod
 from itertools import islice
 from random import Random
@@ -12,6 +13,25 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     def __init__(self):
         self._clones = []
+
+    def __repr__(self):
+        clsname = self.__class__.__name__
+        return f'<{clsname} (id={self.tohu_id})>'
+
+    def __format__(self, fmt):
+        clsname = self.__class__.__name__
+        return f'<{clsname} (id={self.tohu_id})>'
+
+    @property
+    def tohu_id(self):
+        """
+        Return (truncated) md5 hash representing this generator.
+        We truncate the hash simply for readability, as this is
+        purely intended for debugging purposes and the risk of
+        any collisions will be negligible.
+        """
+        myhash = hashlib.md5(str(id(self)).encode()).hexdigest()
+        return myhash[:12]
 
     def __iter__(self):
         return self
