@@ -2,6 +2,7 @@ from functools import partial
 from operator import attrgetter, getitem
 from random import Random
 from .base import TohuBaseGenerator
+from .dependency_graph import DependencyGraph
 
 DERIVED_GENERATORS = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator']
 
@@ -63,6 +64,22 @@ class Apply(TohuBaseGenerator):
                 self.kwarg_gens[name] = g_new.clone()
             except KeyError:
                 pass
+
+    def add_to_dependency_graph(self, graph):
+        sg_attr = dict(style='filled', fillcolor='/blues3/1', pencolor='gray')
+        sg = DependencyGraph(name='cluster_{self.tohu_id}', graph_attr=sg_attr)
+
+        sg.add_node(self)
+        for c in self.arg_gens:
+            c.add_to_dependency_graph(sg)
+        for c in self.kwarg_gens.values():
+            c.add_to_dependency_graph(sg)
+        graph.add_subgraph(sg)
+
+        for g in self.orig_arg_gens:
+            g.add_to_dependency_graph(graph)
+        for g in self.orig_kwarg_gens.values():
+            g.add_to_dependency_graph(graph)
 
 
 class GetAttribute(Apply):
