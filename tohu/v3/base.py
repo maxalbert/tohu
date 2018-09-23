@@ -77,8 +77,8 @@ class TohuBaseGenerator(metaclass=ABCMeta):
     def spawn(self):
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
 
-    def clone(self):
-        c = self.spawn()
+    def clone(self, gen_mapping):
+        c = self.spawn(gen_mapping)
         self.register_clone(c)
         return c
 

@@ -17,8 +17,8 @@ class Apply(TohuBaseGenerator):
         self.orig_arg_gens = list(arg_gens)
         self.orig_kwarg_gens = kwarg_gens
 
-        self.arg_gens = [g.clone() for g in self.orig_arg_gens]
-        self.kwarg_gens = {name: g.clone() for name, g in self.orig_kwarg_gens.items()}
+        self.arg_gens = [g.clone(gen_mapping=dict()) for g in self.orig_arg_gens]
+        self.kwarg_gens = {name: g.clone(gen_mapping=dict()) for name, g in self.orig_kwarg_gens.items()}
 
     def __next__(self):
         next_args = (next(g) for g in self.arg_gens)
@@ -30,7 +30,9 @@ class Apply(TohuBaseGenerator):
 
     def spawn(self, gen_mapping=None):
         gen_mapping = gen_mapping or dict()
-        return Apply(self.func, *self.orig_arg_gens_rewired(gen_mapping), **self.orig_kwarg_gens_rewired(gen_mapping))
+        g_new = Apply(self.func, *self.orig_arg_gens_rewired(gen_mapping), **self.orig_kwarg_gens_rewired(gen_mapping))
+        gen_mapping[self] = g_new
+        return g_new
 
     @property
     def input_generators(self):
@@ -53,7 +55,7 @@ class Apply(TohuBaseGenerator):
             try:
                 g_new = gen_mapping[g]
                 self.orig_arg_gens[i] = g_new
-                self.arg_gens[i] = g_new.clone()
+                self.arg_gens[i] = g_new.clone(gen_mapping=gen_mapping)
             except KeyError:
                 pass
 
@@ -61,13 +63,13 @@ class Apply(TohuBaseGenerator):
             try:
                 g_new = gen_mapping[g]
                 self.orig_kwarg_gens[name] = g_new
-                self.kwarg_gens[name] = g_new.clone()
+                self.kwarg_gens[name] = g_new.clone(gen_mapping=gen_mapping)
             except KeyError:
                 pass
 
     def add_to_dependency_graph(self, graph):
         sg_attr = dict(style='filled', fillcolor='/blues3/1', pencolor='gray')
-        sg = DependencyGraph(name='cluster_{self.tohu_id}', graph_attr=sg_attr)
+        sg = DependencyGraph(name=f'cluster_{self.tohu_id}', graph_attr=sg_attr)
 
         sg.add_node(self)
         for c in self.arg_gens:
@@ -93,7 +95,9 @@ class GetAttribute(Apply):
     def spawn(self, gen_mapping=None):
         gen_mapping = gen_mapping or dict()
         new_parent = gen_mapping.get(self.parent, self.parent)
-        return GetAttribute(new_parent, self.name)
+        g_new = GetAttribute(new_parent, self.name)
+        gen_mapping[self] = g_new
+        return g_new
 
 
 class Lookup(Apply):
@@ -107,7 +111,9 @@ class Lookup(Apply):
     def spawn(self, gen_mapping):
         gen_mapping = gen_mapping or dict()
         new_parent = gen_mapping.get(self.parent, self.parent)
-        return Lookup(new_parent, self.mapping)
+        g_new = Lookup(new_parent, self.mapping)
+        gen_mapping[self] = g_new
+        return g_new
 
 
 # TODO: find a better name for this class!
@@ -125,4 +131,6 @@ class SelectOneFromGenerator(Apply):
     def spawn(self, gen_mapping=None):
         gen_mapping = gen_mapping or dict()
         new_parent = gen_mapping.get(self.parent, self.parent)
-        return SelectOneFromGenerator(new_parent)
+        g_new = SelectOneFromGenerator(new_parent)
+        gen_mapping[self] = g_new
+        return g_new
