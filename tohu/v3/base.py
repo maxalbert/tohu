@@ -1,9 +1,12 @@
 import hashlib
+import logging
 from abc import ABCMeta, abstractmethod
 from itertools import islice
 from random import Random
 from tqdm import tqdm
 from ..item_list import ItemList
+
+logger = logging.getLogger('tohu')
 
 
 class TohuBaseGenerator(metaclass=ABCMeta):
@@ -45,7 +48,9 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     @abstractmethod
     def reset(self, seed):
+        logger.debug(f'Resetting {self} (seed={seed})')
         for c in self._clones:
+            logger.debug(f'   - Resetting clone: {c} (seed={seed})')
             c.reset(seed)
 
     @abstractmethod
