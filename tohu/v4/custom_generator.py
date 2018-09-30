@@ -165,5 +165,7 @@ class CustomGenerator(TohuBaseGenerator):
     def _set_random_state_from(self, other):
         self.seed_generator._set_random_state_from(other.seed_generator)
 
+        # FIXME: should also set random state for unnamed field generators
+        #        (these can occur in chains of derived generators)
         for name in self.field_gens.keys():
             self.field_gens[name]._set_random_state_from(other.field_gens[name])
