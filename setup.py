@@ -30,7 +30,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     packages=find_packages(),
-    install_requires=['attrs', 'faker', 'mako', 'pandas', 'sqlalchemy', 'tqdm'],
+    install_requires=['attrs', 'bidict', 'faker', 'pandas', 'psycopg2-binary', 'shapely', 'sqlalchemy', 'tqdm'],
     extras_require={
         'dev': ['ipython', 'jupyter'],
         'test': ['pytest', 'nbval'],

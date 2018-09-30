@@ -23,6 +23,3 @@ yapf = "*"
 nbval = "*"
 jupyterlab = "*"
 ipython = "*"
-
-[requires]
-python_version = "3.7"
