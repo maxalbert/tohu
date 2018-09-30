@@ -102,9 +102,10 @@ class CustomGenerator(TohuBaseGenerator):
         for name, g in self.field_gen_templates.items():
             spawn_context.spawn_template(g, name=name)
 
-        self.field_gens = spawn_context.named_spawns
+        self.field_gens_named = spawn_context.named_spawns
+        self.field_gens_all = spawn_context.spawns
 
-        self.__dict__.update(self.field_gens)
+        self.__dict__.update(self.field_gens_named)
 
         set_item_class_name_on_custom_generator_class(self.__class__)
         self._set_item_class()
@@ -115,11 +116,11 @@ class CustomGenerator(TohuBaseGenerator):
             The custom generator class for which to create an item-class
         """
         clsname = self.__tohu_items_name__
-        attr_names = self.field_gens.keys()
+        attr_names = self.field_gens_named.keys()
         self.item_cls = make_item_class(clsname, attr_names)
 
     def __next__(self):
-        field_values = [next(g) for g in self.field_gens.values()]
+        field_values = [next(g) for g in self.field_gens_named.values()]
         return self.item_cls(*field_values)
 
     def _find_field_generator_templates(self):
@@ -145,7 +146,7 @@ class CustomGenerator(TohuBaseGenerator):
     def reset(self, seed):
         super().reset(seed)
         self.seed_generator.reset(seed)
-        for name, gen in self.field_gens.items():
+        for name, gen in self.field_gens_all.items(): # FIXME: reset all field gens
             next_seed = next(self.seed_generator)
             gen.reset(next_seed)
 
@@ -167,5 +168,5 @@ class CustomGenerator(TohuBaseGenerator):
 
         # FIXME: should also set random state for unnamed field generators
         #        (these can occur in chains of derived generators)
-        for name in self.field_gens.keys():
-            self.field_gens[name]._set_random_state_from(other.field_gens[name])
+        for name in self.field_gens_named.keys():
+            self.field_gens_named[name]._set_random_state_from(other.field_gens[name])
