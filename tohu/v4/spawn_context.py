@@ -30,7 +30,7 @@ class SpawnContextCG:
             >""")
 
     @property
-    def nonanonymous_spawns(self):
+    def named_spawns(self):
         return {name: g for (name, g) in self.spawned.items() if name not in self.anonymous}
 
     def get_existing_spawn(self, g_tpl):
