@@ -168,5 +168,5 @@ class CustomGenerator(TohuBaseGenerator):
 
         # FIXME: should also set random state for unnamed field generators
         #        (these can occur in chains of derived generators)
-        for name in self.field_gens_named.keys():
-            self.field_gens_named[name]._set_random_state_from(other.field_gens[name])
+        for name in self.field_gens_all.keys():
+            self.field_gens_all[name]._set_random_state_from(other.field_gens_all[name])
