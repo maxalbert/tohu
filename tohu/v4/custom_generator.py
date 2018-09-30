@@ -97,7 +97,6 @@ class CustomGenerator(TohuBaseGenerator):
 
         self.seed_generator = SeedGenerator()
         self.field_gen_templates = self._find_field_generator_templates()
-        self.field_gens = {}
 
         spawn_context = SpawnContextCG()
         for name, g in self.field_gen_templates.items():
