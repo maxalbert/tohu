@@ -1,6 +1,8 @@
+from operator import attrgetter
+
 from .base import TohuBaseGenerator, SeedGenerator
 
-__all__ = ['Apply']
+__all__ = ['Apply', 'GetAttribute']
 
 
 class FuncArgGens:
@@ -69,3 +71,15 @@ class Apply(TohuBaseGenerator):
 
     def spawn(self):
         return Apply(self.func, *self.func_arg_gens_orig.arg_gens, **self.func_arg_gens_orig.kwarg_gens)
+
+
+class GetAttribute(Apply):
+
+    def __init__(self, parent, name):
+        self.parent = parent  # no need to clone here because this happens in the superclass
+        self.name = name
+        func = attrgetter(self.name)
+        super().__init__(func, self.parent)
+
+    def spawn(self):
+        return GetAttribute(self.parent, self.name)
