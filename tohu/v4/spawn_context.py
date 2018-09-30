@@ -6,7 +6,7 @@ from .logging import logger
 from .primitive_generators import PrimitiveGenerator
 from .derived_generators import Apply, GetAttribute, Lookup, SelectOneFromGenerator
 
-__all__ = ['SpawnContextCG']
+__all__ = ['SpawnContext']
 
 
 class NoExistingSpawn(Exception):
@@ -15,7 +15,7 @@ class NoExistingSpawn(Exception):
     """
 
 
-class SpawnContextCG:
+class SpawnContext:
 
     def __init__(self):
         self.templates = bidict()  # mapping {name -> field_generator_template}

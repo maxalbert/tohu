@@ -4,7 +4,7 @@ import re
 
 from .base import TohuBaseGenerator, SeedGenerator
 from .logging import logger
-from .spawn_context import SpawnContextCG
+from .spawn_context import SpawnContext
 
 __all__ = ['CustomGenerator']
 
@@ -98,7 +98,7 @@ class CustomGenerator(TohuBaseGenerator):
         self.seed_generator = SeedGenerator()
         self.field_gen_templates = self._find_field_generator_templates()
 
-        spawn_context = SpawnContextCG()
+        spawn_context = SpawnContext()
         for name, g in self.field_gen_templates.items():
             spawn_context.spawn_template(g, name=name)
 
