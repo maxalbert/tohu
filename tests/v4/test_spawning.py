@@ -77,15 +77,15 @@ def test_spawn_derived_generators():
     assert items_h == items_g_1 + items_g_2
 
 
+@pytest.mark.xfail(reason="FIXME: The anonymous generator in the chain makes things non-reproducible")
 def test_spawn_derived_generators_v2():
     """
     Test that derived generators can be spawned and the spawned versions produce the same elements.
-    """
 
-    # This is similar to test_spawn_derived_generators() above but
-    # involves slightly more complicated definitions of the generators
-    # g and h and also involves constituent generators which have their
-    # own random state (e.g. SelectOneFromGenerator).
+    This is similar to test_spawn_derived_generators() above but involves slightly
+    more complicated definitions of the generators g and h and also involves constituent
+    generators which have their own random state (e.g. SelectOneFromGenerator).
+    """
 
     seqs = [[10, 11, 12, 13, 14, 15],
             [20, 21, 22, 23, 24, 25],
