@@ -2,10 +2,13 @@ import hashlib
 
 from abc import ABCMeta, abstractmethod
 from itertools import islice
+from random import Random
 from tqdm import tqdm
 
 from ..item_list import ItemList
 from .logging import logger
+
+__all__ = ['SeedGenerator', 'TohuBaseGenerator']
 
 
 class TohuBaseGenerator(metaclass=ABCMeta):
@@ -109,3 +112,31 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
         #logger.warning("TODO: initialise ItemList with random seed!")
         return ItemList(item_list, num)
+
+
+class SeedGenerator:
+    """
+    This class is used in custom generators to create a collection of
+    seeds when reset() is called, so that each of the constituent
+    generators can be re-initialised with a different seed in a
+    reproducible way.
+
+    Note: This is almost identical to the `tohu.Integer` generator, but we
+    need a version which does *not* inherit from `TohuUltraBaseGenerator`,
+    otherwise the automatic item class creation in `CustomGeneratorMeta`
+    gets confused.
+    """
+
+    def __init__(self):
+        self.randgen = Random()
+        self.minval = 0
+        self.maxval = 2**32 - 1
+
+    def reset(self, seed):
+        self.randgen.seed(seed)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.randgen.randint(self.minval, self.maxval)
