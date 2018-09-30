@@ -1,8 +1,9 @@
-from operator import attrgetter
+from functools import partial
+from operator import attrgetter, getitem
 
 from .base import TohuBaseGenerator, SeedGenerator
 
-__all__ = ['Apply', 'GetAttribute']
+__all__ = ['Apply', 'GetAttribute', 'Lookup']
 
 
 class FuncArgGens:
@@ -83,3 +84,15 @@ class GetAttribute(Apply):
 
     def spawn(self):
         return GetAttribute(self.parent, self.name)
+
+
+class Lookup(Apply):
+
+    def __init__(self, parent, mapping):
+        self.parent = parent  #  no need to clone here because this happens in the superclass
+        self.mapping = mapping
+        func = partial(getitem, self.mapping)
+        super().__init__(func, parent)
+
+    def spawn(self):
+        return Lookup(self.parent, self.mapping)
