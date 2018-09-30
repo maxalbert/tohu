@@ -137,6 +137,7 @@ class SelectOneFromGenerator(Apply):
         super().__init__(func, parent)
 
     def reset(self, seed):
+        super().reset(seed)
         self.randgen.seed(seed)
 
     def spawn(self):
