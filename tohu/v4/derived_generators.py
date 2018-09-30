@@ -1,9 +1,10 @@
 from functools import partial
 from operator import attrgetter, getitem
+from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
 
-__all__ = ['Apply', 'GetAttribute', 'Lookup']
+__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator']
 
 
 class FuncArgGens:
@@ -96,3 +97,19 @@ class Lookup(Apply):
 
     def spawn(self):
         return Lookup(self.parent, self.mapping)
+
+
+# TODO: find a better name for this class!
+class SelectOneFromGenerator(Apply):
+
+    def __init__(self, parent):
+        self.parent = parent
+        self.randgen = Random()
+        func = self.randgen.choice
+        super().__init__(func, parent)
+
+    def reset(self, seed):
+        self.randgen.seed(seed)
+
+    def spawn(self):
+        return SelectOneFromGenerator(self.parent)
