@@ -144,4 +144,12 @@ class CustomGenerator(TohuBaseGenerator):
             gen.reset(next_seed)
 
     def spawn(self):
-        return self.__class__(*self.orig_args, **self.orig_kwargs)
+        new_obj = self.__class__(*self.orig_args, **self.orig_kwargs)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.seed_generator._set_random_state_from(other.seed_generator)
+
+        for name in self.field_gens.keys():
+            self.field_gens[name]._set_random_state_from(other.field_gens[name])
