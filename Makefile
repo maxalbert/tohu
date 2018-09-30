@@ -1,5 +1,5 @@
-PATH_TO_NOTEBOOKS ?= notebooks/
-PATH_TO_TESTS ?= tests/
+PATH_TO_NOTEBOOKS ?= notebooks/v4
+PATH_TO_TESTS ?= tests/v4
 
 all: test
 
