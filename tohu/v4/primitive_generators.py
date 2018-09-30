@@ -74,9 +74,6 @@ class Integer(PrimitiveGenerator):
     def __next__(self):
         return self.randgen.randint(self.low, self.high)
 
-    def register_clone(self, clone):
-        self._clones.append(clone)
-
     def spawn(self):
         new_obj = Integer(self.low, self.high)
         new_obj._set_random_state_from(self)
