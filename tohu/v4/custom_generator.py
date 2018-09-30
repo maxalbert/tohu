@@ -146,6 +146,14 @@ class CustomGenerator(TohuBaseGenerator):
     def spawn(self):
         new_obj = self.__class__(*self.orig_args, **self.orig_kwargs)
         new_obj._set_random_state_from(self)
+
+        # Explicitly set item_cls. This is necessary because due to
+        # the way in which `attr` works, explicit comparisons between
+        # generated items will return False even though they contain
+        # the same elements (because the underlying attr classes are
+        # different, so attr plays it safe).
+        new_obj.item_cls = self.item_cls
+
         return new_obj
 
     def _set_random_state_from(self, other):
