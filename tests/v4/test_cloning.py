@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 
-from .conftest import EXEMPLAR_GENERATORS
+from .conftest import EXEMPLAR_GENERATORS, EXEMPLAR_PRIMITIVE_GENERATORS
 
 
 @pytest.mark.parametrize("g", EXEMPLAR_GENERATORS)
@@ -23,7 +23,7 @@ def test_can_register_clones_which_are_automatically_reset(g):
     dummy_clone_2.reset.assert_called_with(99999)
 
 
-@pytest.mark.parametrize("g", EXEMPLAR_GENERATORS)
+@pytest.mark.parametrize("g", EXEMPLAR_PRIMITIVE_GENERATORS)
 def test_clone_generators(g):
     """
     Test that g.clone() clones a generator and the resulting clone is reset when the parent is reset, producing the same elements
