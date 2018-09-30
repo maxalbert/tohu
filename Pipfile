@@ -12,6 +12,7 @@ SQLAlchemy = "*"
 attrs = "*"
 faker = "*"
 shapely = "*"
+bidict = "*"
 
 [dev-packages]
 pytest = "*"
