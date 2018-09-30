@@ -4,6 +4,7 @@ from .conftest import EXEMPLAR_PRIMITIVE_GENERATORS
 from .context import tohu
 from tohu.v4.primitive_generators import *
 from tohu.v4.derived_generators import *
+from tohu.v4.custom_generator import *
 
 
 def add(x, y):
@@ -133,3 +134,25 @@ def test_spawn_derived_generators_v2():
     # as well as the full sets of items are identical.
     assert items_h_2 == items_g_2
     assert items_h == items_g_1 + items_g_2
+
+
+def test_spawn_custom_generator():
+
+    class QuuxGenerator(CustomGenerator):
+        aa = Integer(100, 200)
+        bb = HashDigest(length=6)
+        cc = FakerGenerator(method='name')
+
+    g = QuuxGenerator()
+    g.reset(seed=12345)
+    g.generate(num=20)
+
+    h1 = g.spawn()
+    h2 = g.spawn()
+
+    items_g = list(g.generate(num=10))
+    items_h1 = list(h1.generate(num=10))
+    items_h2 = list(h2.generate(num=10))
+
+    assert items_h1 == items_g
+    assert items_h2 == items_g
