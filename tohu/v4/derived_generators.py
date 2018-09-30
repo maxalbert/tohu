@@ -110,6 +110,8 @@ class GetAttribute(Apply):
     def spawn(self):
         return GetAttribute(self.parent, self.name)
 
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
 
 class Lookup(Apply):
 
@@ -121,6 +123,9 @@ class Lookup(Apply):
 
     def spawn(self):
         return Lookup(self.parent, self.mapping)
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
 
 
 # TODO: find a better name for this class!
@@ -137,3 +142,7 @@ class SelectOneFromGenerator(Apply):
 
     def spawn(self):
         return SelectOneFromGenerator(self.parent)
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.randgen.setstate(other.randgen.getstate())
