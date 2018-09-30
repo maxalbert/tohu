@@ -49,6 +49,24 @@ class FuncArgGens:
         for g in self.all_generators:
             g.reset(next(self.seed_generator))
 
+    def _set_random_state_from(self, other):
+        # Sanity checks
+        assert isinstance(other, FuncArgGens)
+        assert len(self.arg_gens) == len(other.arg_gens)
+        assert len(self.kwarg_gens) == len(other.kwarg_gens)
+
+        self.seed_generator._set_random_state_from(other.seed_generator)
+
+        # Transfer random state from individual arg_gens
+        for arg_gen_self, arg_gen_other in zip(self.arg_gens, other.arg_gens):
+            arg_gen_self._set_random_state_from(arg_gen_other)
+
+        # Transfer random state from individual kwarg_gens
+        for name in self.kwarg_gens.keys():
+            kwarg_gen_self = self.kwarg_gens[name]
+            kwarg_gen_other = other.kwarg_gens[name]
+            kwarg_gen_self._set_random_state_from(kwarg_gen_other)
+
 
 class Apply(TohuBaseGenerator):
 
@@ -72,7 +90,13 @@ class Apply(TohuBaseGenerator):
         self.func_arg_gens_internal.reset(seed)
 
     def spawn(self):
-        return Apply(self.func, *self.func_arg_gens_orig.arg_gens, **self.func_arg_gens_orig.kwarg_gens)
+        new_obj = Apply(self.func, *self.func_arg_gens_orig.arg_gens, **self.func_arg_gens_orig.kwarg_gens)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        #self.func_arg_gens_orig._set_random_state_from(other.func_arg_gens_orig)
+        self.func_arg_gens_internal._set_random_state_from(other.func_arg_gens_internal)
 
 
 class GetAttribute(Apply):
