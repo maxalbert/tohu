@@ -1,5 +1,6 @@
 import textwrap
 from bidict import bidict
+from itertools import count
 
 from .logging import logger
 from .primitive_generators import PrimitiveGenerator
@@ -19,19 +20,20 @@ class SpawnContextCG:
     def __init__(self):
         self.templates = bidict()  # mapping {name -> field_generator_template}
         self.spawns = {}  # mapping {name -> field_generator}
-        self.anonymous = []  # names of anonymously spawned generators
+        self.anonymous_spawns = []  # names of anonymously spawned generators
+        self.cnt_anonymous = count()
 
     def __repr__(self):
         return textwrap.dedent(f"""
             <SpawnContextCG:
                 templates: {dict(self.templates)}
-                spawned:   {dict(self.spawned)}
-                anonymous: {self.anonymous}
+                spawns:    {dict(self.spawns)}
+                anonymous: {self.anonymous_spawns}
             >""")
 
     @property
     def named_spawns(self):
-        return {name: g for (name, g) in self.spawns.items() if name not in self.anonymous}
+        return {name: g for (name, g) in self.spawns.items() if name not in self.anonymous_spawns}
 
     def get_existing_spawn(self, g_tpl):
         try:
@@ -46,8 +48,8 @@ class SpawnContextCG:
             try:
                 name = self.templates.inv[g_tpl]
             except KeyError:
-                name = f'anonymous_{g_tpl.tohu_id}'
-                self.anonymous.append(name)
+                name = f'ANONYMOUS_ANONYMOUS_ANONYMOUS_{next(self.cnt_anonymous)}'
+                self.anonymous_spawns.append(name)
                 logger.debug(f"Found anonymous field generator template: {g_tpl}")
 
         try:
@@ -82,7 +84,11 @@ class SpawnContextCG:
             else:
                 raise NotImplementedError(f'g_tpl: {g_tpl}')
 
-        self.spawns[name].set_tohu_name(name)  # set tohu_name for nicer debugging
+        # Set tohu_name for nicer debugging
+        if name.startswith('ANONYMOUS_ANONYMOUS_ANONYMOUS_'):
+            self.spawns[name].set_tohu_name(f'anonymous_{g_tpl.tohu_id}')
+        else:
+            self.spawns[name].set_tohu_name(name)
 
         return self.spawns[name]
 
