@@ -29,7 +29,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
     ],
-    packages=find_packages(),
+    packages=['tohu', 'tohu/v4'],
     install_requires=['attrs', 'bidict', 'faker', 'pandas', 'psycopg2-binary', 'shapely', 'sqlalchemy', 'tqdm'],
     extras_require={
         'dev': ['ipython', 'jupyter'],
