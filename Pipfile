@@ -1,13 +1,12 @@
 [[source]]
-url = "https://pypi.python.org/simple"
+url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
 [packages]
 pandas = "*"
 tqdm = "*"
-Mako = "*"
-SQLAlchemy = "*"
+sqlalchemy = "*"
 "psycopg2-binary" = "*"
 attrs = "*"
 faker = "*"
@@ -16,10 +15,14 @@ bidict = "*"
 
 [dev-packages]
 pytest = "*"
-nbval = "*"
-jupyter = "*"
-ipython = "*"
 pytest-cov = "*"
 yapf = "*"
 "testing.postgresql" = "*"
+"tohu" = {editable = true, path = "."}
+"e1839a8" = {editable = true, path = "."}
+nbval = "*"
 jupyterlab = "*"
+ipython = "*"
+
+[requires]
+python_version = "3.7"
