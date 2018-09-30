@@ -156,3 +156,34 @@ def test_spawn_custom_generator():
 
     assert items_h1 == items_g
     assert items_h2 == items_g
+
+
+def test_spawn_custom_generator_v2():
+    """
+    Test with more complicated custom generator (including chains of derived generators)
+    """
+    seqs = [[10, 11, 12, 13, 14, 15],
+            [20, 21, 22, 23, 24, 25],
+            [30, 31, 32, 33, 34, 35],
+            [40, 41, 42, 43, 44, 45]]
+
+    class QuuxGenerator(CustomGenerator):
+        x = Integer(100, 200).set_tohu_name('x')
+        y = Integer(300, 400).set_tohu_name('y')
+        z = SelectOneFromGenerator(SelectOne(seqs)).set_tohu_name('z')
+
+        aa = Apply(add, Apply(add, x, y), z).set_tohu_name('aa')
+
+    g = QuuxGenerator()
+    g.reset(seed=12345)
+    g.generate(num=20)
+
+    h1 = g.spawn()
+    h2 = g.spawn()
+
+    items_g = list(g.generate(num=10))
+    items_h1 = list(h1.generate(num=10))
+    items_h2 = list(h2.generate(num=10))
+
+    assert items_h1 == items_g
+    assert items_h2 == items_g
