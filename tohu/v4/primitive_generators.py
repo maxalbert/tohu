@@ -5,7 +5,7 @@ from functools import partial
 from random import Random
 
 from .base import TohuBaseGenerator
-from ..item_list import ItemList
+from .item_list import ItemList
 from .utils import identity
 
 __all__ = ['Constant', 'FakerGenerator', 'HashDigest', 'Integer', 'IterateOver', 'SelectOne']

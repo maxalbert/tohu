@@ -5,7 +5,7 @@ from itertools import islice
 from random import Random
 from tqdm import tqdm
 
-from ..item_list import ItemList
+from .item_list import ItemList
 from .logging import logger
 
 __all__ = ['SeedGenerator', 'TohuBaseGenerator']
