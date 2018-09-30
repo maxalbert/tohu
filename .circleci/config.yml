@@ -9,8 +9,8 @@ jobs:
           name: Install PostgreSQL
           command: sudo apt-get update && sudo apt-get install -y postgresql
       - run:
-          name: Install Python dependencies
-          command: pipenv install --dev
+          name: Install Python dependencies (FIXME: remove the --skip-lock flag once the prompt-toolkit version conflict is resolved)
+          command: pipenv install --dev --skip-lock
       - run:
           name: Install tohu
           command: pipenv run pip install .
