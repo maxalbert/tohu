@@ -87,7 +87,6 @@ class Apply(TohuBaseGenerator):
 
     def reset(self, seed):
         super().reset(seed)
-        self.func_arg_gens_internal.reset(seed)
 
     def spawn(self):
         new_obj = Apply(self.func, *self.func_arg_gens_orig.arg_gens, **self.func_arg_gens_orig.kwarg_gens)
