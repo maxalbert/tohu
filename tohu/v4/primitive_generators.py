@@ -165,6 +165,7 @@ class FakerGenerator(PrimitiveGenerator):
 
         self.fake = Faker(locale=locale)
         self.randgen = getattr(self.fake, method)
+        self.fake.seed_instance(None)  # seed instance to ensure we are decoupled from the global random state
 
     def reset(self, seed):
         super().reset(seed)
