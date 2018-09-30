@@ -86,6 +86,18 @@ class TohuBaseGenerator(metaclass=ABCMeta):
             c.reset(seed)
 
     @abstractmethod
+    def _set_random_state_from(self, other):
+        """
+        This helper method sets the internal random state
+        of `self` to the same state that `other` is in. This
+        ensures that afterwards any the two generators `self`
+        and `other` produce the same elements in the same
+        order (even though otherwise they remain independent).
+        This is used internally when spawning generators.
+        """
+        raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
+
+    @abstractmethod
     def spawn(self):
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
 

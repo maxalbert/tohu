@@ -42,6 +42,9 @@ class Constant(PrimitiveGenerator):
     def spawn(self):
         return Constant(self.value)
 
+    def _set_random_state_from(self, other):
+        pass
+
 
 class Integer(PrimitiveGenerator):
     """
@@ -76,8 +79,11 @@ class Integer(PrimitiveGenerator):
 
     def spawn(self):
         new_obj = Integer(self.low, self.high)
-        new_obj.randgen.setstate(self.randgen.getstate())
+        new_obj._set_random_state_from(self)
         return new_obj
+
+    def _set_random_state_from(self, other):
+        self.randgen.setstate(other.randgen.getstate())
 
 
 class HashDigest(PrimitiveGenerator):
@@ -123,8 +129,11 @@ class HashDigest(PrimitiveGenerator):
 
     def spawn(self):
         new_obj = HashDigest(length=self.length, as_bytes=self.as_bytes, uppercase=self.uppercase)
-        new_obj.randgen.set_state(self.randgen.get_state())
+        new_obj._set_random_state_from(self)
         return new_obj
+
+    def _set_random_state_from(self, other):
+        self.randgen.set_state(other.randgen.get_state())
 
 
 class FakerGenerator(PrimitiveGenerator):
@@ -167,8 +176,12 @@ class FakerGenerator(PrimitiveGenerator):
 
     def spawn(self):
         new_obj = FakerGenerator(self.method, locale=self.locale, **self.faker_args)
-        new_obj.fake.random.setstate(self.fake.random.getstate())
+        new_obj._set_random_state_from(self)
         return new_obj
+
+    def _set_random_state_from(self, other):
+        self.fake.random.setstate(other.fake.random.getstate())
+
 
 
 class IterateOver(PrimitiveGenerator):
@@ -210,8 +223,11 @@ class IterateOver(PrimitiveGenerator):
 
     def spawn(self):
         new_obj = IterateOver(self.seq)
-        new_obj.idx = self.idx
+        new_obj._set_random_state_from(self)
         return new_obj
+
+    def _set_random_state_from(self, other):
+        self.idx = other.idx
 
 
 class SelectOne(PrimitiveGenerator):
@@ -259,7 +275,7 @@ class SelectOne(PrimitiveGenerator):
             self.randgen = np.random.RandomState()
             self.func_random_choice = partial(self.randgen.choice, p=self.p)
 
-    def set_state_from(self, other):
+    def _set_random_state_from(self, other):
         """
         Transfer the internal state from `other` to `self`.
         After this call, `self` will produce the same elements
@@ -285,5 +301,5 @@ class SelectOne(PrimitiveGenerator):
 
     def spawn(self):
         new_obj = SelectOne(self.values, p=self.p)
-        new_obj.set_state_from(self)
+        new_obj._set_random_state_from(self)
         return new_obj
