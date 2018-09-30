@@ -117,9 +117,10 @@ class ItemList:
             # Old version:
             #return pd.DataFrame([x.to_series() for x in self.items])
         else:
-            # TODO: switch this to the faster version (see above)
-            attr_getters = [(field_name, attrgetter(attr_name)) for (field_name, attr_name) in fields.items()]
-            return pd.DataFrame([pd.Series({field_name: func(x) for (field_name, func) in attr_getters}) for x in self.items])
+            # New version (much faster!)
+            colnames = list(fields.keys())
+            attr_getters = [attrgetter(attr_name) for attr_name in fields.values()]
+            return pd.DataFrame([tuple(func(x) for func in attr_getters) for x in self.items], columns=colnames)
 
     def to_csv(self, filename=None, *, fields=None, append=False, header=True, header_prefix='', sep=',', newline='\n'):
         """
