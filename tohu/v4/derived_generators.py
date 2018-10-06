@@ -188,6 +188,9 @@ class fstr(Apply):
 
         super().__init__(format_items, **gens)
 
+    def spawn(self):
+        raise NotImplemented("TODO: check which namespace to use when spawning an instance of 'fstr'")
+
 
 class TohuDict:
     """
