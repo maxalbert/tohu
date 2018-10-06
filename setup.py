@@ -30,7 +30,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     packages=['tohu', 'tohu/v4'],
-    install_requires=['attrs', 'bidict', 'faker' 'geojson', 'pandas', 'psycopg2-binary', 'shapely', 'sqlalchemy', 'tqdm'],
+    install_requires=['attrs', 'bidict', 'faker', 'geojson', 'pandas', 'psycopg2-binary', 'shapely', 'sqlalchemy', 'tqdm'],
     extras_require={
         'dev': ['ipython', 'jupyter'],
         'test': ['pytest', 'nbval'],
