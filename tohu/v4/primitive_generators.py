@@ -15,7 +15,7 @@ from .logging import logger
 from .utils import identity
 
 __all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'GeoJSONGeolocationPair',
-           'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'Timestamp', 'as_tohu_generator']
+           'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'Sequential', 'Timestamp', 'as_tohu_generator']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -283,6 +283,68 @@ class HashDigest(PrimitiveGenerator):
 
     def _set_random_state_from(self, other):
         self.randgen.set_state(other.randgen.get_state())
+
+
+class Sequential(TohuBaseGenerator):
+    """
+    Generator which produces a sequence of strings
+    of the form:
+
+        "PREFIX001"
+        "PREFIX002"
+        "PREFIX003"
+        ...
+
+    Both the prefix and the number of digits can
+    be modified by the user.
+
+    Example:
+        >>> s = Sequential(prefix="Foobar_", digits=4)
+        >>> next(s)
+        Foobar_0001
+        >>> next(s)
+        Foobar_0002
+        >>> next(s)
+        Foobar_0003
+    """
+
+    def __init__(self, *, prefix, digits):
+        """
+        Parameters
+        ----------
+        prefix: string
+            Prefix to be appended to generated elements.
+        digits: integer
+            Number of digits to use for the sequential numbering.
+            Any numbers will fewer digits will be zero-padded;
+            numbers with more digits are unaffected.
+        """
+        super().__init__()
+        self.prefix = prefix
+        self.digits = digits
+        self.fmt_str = self.prefix + '{{:0{digits}}}'.format(digits=digits)
+        self.cnt = 0
+
+    def spawn(self):
+        new_obj = Sequential(prefix=self.prefix, digits=self.digits)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.cnt = other.cnt
+
+    def reset(self, seed=None):
+        """
+        Note that this method supports the `seed` argument (for consistency with other generators),
+        but its value is ignored - the generator is simply reset to its initial value.
+        """
+        super().reset(seed)
+        self.cnt = 0
+        return self
+
+    def __next__(self):
+        self.cnt += 1
+        return self.fmt_str.format(self.cnt)
 
 
 class FakerGenerator(PrimitiveGenerator):
