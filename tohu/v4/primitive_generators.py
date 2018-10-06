@@ -431,6 +431,8 @@ class ShapelyGeolocationPair(TohuBaseGenerator):
 
     def _set_random_state_from(self, other):
         self.seed_generator._set_random_state_from(other.seed_generator)
+        self.lon_gen._set_random_state_from(other.lon_gen)
+        self.lat_gen._set_random_state_from(other.lat_gen)
 
     @property
     def area(self):
@@ -520,6 +522,8 @@ class GeoJSONGeolocationPair(TohuBaseGenerator):
     def _set_random_state_from(self, other):
         self.seed_generator._set_random_state_from(other.seed_generator)
         self.shape_gen_chooser.set_state(other.shape_gen_chooser.get_state())
+        for gen_self, gen_other in zip(self.shape_gens, other.shape_gens):
+            gen_self._set_random_state_from(gen_other)
 
 
 class TimestampError(Exception):
