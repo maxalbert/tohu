@@ -1,3 +1,5 @@
+import os
+
 from .context import tohu
 from tohu.v4.primitive_generators import *
 from tohu.v4.derived_generators import *
@@ -7,12 +9,16 @@ __all__ = ['EXEMPLAR_GENERATORS', 'EXEMPLAR_PRIMITIVE_GENERATORS', 'EXEMPLAR_DER
 def add(x, y):
     return x + y
 
+here = os.path.abspath(os.path.dirname(__file__))
+geojson_filename = os.path.join(here, '..', '..', 'tohu', 'data', 'admin_0_countries.geojson')
+
 
 EXEMPLAR_PRIMITIVE_GENERATORS = [
     Boolean(p=0.3),
     Constant("quux"),
     FakerGenerator(method="name"),
     Float(12.34, 56.78),
+    GeoJSONGeolocationPair(geojson_filename, include_attributes=['name', 'pop_est']),
     HashDigest(length=6),
     Integer(100, 200),
     IterateOver('abcdefghijklmnopqrstuvwxyz'),
