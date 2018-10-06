@@ -455,7 +455,7 @@ class GeoJSONGeolocationPair(TohuBaseGenerator):
     Generator which produces random locations inside a geographic area.
     """
 
-    def __init__(self, filename_or_geojson_data, include_attributes=None):
+    def __init__(self, filename_or_geojson_data, include_attributes=None, max_tries=100):
         super().__init__()
 
         if isinstance(filename_or_geojson_data, str):
@@ -469,6 +469,7 @@ class GeoJSONGeolocationPair(TohuBaseGenerator):
 
         self.geojson_data = geojson_data
         self.include_attributes = include_attributes or []
+        self.max_tries = max_tries
 
         self.shape_gens = self._make_shape_generators()
 
@@ -493,12 +494,12 @@ class GeoJSONGeolocationPair(TohuBaseGenerator):
                     valid_attributes = list(feature['properties'].keys())
                     raise ValueError(f"Feature does not have attribute '{name}'. Valid attributes are: {valid_attributes}")
 
-            shape_gens.append(ShapelyGeolocationPair(geom, cur_attributes))
+            shape_gens.append(ShapelyGeolocationPair(geom, cur_attributes, max_tries=self.max_tries))
 
         return shape_gens
 
     def spawn(self):
-        new_obj = GeoJSONGeolocationPair(self.geojson_data)
+        new_obj = GeoJSONGeolocationPair(self.geojson_data, include_attributes=self.include_attributes, max_tries=self.max_tries)
         new_obj._set_random_state_from(self)
         return new_obj
 
