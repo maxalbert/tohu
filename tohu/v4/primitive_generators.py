@@ -14,7 +14,7 @@ from .item_list import ItemList
 from .logging import logger
 from .utils import identity
 
-__all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'GeoJSONGeolocationPair',
+__all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'GeoJSONGeolocation',
            'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'Sequential', 'Timestamp', 'as_tohu_generator']
 
 
@@ -122,7 +122,7 @@ class Integer(PrimitiveGenerator):
         self.randgen.setstate(other.randgen.getstate())
 
 
-class Float(TohuBaseGenerator):
+class Float(PrimitiveGenerator):
     """
     Generator which produces random floating point numbers x in the range low <= x <= high.
     """
@@ -168,7 +168,7 @@ CHARACTER_SETS = {
 }
 
 
-class CharString(TohuBaseGenerator):
+class CharString(PrimitiveGenerator):
     """
     Generator which produces a sequence of character strings.
     """
@@ -285,7 +285,7 @@ class HashDigest(PrimitiveGenerator):
         self.randgen.set_state(other.randgen.get_state())
 
 
-class Sequential(TohuBaseGenerator):
+class Sequential(PrimitiveGenerator):
     """
     Generator which produces a sequence of strings
     of the form:
@@ -529,11 +529,11 @@ def as_tohu_generator(g):
         return Constant(g)
 
 
-class ShapelyGeolocationPair(TohuBaseGenerator):
+class ShapelyGeolocation(PrimitiveGenerator):
     """
     Generator which produces random locations inside a shapely polygon
     or multipolygon. This is a helper class and most users will probably
-    find the GeoJSONGeolocationPair generator more useful.
+    find the GeoJSONGeolocation generator more useful.
     """
 
     def __init__(self, shp, properties=None, max_tries=100):
@@ -567,7 +567,7 @@ class ShapelyGeolocationPair(TohuBaseGenerator):
         return f"<ShapelyShape, area={self.area:.3f}>"
 
     def spawn(self):
-        new_obj = ShapelyGeolocationPair(self.shape, properties=self.properties, max_tries=self.max_tries)
+        new_obj = ShapelyGeolocation(self.shape, properties=self.properties, max_tries=self.max_tries)
         new_obj._set_random_state_from(self)
         return new_obj
 
@@ -597,7 +597,7 @@ class ShapelyGeolocationPair(TohuBaseGenerator):
         return self
 
 
-class GeoJSONGeolocationPair(TohuBaseGenerator):
+class GeoJSONGeolocation(PrimitiveGenerator):
     """
     Generator which produces random locations inside a geographic area.
     """
@@ -641,12 +641,12 @@ class GeoJSONGeolocationPair(TohuBaseGenerator):
                     valid_attributes = list(feature['properties'].keys())
                     raise ValueError(f"Feature does not have attribute '{name}'. Valid attributes are: {valid_attributes}")
 
-            shape_gens.append(ShapelyGeolocationPair(geom, cur_attributes, max_tries=self.max_tries))
+            shape_gens.append(ShapelyGeolocation(geom, cur_attributes, max_tries=self.max_tries))
 
         return shape_gens
 
     def spawn(self):
-        new_obj = GeoJSONGeolocationPair(self.geojson_data, include_attributes=self.include_attributes, max_tries=self.max_tries)
+        new_obj = GeoJSONGeolocation(self.geojson_data, include_attributes=self.include_attributes, max_tries=self.max_tries)
         new_obj._set_random_state_from(self)
         return new_obj
 
@@ -676,7 +676,7 @@ class TimestampError(Exception):
     """
 
 
-class Timestamp(TohuBaseGenerator):
+class Timestamp(PrimitiveGenerator):
     """
     Generator which produces random timestamps.
     """

@@ -20,7 +20,7 @@ EXEMPLAR_PRIMITIVE_GENERATORS = [
     DigitString(length=20),
     FakerGenerator(method="name"),
     Float(12.34, 56.78),
-    #GeoJSONGeolocationPair(geojson_filename, include_attributes=['name', 'pop_est']),
+    #GeoJSONGeolocation(geojson_filename, include_attributes=['name', 'pop_est']),
     HashDigest(length=6),
     Integer(100, 200),
     IterateOver('abcdefghijklmnopqrstuvwxyz'),
