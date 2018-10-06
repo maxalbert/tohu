@@ -1,10 +1,13 @@
+import inspect
+import re
+
 from functools import partial
 from operator import attrgetter, getitem
 from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
 
-__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator']
+__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator', 'fstr']
 
 
 class FuncArgGens:
@@ -146,3 +149,41 @@ class SelectOneFromGenerator(Apply):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.randgen.setstate(other.randgen.getstate())
+
+
+class fstr(Apply):
+    """
+    Helper function for easy formatting of generators.
+
+    Usage example:
+
+        >>> g1 = Integer(100, 200)
+        >>> g2 = Integer(300, 400)
+        >>> g3 = g1 + g2
+        >>> h = fstr('{g1} + {g2} = {g3}')
+        >>> print(next(h))
+        122 + 338 = 460
+        >>> print(next(h))
+        165 + 325 = 490
+    """
+
+    def __init__(self, spec, namespace=None):
+
+        # FIXME: this pattern is not yet compatible with the full f-string spec.
+        # For example, it doesn't recognise double '{{' and '}}' (for escaping).
+        # Also it would be awesome if we could parse arbitrary expressions inside
+        # the curly braces.
+        pattern = '{([^}]+)}'
+
+        gen_names = re.findall(pattern, spec)
+
+        if namespace is None:
+            namespace = inspect.currentframe().f_back.f_globals
+            namespace.update(inspect.currentframe().f_back.f_locals)
+
+        gens = {name: namespace[name] for name in gen_names}
+
+        def format_items(**kwargs):
+            return spec.format(**kwargs)
+
+        super().__init__(format_items, **gens)
