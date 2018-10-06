@@ -15,6 +15,7 @@ geojson_filename = os.path.join(here, '..', '..', 'tohu', 'data', 'admin_0_count
 
 EXEMPLAR_PRIMITIVE_GENERATORS = [
     Boolean(p=0.3),
+    CharString(length=12, charset='<alphanumeric>'),
     Constant("quux"),
     FakerGenerator(method="name"),
     Float(12.34, 56.78),
