@@ -149,6 +149,7 @@ class CustomGenerator(TohuBaseGenerator):
         for name, gen in self.field_gens_all.items(): # FIXME: reset all field gens
             next_seed = next(self.seed_generator)
             gen.reset(next_seed)
+        return self
 
     def spawn(self):
         new_obj = self.__class__(*self.orig_args, **self.orig_kwargs)
