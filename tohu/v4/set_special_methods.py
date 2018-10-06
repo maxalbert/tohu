@@ -8,8 +8,8 @@ support other generators as arguments.
 from operator import add, mul, gt, ge, lt, le, eq
 
 from .base import TohuBaseGenerator
-from .primitive_generators import Constant
-from .derived_generators import Apply
+from .primitive_generators import Constant, SelectOne
+from .derived_generators import Apply, GetAttribute, SelectOneFromGenerator
 
 __all__ = []
 
@@ -71,3 +71,23 @@ TohuBaseGenerator.__lt__ = lt_generators
 TohuBaseGenerator.__le__ = le_generators
 TohuBaseGenerator.__gt__ = gt_generators
 TohuBaseGenerator.__ge__ = ge_generators
+
+
+def getattribute_generators(self, name):
+
+    if name == '__isabstractmethod__':
+        # Special case which is needed because TohuUltraBaseMeta is
+        # derived from ABCMeta and it uses '__isabstractmethod__'
+        # to check for abstract methods.
+        #
+        # TODO: This check should probably be moved to TohuUltraBaseGenerator somewhere.
+        return
+
+    if name == '_ipython_canary_method_should_not_exist_':
+        # Special case which is needed because IPython uses this attribute internally.
+        raise NotImplementedError("Special case needed for IPython")
+
+    return GetAttribute(self, name)
+
+SelectOne.__getattr__ = getattribute_generators
+SelectOneFromGenerator.__getattr__ = getattribute_generators
