@@ -1,14 +1,20 @@
+import attr
+import geojson
 import numpy as np
+import shapely
 
 from faker import Faker
 from functools import partial
 from random import Random
+from shapely.geometry import Point, Polygon, MultiPolygon
 
-from .base import TohuBaseGenerator
+from .base import TohuBaseGenerator, SeedGenerator
 from .item_list import ItemList
+from .logging import logger
 from .utils import identity
 
-__all__ = ['Boolean', 'Constant', 'FakerGenerator', 'Float', 'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'as_tohu_generator']
+__all__ = ['Boolean', 'Constant', 'FakerGenerator', 'Float', 'GeoJSONGeolocationPair',
+           'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'as_tohu_generator']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -381,3 +387,132 @@ def as_tohu_generator(g):
         return g
     else:
         return Constant(g)
+
+
+class ShapelyGeolocationPair(TohuBaseGenerator):
+    """
+    Generator which produces random locations inside a shapely polygon
+    or multipolygon. This is a helper class and most users will probably
+    find the GeoJSONGeolocationPair generator more useful.
+    """
+
+    def __init__(self, shp, properties=None, max_tries=100):
+        if not isinstance(shp, (Polygon, MultiPolygon)):
+            raise TypeError(f"Argument 'shp' must be of type Polygon or MultiPolygon. Got: {type(shp)}")
+
+        super().__init__()
+
+        self.shape = shapely.geometry.shape(shp)
+        self.properties = properties or dict()
+
+        self.geolocation_cls = self._make_geolocation_class()
+
+        lon_min, lat_min, lon_max, lat_max = self.shape.bounds
+        self.lon_gen = Float(lon_min, lon_max)
+        self.lat_gen = Float(lat_min, lat_max)
+        self.max_tries = max_tries
+        self.seed_generator = SeedGenerator()
+
+    def _make_geolocation_class(self):
+        fields = {'lon': attr.ib(), 'lat': attr.ib()}
+        fields.update({name: attr.ib(value) for name, value in self.properties.items()})
+        return attr.make_class('Geolocation', fields)
+
+    def __repr__(self):
+        return f"<ShapelyShape, area={self.area:.3f}>"
+
+    def spawn(self):
+        new_obj = ShapelyGeolocationPair(self.shape, properties=self.properties, max_tries=self.max_tries)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.seed_generator._set_random_state_from(other.seed_generator)
+
+    @property
+    def area(self):
+        return self.shape.area
+
+    def __next__(self):
+        for cnt in range(1, self.max_tries + 1):
+            pt = Point(next(self.lon_gen), next(self.lat_gen))
+            if pt.within(self.shape):
+                return self.geolocation_cls(lon=pt.x, lat=pt.y)
+            else:
+                logger.debug(f"Generated point is not within shape. Trying again... [{cnt}/{self.max_tries}]")
+        raise RuntimeError(f"Could not generate point in shape after {self.max_tries} attempts")
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.seed_generator.reset(seed)
+        self.lon_gen.reset(next(self.seed_generator))
+        self.lat_gen.reset(next(self.seed_generator))
+        return self
+
+
+class GeoJSONGeolocationPair(TohuBaseGenerator):
+    """
+    Generator which produces random locations inside a geographic area.
+    """
+
+    def __init__(self, filename_or_geojson_data, include_attributes=None):
+        super().__init__()
+
+        if isinstance(filename_or_geojson_data, str):
+            try:
+                with open(filename_or_geojson_data, 'r') as f:
+                    geojson_data = geojson.load(f)
+            except AttributeError:
+                raise NotImplementedError()
+        else:
+            geojson_data = filename_or_geojson_data
+
+        self.geojson_data = geojson_data
+        self.include_attributes = include_attributes or []
+
+        self.shape_gens = self._make_shape_generators()
+
+        areas = np.array([s.area for s in self.shape_gens])
+        self.choice_probs = areas / areas.sum()  # TODO: allow weighin by an arbitrary attribute, not just by area
+
+        self.seed_generator = SeedGenerator()
+        self.shape_gen_chooser = np.random.RandomState()
+
+    def _make_shape_generators(self):
+        shape_gens = []
+
+        for feature in self.geojson_data['features']:
+
+            geom = shapely.geometry.shape(feature['geometry'])
+
+            cur_attributes = {}
+            for name in self.include_attributes:
+                try:
+                    cur_attributes[name] = feature['properties'][name]
+                except KeyError:
+                    valid_attributes = list(feature['properties'].keys())
+                    raise ValueError(f"Feature does not have attribute '{name}'. Valid attributes are: {valid_attributes}")
+
+            shape_gens.append(ShapelyGeolocationPair(geom, cur_attributes))
+
+        return shape_gens
+
+    def spawn(self):
+        new_obj = GeoJSONGeolocationPair(self.geojson_data)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def __next__(self):
+        sg = self.shape_gen_chooser.choice(self.shape_gens, p=self.choice_probs)
+        return next(sg)
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.seed_generator.reset(seed)
+        self.shape_gen_chooser.seed(next(self.seed_generator))
+        for g in self.shape_gens:
+            g.reset(next(self.seed_generator))
+
+    def _set_random_state_from(self, other):
+        self.seed_generator._set_random_state_from(other.seed_generator)
+        self.shape_gen_chooser.set_state(other.shape_gen_chooser.get_state())
