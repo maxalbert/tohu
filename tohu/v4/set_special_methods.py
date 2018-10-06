@@ -8,7 +8,7 @@ support other generators as arguments.
 from operator import add, mul, gt, ge, lt, le, eq
 
 from .base import TohuBaseGenerator
-from .primitive_generators import SelectOne, as_tohu_generator
+from .primitive_generators import GeoJSONGeolocation, SelectOne, as_tohu_generator
 from .derived_generators import Apply, GetAttribute, SelectOneFromGenerator
 
 __all__ = []
@@ -80,3 +80,10 @@ def getattribute_generators(self, name):
 
 SelectOne.__getattr__ = getattribute_generators
 SelectOneFromGenerator.__getattr__ = getattribute_generators
+
+
+def split_geolocation(self):
+    attributes = ['lon', 'lat'] + self.include_attributes
+    return tuple(GetAttribute(self, attr_name) for attr_name in attributes)
+
+GeoJSONGeolocation.split = split_geolocation
