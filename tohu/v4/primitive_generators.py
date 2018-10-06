@@ -416,7 +416,9 @@ class ShapelyGeolocationPair(TohuBaseGenerator):
     def _make_geolocation_class(self):
         fields = {'lon': attr.ib(), 'lat': attr.ib()}
         fields.update({name: attr.ib(value) for name, value in self.properties.items()})
-        return attr.make_class('Geolocation', fields)
+        cls = attr.make_class('Geolocation', fields)
+        cls.as_dict = lambda self: attr.asdict(self)
+        return cls
 
     def __repr__(self):
         return f"<ShapelyShape, area={self.area:.3f}>"
