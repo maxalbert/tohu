@@ -8,7 +8,7 @@ from .base import TohuBaseGenerator
 from .item_list import ItemList
 from .utils import identity
 
-__all__ = ['Boolean', 'Constant', 'FakerGenerator', 'Float', 'HashDigest', 'Integer', 'IterateOver', 'SelectOne']
+__all__ = ['Boolean', 'Constant', 'FakerGenerator', 'Float', 'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'as_tohu_generator']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -369,3 +369,20 @@ class SelectOne(PrimitiveGenerator):
         new_obj = SelectOne(self.values, p=self.p)
         new_obj._set_random_state_from(self)
         return new_obj
+
+
+def as_tohu_generator(g):
+    """
+    Helper function which guarantees its return value
+    to be a tohu generator.
+
+    If the input `g` is already a tohu generator, it
+    is returned unchanged. Otherwise it is wrapped
+    in a Constant generator which returns the input
+    value at each iteration.
+    """
+
+    if isinstance(g, TohuBaseGenerator):
+        return g
+    else:
+        return Constant(g)
