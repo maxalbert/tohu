@@ -7,7 +7,7 @@ from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
 
-__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator', 'fstr']
+__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator', 'TohuDict', 'fstr']
 
 
 class FuncArgGens:
@@ -187,3 +187,19 @@ class fstr(Apply):
             return spec.format(**kwargs)
 
         super().__init__(format_items, **gens)
+
+
+class TohuDict:
+    """
+    Helper class which behaves like a regular dictionary but
+    also allows easy lookup of items produced by a generator.
+    """
+
+    def __init__(self, mapping):
+        self.mapping = mapping
+
+    def __getitem__(self, key):
+        if isinstance(key, TohuBaseGenerator):
+            return Lookup(key, self.mapping)
+        else:
+            return self.mapping[key]
