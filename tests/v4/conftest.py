@@ -16,6 +16,7 @@ EXEMPLAR_PRIMITIVE_GENERATORS = [
     IterateOver('abcdefghijklmnopqrstuvwxyz'),
     SelectOne('abcdefghijklmnopqrstuvwxyz'),
     SelectOne('abcde', p=[0.1, 0.05, 0.7, 0.03, 0.12]),
+    Timestamp(date='2018-01-01'),
     ]
 
 EXEMPLAR_DERIVED_GENERATORS = [

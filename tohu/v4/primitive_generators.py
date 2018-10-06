@@ -1,4 +1,5 @@
 import attr
+import datetime as dt
 import geojson
 import numpy as np
 import shapely
@@ -14,7 +15,7 @@ from .logging import logger
 from .utils import identity
 
 __all__ = ['Boolean', 'Constant', 'FakerGenerator', 'Float', 'GeoJSONGeolocationPair',
-           'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'as_tohu_generator']
+           'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'Timestamp', 'as_tohu_generator']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -519,3 +520,83 @@ class GeoJSONGeolocationPair(TohuBaseGenerator):
     def _set_random_state_from(self, other):
         self.seed_generator._set_random_state_from(other.seed_generator)
         self.shape_gen_chooser.set_state(other.shape_gen_chooser.get_state())
+
+
+class TimestampError(Exception):
+    """
+    Custom exception raised to indicate Timestamp errors
+    (for example when the end time of the timestamp interval
+    is before the start time).
+    """
+
+
+class Timestamp(TohuBaseGenerator):
+    """
+    Generator which produces random timestamps.
+    """
+
+    def __init__(self, *, start=None, end=None, date=None):
+        """
+        Initialise timestamp generator.
+
+        Note that `start` and `end` are both inclusive. They can either
+        be full timestamps such as 'YYYY-MM-DD HH:MM:SS', or date strings
+        such as 'YYYY-MM-DD'. Note that in the latter case `end` is
+        interpreted as as `YYYY-MM-DD 23:59:59`, i.e. the day is counted
+        in full.
+
+        Args:
+            start (date string):  start time
+            end   (date string):  end time
+            date (str):           string of the form YYYY-MM-DD. This is an alternative
+                                  (and mutually exclusive) to specifying `start` and `end`.
+                                  It is equivalent to setting start='YYYY-MM-DD 00:00:00',
+                                  end='YYYY-MM-DD 23:59:59'.
+        """
+        super().__init__()
+
+        if (date is not None):
+            if not (start is None and end is None):
+                raise TimestampError("Argument `date` is mutually exclusive with `start` and `end`.")
+
+            self.start = dt.datetime.strptime(date, '%Y-%m-%d')
+            self.end = self.start + dt.timedelta(hours=23, minutes=59, seconds=59)
+        else:
+            if (start is None or end is None):
+                raise TimestampError("Either `date` or both `start` and `end` must be provided.")
+
+            try:
+                self.start = dt.datetime.strptime(start, '%Y-%m-%d')
+            except ValueError:
+                self.start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+
+            try:
+                self.end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                end_date = dt.datetime.strptime(end, '%Y-%m-%d')
+                self.end = dt.datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
+
+        self.dt = int((self.end - self.start).total_seconds())
+
+        if self.dt < 0:
+            raise TimestampError(f"Start time must be before end time. Got: start_time='{self.start}', end_time='{self.end}'.")
+
+        self.offset_randgen = Random()
+
+    def spawn(self):
+        new_obj = Timestamp(start=self.start.strftime('%Y-%m-%d %H:%M:%S'), end=self.end.strftime('%Y-%m-%d %H:%M:%S'))
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.offset_randgen.setstate(other.offset_randgen.getstate())
+
+    def __next__(self):
+        next_offset = self.offset_randgen.randint(0, self.dt)
+        ts = (self.start + dt.timedelta(seconds=next_offset))
+        return ts
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.offset_randgen.seed(seed)
+        return self
