@@ -8,7 +8,7 @@ from .base import TohuBaseGenerator
 from .item_list import ItemList
 from .utils import identity
 
-__all__ = ['Constant', 'FakerGenerator', 'Float', 'HashDigest', 'Integer', 'IterateOver', 'SelectOne']
+__all__ = ['Boolean', 'Constant', 'FakerGenerator', 'Float', 'HashDigest', 'Integer', 'IterateOver', 'SelectOne']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -44,6 +44,39 @@ class Constant(PrimitiveGenerator):
 
     def _set_random_state_from(self, other):
         pass
+
+
+class Boolean(PrimitiveGenerator):
+    """
+    Generator which produces random boolean values (True or False).
+    """
+
+    def __init__(self, p=0.5):
+        """
+        Parameters
+        ----------
+        p: float
+            The probability that True is returned. Must be between 0.0 and 1.0.
+        """
+        super().__init__()
+        self.p = p
+        self.randgen = Random()
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(seed)
+        return self
+
+    def __next__(self):
+        return self.randgen.random() < self.p
+
+    def spawn(self):
+        new_obj = Boolean(self.p)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.randgen.setstate(other.randgen.getstate())
 
 
 class Integer(PrimitiveGenerator):
