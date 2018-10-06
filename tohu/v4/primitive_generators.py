@@ -64,7 +64,6 @@ class Integer(PrimitiveGenerator):
         self.low = low
         self.high = high
         self.randgen = Random()
-        self._clones = []
 
     def reset(self, seed):
         super().reset(seed)
