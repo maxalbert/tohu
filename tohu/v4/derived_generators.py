@@ -6,8 +6,9 @@ from operator import attrgetter, getitem
 from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
+from .primitive_generators import as_tohu_generator
 
-__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator', 'TohuDict', 'fstr']
+__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator', 'TohuDict', 'fstr', 'ifthen']
 
 
 class FuncArgGens:
@@ -115,6 +116,7 @@ class GetAttribute(Apply):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
 
+
 class Lookup(Apply):
 
     def __init__(self, parent, mapping):
@@ -206,3 +208,28 @@ class TohuDict:
             return Lookup(key, self.mapping)
         else:
             return self.mapping[key]
+
+
+class ifthen(Apply):
+
+    def __init__(self, g_cond, g_true, g_false):
+        """
+        Parameters
+        ----------
+        g_cond: tohu.generator
+
+        :param g_cond:
+        :param g_true:
+        :param g_false:
+        """
+        self.g_cond = g_cond
+        self.g_true = g_true
+        self.g_false = g_false
+
+        def func(cond, x, y):
+            return x if cond else y
+
+        super().__init__(func, self.g_cond, as_tohu_generator(self.g_true), as_tohu_generator(self.g_false))
+
+    def spawn(self):
+        return ifthen(self.g_cond, self.g_true, self.g_false)
