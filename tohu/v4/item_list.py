@@ -99,15 +99,21 @@ class ItemList:
 
     def to_df(self, fields=None):
         """
-        Export items as rows in a PostgreSQL table.
+        Export items as rows in a pandas dataframe table.
 
         Parameters
         ----------
 
-        fields: dict
-            Dictionary which maps output column names to attribute names of the generators.
-            Example: `fields={'COL1': 'field_name_1', 'COL2': 'field_name_2'}
+        fields: list or dict
+            List of field names to export, or dictionary mapping output column names
+            to attribute names of the generators.
+
+            Examples:
+               fields=['field_name_1', 'field_name_2']
+               fields={'COL1': 'field_name_1', 'COL2': 'field_name_2'}
         """
+        if isinstance(fields, (list, tuple)):
+            fields = {name: name for name in fields}
 
         if fields is None:
             # New version (much faster!, but needs cleaning up)
@@ -131,9 +137,13 @@ class ItemList:
             overwritten. Use `append=True` to open the file in append mode instead.
             If filename is None, the generated CSV output is returned instead of written
             to a file.
-        fields: dict
-            Dictionary which maps output field names to attribute names of the generators.
-            Example: `fields={'CSV_COL1': 'field_name_1', 'CSV_COL2': 'field_name_2'}
+        fields: list or dict
+            List of field names to export, or dictionary mapping output column names
+            to attribute names of the generators.
+
+            Examples:
+               fields=['field_name_1', 'field_name_2']
+               fields={'COL1': 'field_name_1', 'COL2': 'field_name_2'}
         append: bool
             If `True`, open the file in 'append' mode to avoid overwriting existing content.
             Default is `False`, i.e. any existing content will be overwritten.
@@ -163,6 +173,9 @@ class ItemList:
 
         if fields is None:
             raise NotImplementedError("TODO: derive field names automatically from the generator which produced this item list")
+
+        if isinstance(fields, (list, tuple)):
+            fields = {name: name for name in fields}
 
         header_line = _generate_csv_header_line(header=header, header_prefix=header_prefix, header_names=fields.keys(), sep=sep, newline=newline)
 
@@ -206,9 +219,13 @@ class ItemList:
             Specify the schema (if database flavor supports this). If None,
             use default schema or derive the schema name from `table_name`.
 
-        fields: dict
-            Dictionary which maps output column names to attribute names of the generators.
-            Example: `fields={'COL1': 'field_name_1', 'COL2': 'field_name_2'}
+        fields: list or dict
+            List of field names to export, or dictionary mapping output column names
+            to attribute names of the generators.
+
+            Examples:
+               fields=['field_name_1', 'field_name_2']
+               fields={'COL1': 'field_name_1', 'COL2': 'field_name_2'}
 
         if_exists : {'fail', 'do_nothing', 'replace', 'append'}, default 'fail'
             - fail: If table exists, raise an error.
