@@ -9,10 +9,12 @@ def add(x, y):
 
 
 EXEMPLAR_PRIMITIVE_GENERATORS = [
+    Boolean(p=0.3),
     Constant("quux"),
-    Integer(100, 200),
-    HashDigest(length=6),
     FakerGenerator(method="name"),
+    Float(12.34, 56.78),
+    HashDigest(length=6),
+    Integer(100, 200),
     IterateOver('abcdefghijklmnopqrstuvwxyz'),
     SelectOne('abcdefghijklmnopqrstuvwxyz'),
     SelectOne('abcde', p=[0.1, 0.05, 0.7, 0.03, 0.12]),
