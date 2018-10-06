@@ -12,6 +12,7 @@ attrs = "*"
 faker = "*"
 shapely = "*"
 bidict = "*"
+geojson = "*"
 
 [dev-packages]
 pytest = "*"
