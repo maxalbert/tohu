@@ -373,13 +373,8 @@ class SelectOne(PrimitiveGenerator):
 
 def as_tohu_generator(g):
     """
-    Helper function which guarantees its return value
-    to be a tohu generator.
-
-    If the input `g` is already a tohu generator, it
-    is returned unchanged. Otherwise it is wrapped
-    in a Constant generator which returns the input
-    value at each iteration.
+    If g is a tohu generator return it unchanged,
+    otherwise wrap it in a Constant generator.
     """
 
     if isinstance(g, TohuBaseGenerator):
