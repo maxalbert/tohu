@@ -419,6 +419,9 @@ class ShapelyGeolocationPair(TohuBaseGenerator):
         fields.update({name: attr.ib(value) for name, value in self.properties.items()})
         cls = attr.make_class('Geolocation', fields)
         cls.as_dict = lambda self: attr.asdict(self)
+        def __new_eq__(self, other):
+            return self.lon == other.lon and self.lat == other.lat
+        cls.__eq__ = __new_eq__
         return cls
 
     def __repr__(self):
