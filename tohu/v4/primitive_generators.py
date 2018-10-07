@@ -681,7 +681,7 @@ class Timestamp(PrimitiveGenerator):
     Generator which produces random timestamps.
     """
 
-    def __init__(self, *, start=None, end=None, date=None):
+    def __init__(self, *, start=None, end=None, date=None, fmt=None, uppercase=False):
         """
         Initialise timestamp generator.
 
@@ -695,6 +695,9 @@ class Timestamp(PrimitiveGenerator):
         `strftime(fmt=...)` on this generator another generator is
         returned which produces timestamps as strings instead.
 
+        Alternatively, you can provide the `fmt` argument directly
+        to produce timestamps formatted as strings.
+
         Args:
             start (date string):  start time
             end   (date string):  end time
@@ -702,6 +705,10 @@ class Timestamp(PrimitiveGenerator):
                                   (and mutually exclusive) to specifying `start` and `end`.
                                   It is equivalent to setting start='YYYY-MM-DD 00:00:00',
                                   end='YYYY-MM-DD 23:59:59'.
+            fmt (str or None):    if given, return timestamps as strings instead of datetime
+                                  objects, using `fmt` as the formatting string (default: None)
+            uppercase (bool):     whether to format strings as uppercase. If `fmt` is None
+                                  then this parameter is ignored.
         """
         super().__init__()
 
@@ -731,10 +738,25 @@ class Timestamp(PrimitiveGenerator):
         if self.dt < 0:
             raise TimestampError(f"Start time must be before end time. Got: start_time='{self.start}', end_time='{self.end}'.")
 
+        self.fmt = fmt
+        self.uppercase = uppercase
+
+        if self.fmt is None:
+            self._maybe_format_timestamp = identity
+        else:
+            if not isinstance(self.fmt, str):
+                raise ValueError(f"Argument 'fmt' must be of type string, got '{type(self.fmt)}'")
+
+            if uppercase:
+                self._maybe_format_timestamp = lambda ts: ts.strftime(self.fmt).upper()
+            else:
+                self._maybe_format_timestamp = lambda ts: ts.strftime(self.fmt)
+
         self.offset_randgen = Random()
 
     def spawn(self):
-        new_obj = Timestamp(start=self.start.strftime('%Y-%m-%d %H:%M:%S'), end=self.end.strftime('%Y-%m-%d %H:%M:%S'))
+        new_obj = Timestamp(start=self.start.strftime('%Y-%m-%d %H:%M:%S'), end=self.end.strftime('%Y-%m-%d %H:%M:%S'),
+                            fmt=self.fmt, uppercase=self.uppercase)
         new_obj._set_random_state_from(self)
         return new_obj
 
@@ -744,9 +766,15 @@ class Timestamp(PrimitiveGenerator):
     def __next__(self):
         next_offset = self.offset_randgen.randint(0, self.dt)
         ts = (self.start + dt.timedelta(seconds=next_offset))
-        return ts
+        return self._maybe_format_timestamp(ts)
 
     def reset(self, seed):
         super().reset(seed)
         self.offset_randgen.seed(seed)
         return self
+
+    def strftime(self, fmt='%Y-%m-%d %H:%M:%S', uppercase=False):
+        g = Timestamp(start=self.start.strftime('%Y-%m-%d %H:%M:%S'), end=self.end.strftime('%Y-%m-%d %H:%M:%S'),
+                      fmt=fmt, uppercase=uppercase)
+        self.register_clone(g)
+        return g

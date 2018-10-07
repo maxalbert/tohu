@@ -88,26 +88,3 @@ def split_geolocation(self):
     return tuple(GetAttribute(self, attr_name) for attr_name in attributes)
 
 GeoJSONGeolocation.split = split_geolocation
-
-
-def strftime(self, fmt='%Y-%m-%d %H:%M:%S', uppercase=False):
-    """
-    Parameters
-    ----------
-    fmt : str
-        Format string for timestamps produced by the generator
-        (same format as accepted by `datetime.strftime`)
-    uppercase : bool
-        If True, timestampts are formatted in uppercase (default: False)
-    """
-    if uppercase:
-        maybe_to_uppercase = lambda x: x.upper()
-    else:
-        maybe_to_uppercase = identity
-
-    def format_timestamp(ts):
-        return maybe_to_uppercase(ts.strftime(fmt))
-
-    return Apply(format_timestamp, self)
-
-Timestamp.strftime = strftime
