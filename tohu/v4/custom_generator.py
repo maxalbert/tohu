@@ -108,7 +108,24 @@ class CustomGenerator(TohuBaseGenerator):
         self.__dict__.update(self.field_gens_named)
 
         set_item_class_name_on_custom_generator_class(self.__class__)
+        self._set_field_names_and_field_gens()
         self._set_item_class()
+
+    def _set_field_names_and_field_gens(self):
+        field_gen_names = list(self.field_gens_named.keys())
+
+        if hasattr(self, '__fields__'):
+            self.field_names = self.__fields__
+        else:
+            self.field_names = field_gen_names
+
+        if hasattr(self, '__fields__'):
+            # sanity check
+            for field_name in self.field_names:
+                if field_name not in field_gen_names:
+                    raise ValueError(f"Attribute __fields__ contains name which is not a named field generator: '{field_name}'")
+
+        self.field_gens = {name: gen for (name, gen) in self.field_gens_named.items() if name in self.field_names}
 
     def _set_item_class(self):
         """
@@ -116,11 +133,10 @@ class CustomGenerator(TohuBaseGenerator):
             The custom generator class for which to create an item-class
         """
         clsname = self.__tohu_items_name__
-        attr_names = self.field_gens_named.keys()
-        self.item_cls = make_item_class(clsname, attr_names)
+        self.item_cls = make_item_class(clsname, self.field_names)
 
     def __next__(self):
-        field_values = [next(g) for g in self.field_gens_named.values()]
+        field_values = [next(g) for g in self.field_gens.values()]
         return self.item_cls(*field_values)
 
     def _find_field_generator_templates(self):
