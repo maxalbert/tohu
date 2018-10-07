@@ -716,6 +716,14 @@ class Timestamp(PrimitiveGenerator):
             if not (start is None and end is None):
                 raise TimestampError("Argument `date` is mutually exclusive with `start` and `end`.")
 
+            # ensure that date is a string of the form 'YYYY-MM-DD'
+            try:
+                date = date.strftime('%Y-%m-%d')
+            except AttributeError:
+                if not isinstance(date, str):
+                    raise TypeError("Argument `date` must be either a string or a date-like object "
+                                    f"(e.g. datetime.date or pandas.Timestamp). Got: {type(date)}")
+
             self.start = dt.datetime.strptime(date, '%Y-%m-%d')
             self.end = self.start + dt.timedelta(hours=23, minutes=59, seconds=59)
         else:
