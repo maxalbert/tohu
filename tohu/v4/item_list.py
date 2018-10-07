@@ -1,6 +1,7 @@
 import io
 import logging
 import numpy as np
+import os
 import re
 import pandas as pd
 from operator import attrgetter
@@ -179,6 +180,11 @@ class ItemList:
 
         header_line = _generate_csv_header_line(header=header, header_prefix=header_prefix, header_names=fields.keys(), sep=sep, newline=newline)
 
+        if filename is not None:
+            # ensure parent directory of output file exits
+            dirname = os.path.dirname(os.path.abspath(filename))
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
         file_or_string = open(filename, 'a' if append else 'w') if (filename is not None) else io.StringIO()
 
         retval = None
