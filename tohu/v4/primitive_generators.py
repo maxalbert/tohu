@@ -691,6 +691,10 @@ class Timestamp(PrimitiveGenerator):
         interpreted as as `YYYY-MM-DD 23:59:59`, i.e. the day is counted
         in full.
 
+        The produced timestamps are datetime objects, but calling
+        `strftime(fmt=...)` on this generator another generator is
+        returned which produces timestamps as strings instead.
+
         Args:
             start (date string):  start time
             end   (date string):  end time
