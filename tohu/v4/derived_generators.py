@@ -8,7 +8,7 @@ from random import Random
 from .base import TohuBaseGenerator, SeedGenerator
 from .primitive_generators import as_tohu_generator
 
-__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator', 'TohuDict', 'fstr', 'ifthen']
+__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator', 'SelectMultipleFromGenerator', 'TohuDict', 'fstr', 'ifthen']
 
 
 class FuncArgGens:
@@ -147,6 +147,30 @@ class SelectOneFromGenerator(Apply):
 
     def spawn(self):
         return SelectOneFromGenerator(self.parent)
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.randgen.setstate(other.randgen.getstate())
+
+
+# TODO: find a better name for this class!
+class SelectMultipleFromGenerator(Apply):
+
+    def __init__(self, parent, num):
+        assert isinstance(parent, TohuBaseGenerator)
+        assert isinstance(num, TohuBaseGenerator)
+        self.parent = parent
+        self.num = num
+        self.randgen = Random()
+        func = self.randgen.choices
+        super().__init__(func, parent, k=self.num)
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(seed)
+
+    def spawn(self):
+        return SelectMultipleFromGenerator(self.parent, self.num)
 
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
