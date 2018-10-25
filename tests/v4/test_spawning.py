@@ -84,7 +84,7 @@ def test_spawn_derived_generators_v2():
 
     This is similar to test_spawn_derived_generators() above but involves slightly
     more complicated definitions of the generators g and h and also involves constituent
-    generators which have their own random state (e.g. SelectOneFromGenerator).
+    generators which have their own random state (e.g. SelectOneDerived).
     """
 
     seqs = [[10, 11, 12, 13, 14, 15],
@@ -102,7 +102,7 @@ def test_spawn_derived_generators_v2():
     x = Integer(100, 200)
     y = Integer(300, 400)
     s = SelectOne(seqs)
-    z = SelectOneFromGenerator(s)
+    z = SelectOneDerived(s)
 
     g = Apply(add, Apply(add, x, y), z)
 
@@ -170,7 +170,7 @@ def test_spawn_custom_generator_v2():
     class QuuxGenerator(CustomGenerator):
         x = Integer(100, 200).set_tohu_name('x')
         y = Integer(300, 400).set_tohu_name('y')
-        z = SelectOneFromGenerator(SelectOne(seqs)).set_tohu_name('z')
+        z = SelectOneDerived(SelectOne(seqs)).set_tohu_name('z')
 
         aa = Apply(add, Apply(add, x, y), z).set_tohu_name('aa')
 

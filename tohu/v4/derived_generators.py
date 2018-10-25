@@ -8,7 +8,7 @@ from random import Random
 from .base import TohuBaseGenerator, SeedGenerator
 from .primitive_generators import as_tohu_generator
 
-__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneFromGenerator', 'SelectMultipleFromGenerator', 'TohuDict', 'fstr', 'ifthen']
+__all__ = ['Apply', 'GetAttribute', 'Lookup', 'SelectOneDerived', 'SelectMultipleDerived', 'TohuDict', 'fstr', 'ifthen']
 
 
 class FuncArgGens:
@@ -132,8 +132,7 @@ class Lookup(Apply):
         super()._set_random_state_from(other)
 
 
-# TODO: find a better name for this class!
-class SelectOneFromGenerator(Apply):
+class SelectOneDerived(Apply):
 
     def __init__(self, parent):
         self.parent = parent
@@ -146,7 +145,7 @@ class SelectOneFromGenerator(Apply):
         self.randgen.seed(seed)
 
     def spawn(self):
-        return SelectOneFromGenerator(self.parent)
+        return SelectOneDerived(self.parent)
 
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
@@ -154,7 +153,7 @@ class SelectOneFromGenerator(Apply):
 
 
 # TODO: find a better name for this class!
-class SelectMultipleFromGenerator(Apply):
+class SelectMultipleDerived(Apply):
 
     def __init__(self, parent, num):
         assert isinstance(parent, TohuBaseGenerator)
@@ -170,7 +169,7 @@ class SelectMultipleFromGenerator(Apply):
         self.randgen.seed(seed)
 
     def spawn(self):
-        return SelectMultipleFromGenerator(self.parent, self.num)
+        return SelectMultipleDerived(self.parent, self.num)
 
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)

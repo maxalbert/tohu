@@ -4,7 +4,7 @@ from itertools import count
 
 from .logging import logger
 from .primitive_generators import PrimitiveGenerator
-from .derived_generators import Apply, GetAttribute, Lookup, SelectOneFromGenerator
+from .derived_generators import Apply, GetAttribute, Lookup, SelectOneDerived
 
 __all__ = ['SpawnContext']
 
@@ -58,10 +58,10 @@ class SpawnContext:
             if isinstance(g_tpl, PrimitiveGenerator):
                 self.templates[name] = g_tpl
                 self.spawns[name] = g_tpl.spawn()
-            elif isinstance(g_tpl, SelectOneFromGenerator):
+            elif isinstance(g_tpl, SelectOneDerived):
                 new_parent = self.spawn_template(g_tpl.parent, name=None)
                 self.templates[name] = g_tpl
-                self.spawns[name] = SelectOneFromGenerator(new_parent)
+                self.spawns[name] = SelectOneDerived(new_parent)
             elif isinstance(g_tpl, GetAttribute):
                 new_parent = self.spawn_template(g_tpl.parent, name=None)
                 self.templates[name] = g_tpl

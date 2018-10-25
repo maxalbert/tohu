@@ -9,7 +9,7 @@ from operator import add, mul, gt, ge, lt, le, eq
 
 from .base import TohuBaseGenerator
 from .primitive_generators import GeoJSONGeolocation, SelectOne, Timestamp, as_tohu_generator
-from .derived_generators import Apply, GetAttribute, SelectOneFromGenerator
+from .derived_generators import Apply, GetAttribute, SelectOneDerived
 from .utils import identity
 
 __all__ = []
@@ -80,7 +80,7 @@ def getattribute_generators(self, name):
     return GetAttribute(self, name)
 
 SelectOne.__getattr__ = getattribute_generators
-SelectOneFromGenerator.__getattr__ = getattribute_generators
+SelectOneDerived.__getattr__ = getattribute_generators
 
 
 def split_geolocation(self):
