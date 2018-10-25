@@ -15,7 +15,8 @@ from .logging import logger
 from .utils import identity
 
 __all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'GeoJSONGeolocation',
-           'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'Sequential', 'Timestamp', 'as_tohu_generator']
+           'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'SelectMultiple', 'Sequential', 'Timestamp',
+           'as_tohu_generator']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -513,6 +514,84 @@ class SelectOne(PrimitiveGenerator):
 
     def spawn(self):
         new_obj = SelectOne(self.values, p=self.p)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+
+class SelectMultiple(PrimitiveGenerator):
+    """
+    Generator which produces a sequence of items taken from a given set of elements.
+    """
+
+    def __init__(self, values, num, p=None):
+        """
+        Parameters
+        ----------
+        values: list
+            List of options from which to choose elements.
+        num: int
+            Number of elements to select.
+        p: list, optional
+            The probabilities associated with each element in `values`.
+            If not given the assumes a uniform distribution over all values.
+        """
+        super().__init__()
+        self.values = list(values)  # need to convert to a list so that numpy.random.RandomState() doesn't get confused
+        self.num = num
+        self.p = p
+        self.randgen = None
+        self.func_random_choice = None
+        self._init_randgen()
+
+    def _init_randgen(self):
+        """
+        Initialise random generator to be used for picking elements.
+        With the current implementation in tohu (where we pick elements
+        from generators individually instead of in bulk), it is faster
+        to `use random.Random` than `numpy.random.RandomState` (it is
+        possible that this may change in the future if we change the
+        design so that tohu pre-produces elements in bulk, but that's
+        not likely to happen in the near future).
+
+        Since `random.Random` doesn't support arbitrary distributions,
+        we can only use it if `p=None`. This helper function returns
+        the appropriate random number generator depending in the value
+        of `p`, and also returns a function `random_choice` which can be
+        applied to the input sequence to select random elements from it.
+        """
+        if self.p is None:
+            self.randgen = Random()
+            self.func_random_choice = partial(self.randgen.choices, k=self.num)
+        else:
+            self.randgen = np.random.RandomState()
+            self.func_random_choice = partial(self.randgen.choice, p=self.p, k=self.num)
+
+    def _set_random_state_from(self, other):
+        """
+        Transfer the internal state from `other` to `self`.
+        After this call, `self` will produce the same elements
+        in the same order as `other` (even though they otherwise
+        remain completely independent).
+        """
+        try:
+            # this works if randgen is an instance of random.Random()
+            self.randgen.setstate(other.randgen.getstate())
+        except AttributeError:
+            # this works if randgen is an instance of numpy.random.RandomState()
+            self.randgen.set_state(other.randgen.get_state())
+
+        return self
+
+    def __next__(self):
+        return self.func_random_choice(self.values)
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(seed)
+        return self
+
+    def spawn(self):
+        new_obj = SelectMultiple(self.values, num=self.num, p=self.p)
         new_obj._set_random_state_from(self)
         return new_obj
 
