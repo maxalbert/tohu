@@ -15,7 +15,7 @@ from .logging import logger
 from .utils import identity
 
 __all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'GeoJSONGeolocation',
-           'HashDigest', 'Integer', 'IterateOver', 'SelectOne', 'SelectMultiple', 'Sequential', 'Timestamp',
+           'HashDigest', 'Integer', 'IterateOver', 'SelectOnePrimitive', 'SelectMultiplePrimitive', 'Sequential', 'Timestamp',
            'as_tohu_generator']
 
 
@@ -443,7 +443,7 @@ class IterateOver(PrimitiveGenerator):
         self.idx = other.idx
 
 
-class SelectOne(PrimitiveGenerator):
+class SelectOnePrimitive(PrimitiveGenerator):
     """
     Generator which produces a sequence of items taken from a given set of elements.
     """
@@ -513,12 +513,12 @@ class SelectOne(PrimitiveGenerator):
         return self
 
     def spawn(self):
-        new_obj = SelectOne(self.values, p=self.p)
+        new_obj = SelectOnePrimitive(self.values, p=self.p)
         new_obj._set_random_state_from(self)
         return new_obj
 
 
-class SelectMultiple(PrimitiveGenerator):
+class SelectMultiplePrimitive(PrimitiveGenerator):
     """
     Generator which produces a sequence of items taken from a given set of elements.
     """
@@ -591,7 +591,7 @@ class SelectMultiple(PrimitiveGenerator):
         return self
 
     def spawn(self):
-        new_obj = SelectMultiple(self.values, num=self.num, p=self.p)
+        new_obj = SelectMultiplePrimitive(self.values, num=self.num, p=self.p)
         new_obj._set_random_state_from(self)
         return new_obj
 

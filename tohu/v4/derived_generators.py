@@ -134,8 +134,9 @@ class Lookup(Apply):
 
 class SelectOneDerived(Apply):
 
-    def __init__(self, parent):
-        self.parent = parent
+    def __init__(self, parent, p=None):
+        self.parent = as_tohu_generator(parent)
+        self.p = as_tohu_generator(p)
         self.randgen = Random()
         func = self.randgen.choice
         super().__init__(func, parent)
@@ -145,7 +146,7 @@ class SelectOneDerived(Apply):
         self.randgen.seed(seed)
 
     def spawn(self):
-        return SelectOneDerived(self.parent)
+        return SelectOneDerived(self.parent, self.p)
 
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)

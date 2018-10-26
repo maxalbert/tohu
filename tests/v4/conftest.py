@@ -3,6 +3,7 @@ import os
 from .context import tohu
 from tohu.v4.primitive_generators import *
 from tohu.v4.derived_generators import *
+from tohu.v4.dispatch_generators import *
 
 __all__ = ['EXEMPLAR_GENERATORS', 'EXEMPLAR_PRIMITIVE_GENERATORS', 'EXEMPLAR_DERIVED_GENERATORS']
 
