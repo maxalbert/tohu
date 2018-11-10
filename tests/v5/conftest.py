@@ -8,6 +8,7 @@ logger.setLevel('DEBUG')
 EXEMPLAR_PRIMITIVE_GENERATORS = [
     Constant("quux"),
     Boolean(p=0.3),
+    Integer(100, 200),
 ]
 
 EXEMPLAR_GENERATORS = EXEMPLAR_PRIMITIVE_GENERATORS
