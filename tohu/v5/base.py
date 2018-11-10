@@ -1,7 +1,10 @@
 import hashlib
 from abc import ABCMeta, abstractmethod
+from itertools import islice
 from random import Random
+from tqdm import tqdm
 
+from .item_list import ItemList
 from .logging import logger
 
 __all__ = ['SeedGenerator', 'TohuBaseGenerator']
@@ -86,3 +89,22 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         self.seed_generator.reset(seed)
 
         # TODO: reset clones once we have added them back in
+
+    def generate(self, num, *, seed=None, progressbar=False):
+        """
+        Return sequence of `num` elements.
+
+        If `seed` is not None, the generator is reset
+        using this seed before generating the elements.
+        """
+        if seed is not None:
+            self.reset(seed)
+
+        items = islice(self, num)
+        if progressbar:
+            items = tqdm(items, total=num)
+
+        item_list = [x for x in items]
+
+        #logger.warning("TODO: initialise ItemList with random seed!")
+        return ItemList(item_list, num)
