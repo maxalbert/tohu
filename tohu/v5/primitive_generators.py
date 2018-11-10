@@ -1,7 +1,7 @@
 from random import Random
 from .base import TohuBaseGenerator
 
-__all__ = ['Boolean', 'Constant', 'PrimitiveGenerator']
+__all__ = ['Boolean', 'Constant', 'Integer', 'PrimitiveGenerator']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -60,8 +60,51 @@ class Boolean(PrimitiveGenerator):
         self.randgen.seed(next(self.seed_generator))
         return self
 
-    def _set_random_state_from(self, other):
-        self.randgen.setstate(other.randgen.getstate())
-
     def __next__(self):
         return self.randgen.random() < self.p
+
+    def spawn(self):
+        new_obj = Boolean(self.p)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.randgen.setstate(other.randgen.getstate())
+
+
+class Integer(PrimitiveGenerator):
+    """
+    Generator which produces random integers k in the range low <= k <= high.
+    """
+
+    def __init__(self, low, high):
+        """
+        Parameters
+        ----------
+        low: integer
+            Lower bound (inclusive).
+        high: integer
+            Upper bound (inclusive).
+        """
+        super().__init__()
+        self.low = low
+        self.high = high
+        self.randgen = Random()
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(next(self.seed_generator))
+        return self
+
+    def __next__(self):
+        return self.randgen.randint(self.low, self.high)
+
+    def spawn(self):
+        new_obj = Integer(self.low, self.high)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.randgen.setstate(other.randgen.getstate())
