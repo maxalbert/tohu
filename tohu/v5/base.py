@@ -83,6 +83,9 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         myhash = hashlib.md5(str(id(self)).encode()).hexdigest()
         return myhash[:12]
 
+    def __iter__(self):
+        return self
+
     @abstractmethod
     def reset(self, seed):
         logger.debug(f'Resetting {self} (seed={seed})')
