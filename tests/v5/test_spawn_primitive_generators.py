@@ -1,17 +1,5 @@
 import pytest
-#from .conftest import EXEMPLAR_PRIMITIVE_GENERATORS
-
-from .context import tohu
-from tohu.v5.primitive_generators import *
-
-# FIXME: we need to duplicate the list of exemplar generators here
-# because for some reason the tests fail if we import them from
-# conftest.py
-EXEMPLAR_PRIMITIVE_GENERATORS = [
-    Constant("quux"),
-    Boolean(p=0.3),
-    Integer(100, 200),
-]
+from .exemplar_generators import EXEMPLAR_PRIMITIVE_GENERATORS
 
 
 @pytest.mark.parametrize("g", EXEMPLAR_PRIMITIVE_GENERATORS)
