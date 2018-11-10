@@ -111,3 +111,6 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
         #logger.warning("TODO: initialise ItemList with random seed!")
         return ItemList(item_list, num)
+
+    def _set_random_state_from(self, other):
+        self.seed_generator._set_random_state_from(other.seed_generator)
