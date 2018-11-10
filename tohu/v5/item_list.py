@@ -51,19 +51,19 @@ def _extract_schema_if_given(table_name):
 
 class ItemList:
 
-    def __init__(self, items, N):
+    def __init__(self, items, num):
         self.items = items if isinstance(items, list) else list(items)
-        self.N = N
+        self.num = num
         self.randstate = np.random.RandomState()
 
     def __repr__(self):
-        return f"<ItemList containing {self.N} items>"
+        return f"<ItemList containing {self.num} items>"
 
     def __eq__(self, other):
         return self.items == other
 
     def __len__(self):
-        return self.N
+        return self.num
 
     def __getitem__(self, idx):
         return self.items[idx]
@@ -87,13 +87,13 @@ class ItemList:
             raise ValueError("Exactly one of the arguments `num`, `p` must be given.")
 
         if num is not None:
-            if num > self.N:
-                raise ValueError(f"Subsample cannot be larger than the original sample of size {self.N}")
-            return ItemList(self.randstate.choice(self.items, size=num, replace=False), N=num)
+            if num > self.num:
+                raise ValueError(f"Subsample cannot be larger than the original sample of size {self.num}")
+            return ItemList(self.randstate.choice(self.items, size=num, replace=False), num=num)
         elif p is not None:
             if p < 0 or p > 1.0:
                 raise ValueError(f"The value of p must be in the range [0, 1]. Got: p={p}")
-            subsample = np.array(self.items)[self.randstate.random_sample(self.N) < p]
+            subsample = np.array(self.items)[self.randstate.random_sample(self.num) < p]
             return subsample
         else:
             raise ValueError("Arguments `num` and `p` are mutually exclusive - only one of them may be specified.")
