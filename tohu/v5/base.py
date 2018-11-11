@@ -114,3 +114,8 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     def _set_random_state_from(self, other):
         self.seed_generator._set_random_state_from(other.seed_generator)
+
+    @abstractmethod
+    def spawn(self):
+        raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
+
