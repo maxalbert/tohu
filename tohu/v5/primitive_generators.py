@@ -1,7 +1,8 @@
 from random import Random
 from .base import TohuBaseGenerator
+from .logging import logger
 
-__all__ = ['Boolean', 'Constant', 'Float', 'Integer', 'PrimitiveGenerator']
+__all__ = ['Boolean', 'CharString', 'Constant', 'Float', 'Integer', 'PrimitiveGenerator']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -145,3 +146,57 @@ class Float(PrimitiveGenerator):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.randgen.setstate(other.randgen.getstate())
+
+
+CHARACTER_SETS = {
+    '<alphanumeric>': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+    '<alphanumeric_lowercase>': 'abcdefghijklmnopqrstuvwxyz0123456789',
+    '<alphanumeric_uppercase>': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+    '<lowercase>': 'abcdefghijklmnopqrstuvwxyz',
+    '<uppercase>': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    '<digits>': '0123456789',
+}
+
+
+class CharString(PrimitiveGenerator):
+    """
+    Generator which produces a sequence of character strings.
+    """
+
+    def __init__(self, *, length, charset='<alphanumeric>'):
+        """
+        Parameters
+        ----------
+        length: integer
+            Length of the character strings produced by this generator.
+        charset: iterable
+            Character set to draw from when generating strings, or string
+            with the name of a pre-defined character set.
+            Default: <alphanumeric> (both lowercase and uppercase letters).
+        """
+        super().__init__()
+        self.length = length
+        try:
+            self.charset = CHARACTER_SETS[charset]
+            logger.debug(f"Using pre-defined character set: '{charset}'")
+        except KeyError:
+            self.charset = charset
+        self.char_gen = Random()
+
+    def spawn(self):
+        new_obj = CharString(length=self.length, charset=self.charset)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.char_gen.setstate(other.char_gen.getstate())
+
+    def __next__(self):
+        chars = self.char_gen.choices(self.charset, k=self.length)
+        return ''.join(chars)
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.char_gen.seed(next(self.seed_generator))
+        return self
