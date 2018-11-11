@@ -2,7 +2,7 @@ from random import Random
 from .base import TohuBaseGenerator
 from .logging import logger
 
-__all__ = ['Boolean', 'CharString', 'Constant', 'Float', 'Integer', 'PrimitiveGenerator']
+__all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'Float', 'Integer', 'PrimitiveGenerator']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -200,3 +200,24 @@ class CharString(PrimitiveGenerator):
         super().reset(seed)
         self.char_gen.seed(next(self.seed_generator))
         return self
+
+
+class DigitString(CharString):
+    """
+    Generator which produces a sequence of strings containing only digits.
+    """
+
+    def __init__(self, *, length=None):
+        """
+        Parameters
+        ----------
+        length: integer
+            Length of the character strings produced by this generator.
+        """
+        charset = "0123456789"
+        super().__init__(length=length, charset=charset)
+
+    def spawn(self):
+        new_obj = DigitString(length=self.length)
+        new_obj._set_random_state_from(self)
+        return new_obj

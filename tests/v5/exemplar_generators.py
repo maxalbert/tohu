@@ -8,6 +8,7 @@ EXEMPLAR_PRIMITIVE_GENERATORS = [
     Integer(100, 200),
     Float(low=1.234, high=5.678),
     CharString(length=8),
+    DigitString(length=10),
 ]
 
 EXEMPLAR_GENERATORS = EXEMPLAR_PRIMITIVE_GENERATORS
