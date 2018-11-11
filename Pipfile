@@ -20,7 +20,6 @@ pytest-cov = "*"
 yapf = "*"
 "testing.postgresql" = "*"
 "tohu" = {editable = true, path = "."}
-"e1839a8" = {editable = true, path = "."}
 nbval = "*"
 jupyterlab = "*"
 ipython = "*"
