@@ -9,6 +9,7 @@ EXEMPLAR_PRIMITIVE_GENERATORS = [
     Float(low=1.234, high=5.678),
     CharString(length=8),
     DigitString(length=10),
+    HashDigest(length=8),
 ]
 
 EXEMPLAR_GENERATORS = EXEMPLAR_PRIMITIVE_GENERATORS
