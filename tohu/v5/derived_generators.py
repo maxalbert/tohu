@@ -1,6 +1,8 @@
+from random import Random
 from .base import TohuBaseGenerator
+from .extras import as_tohu_generator
 
-__all__ = ['Apply', 'DerivedGenerator', 'Lookup']
+__all__ = ['Apply', 'DerivedGenerator', 'Lookup', 'SelectOneDerived']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -46,3 +48,24 @@ class Lookup(Apply):
 
     def spawn(self):
         return Lookup(self.g, self.mapping)
+
+
+class SelectOneDerived(Apply):
+
+    def __init__(self, parent, p=None):
+        self.parent = as_tohu_generator(parent)
+        self.p = as_tohu_generator(p)
+        self.randgen = Random()
+        func = self.randgen.choice
+        super().__init__(func, parent)
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(next(self.seed_generator))
+
+    def spawn(self):
+        return SelectOneDerived(self.parent, self.p)
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.randgen.setstate(other.randgen.getstate())
