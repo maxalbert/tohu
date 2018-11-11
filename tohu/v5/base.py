@@ -47,6 +47,8 @@ class TohuBaseGenerator(metaclass=ABCMeta):
     """
 
     def __init__(self):
+        self.parent = None
+        self._clones = []
         self._constituents = []
         self.tohu_name = None
         self.seed_generator = SeedGenerator()
@@ -120,3 +122,30 @@ class TohuBaseGenerator(metaclass=ABCMeta):
     def spawn(self):
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
 
+    def clone(self):
+        c = self.spawn()
+        self.register_clone(c)
+        c.register_parent(self)
+        return c
+
+    def register_clone(self, clone):
+        self._clones.append(clone)
+
+        # If possible, set the clone's tohu_name for easier debugging
+        if self.tohu_name is not None:
+            clone.set_tohu_name(f"{self.tohu_name} (clone #{len(self._clones)})")
+
+        if len(self._clones) != len(set(self._clones)):
+            raise RuntimeError(f"Duplicate clone added: {self}  -->  {clone}")
+
+    def register_parent(self, parent):
+        self.parent = parent
+
+    @property
+    def parent_chain(self):
+        n = self.parent
+        chain = []
+        while n:
+            chain.append(n)
+            n = n.parent
+        return chain
