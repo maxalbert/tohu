@@ -91,10 +91,14 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     @abstractmethod
     def reset(self, seed):
+        """
+        Reset this generator's seed generator and any clones.
+        """
         logger.debug(f'Resetting {self} (seed={seed})')
         self.seed_generator.reset(seed)
 
-        # TODO: reset clones once we have added them back in
+        for c in self._clones:
+            c.reset(next(self.seed_generator))
 
     def generate(self, num, *, seed=None, progressbar=False):
         """
