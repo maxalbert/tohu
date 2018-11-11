@@ -10,6 +10,7 @@ EXEMPLAR_PRIMITIVE_GENERATORS = [
     CharString(length=8),
     DigitString(length=10),
     HashDigest(length=8),
+    FakerGenerator(method="name"),
 ]
 
 EXEMPLAR_GENERATORS = EXEMPLAR_PRIMITIVE_GENERATORS
