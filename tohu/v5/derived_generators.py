@@ -29,11 +29,5 @@ class Apply(DerivedGenerator):
     def reset(self, seed):
         super().reset(seed)
 
-        for g in self.arg_gens:
-            g.reset(next(self.seed_generator))
-
-        for g in self.kwarg_gens.values():
-            g.reset(next(self.seed_generator))
-
     def spawn(self):
         return Apply(self.callable, *self.arg_gens_orig, **self.kwarg_gens_orig)
