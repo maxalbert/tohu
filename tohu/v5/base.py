@@ -98,7 +98,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         self.seed_generator.reset(seed)
 
         for c in self._clones:
-            c.reset(next(self.seed_generator))
+            c.reset(seed)
 
     def generate(self, num, *, seed=None, progressbar=False):
         """
