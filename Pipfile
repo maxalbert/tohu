@@ -13,6 +13,7 @@ faker = "*"
 shapely = "*"
 bidict = "*"
 geojson = "*"
+mako = "*"
 
 [dev-packages]
 pytest = "*"
