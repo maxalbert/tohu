@@ -6,7 +6,7 @@ from .base import TohuBaseGenerator
 from .logging import logger
 from .utils import identity
 
-__all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'HashDigest', 'Integer', 'PrimitiveGenerator', 'SelectOne']
+__all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'HashDigest', 'Integer', 'PrimitiveGenerator', 'SelectOnePrimitive']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -327,7 +327,7 @@ class FakerGenerator(PrimitiveGenerator):
         self.fake.random.setstate(other.fake.random.getstate())
 
 
-class SelectOne(PrimitiveGenerator):
+class SelectOnePrimitive(PrimitiveGenerator):
     """
     Generator which produces a sequence of items taken from a given set of elements.
     """
@@ -397,6 +397,6 @@ class SelectOne(PrimitiveGenerator):
         return self
 
     def spawn(self):
-        new_obj = SelectOne(self.values, p=self.p)
+        new_obj = SelectOnePrimitive(self.values, p=self.p)
         new_obj._set_random_state_from(self)
         return new_obj
