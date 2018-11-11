@@ -1,7 +1,7 @@
 from random import Random
 from .base import TohuBaseGenerator
 
-__all__ = ['Boolean', 'Constant', 'Integer', 'PrimitiveGenerator']
+__all__ = ['Boolean', 'Constant', 'Float', 'Integer', 'PrimitiveGenerator']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -102,6 +102,43 @@ class Integer(PrimitiveGenerator):
 
     def spawn(self):
         new_obj = Integer(self.low, self.high)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.randgen.setstate(other.randgen.getstate())
+
+
+class Float(PrimitiveGenerator):
+    """
+    Generator which produces random floating point numbers x in the range low <= x <= high.
+    """
+
+    def __init__(self, low, high):
+        """
+        Parameters
+        ----------
+        low: integer
+            Lower bound (inclusive).
+        high: integer
+            Upper bound (inclusive).
+        """
+        super().__init__()
+        self.low = low
+        self.high = high
+        self.randgen = Random()
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(next(self.seed_generator))
+        return self
+
+    def __next__(self):
+        return self.randgen.uniform(self.low, self.high)
+
+    def spawn(self):
+        new_obj = Float(self.low, self.high)
         new_obj._set_random_state_from(self)
         return new_obj
 
