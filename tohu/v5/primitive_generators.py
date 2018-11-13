@@ -6,7 +6,8 @@ from .base import TohuBaseGenerator
 from .logging import logger
 from .utils import identity
 
-__all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'HashDigest', 'Integer', 'PrimitiveGenerator', 'SelectOnePrimitive']
+__all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'HashDigest',
+           'Integer', 'NumpyRandomGenerator', 'PrimitiveGenerator', 'SelectOnePrimitive']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -276,6 +277,49 @@ class HashDigest(PrimitiveGenerator):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.randgen.set_state(other.randgen.get_state())
+
+
+class NumpyRandomGenerator(TohuBaseGenerator):
+    """
+    Generator which produces random numbers using one of the methods supported by numpy. [1]
+
+    [1] https://docs.scipy.org/doc/numpy/reference/routines.random.html
+    """
+
+    def __init__(self, method, **numpy_args):
+        """
+        Parameters
+        ----------
+        method: string
+            Name of the numpy function to use (see [1] for details)
+        numpy_args:
+            Remaining arguments passed to the numpy function (see [1] for details)
+
+        References
+        ----------
+        [1] https://docs.scipy.org/doc/numpy/reference/routines.random.html
+        """
+        super().__init__()
+        self.method = method
+        self.random_state = np.random.RandomState()
+        self.randgen = getattr(self.random_state, method)
+        self.numpy_args = numpy_args
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.random_state.seed(seed)
+        return self
+
+    def __next__(self):
+        return self.randgen(**self.numpy_args)
+
+    def _spawn(self, spawn_mapping):
+        new_obj = NumpyRandomGenerator(method=self.method, **self.numpy_args)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.random_state.set_state(other.random_state.get_state())
 
 
 class FakerGenerator(PrimitiveGenerator):
