@@ -54,19 +54,19 @@ class Lookup(Apply):
 
 class SelectOneDerived(Apply):
 
-    def __init__(self, parent, p=None):
-        self.parent = as_tohu_generator(parent)
+    def __init__(self, gen_input, p=None):
+        self.gen_input = as_tohu_generator(gen_input)
         self.p = as_tohu_generator(p)
         self.randgen = Random()
         func = self.randgen.choice
-        super().__init__(func, parent)
+        super().__init__(func, gen_input)
 
     def reset(self, seed):
         super().reset(seed)
         self.randgen.seed(next(self.seed_generator))
 
     def _spawn(self, spawn_mapping):
-        return SelectOneDerived(self.parent, self.p)
+        return SelectOneDerived(self.gen_input, self.p)
 
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
