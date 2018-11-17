@@ -17,6 +17,15 @@ def test_add_generator_with_explicit_name():
     assert n["foobar"] == g
 
 
+def test_contains():
+    n = TohuNamespace()
+    g1 = Integer(100, 200)
+    g2 = Integer(100, 200)
+    n.add_generator(g1)
+    assert g1 in n
+    assert g2 not in n
+
+
 def test_add_generator_without_explicit_name():
     """
 

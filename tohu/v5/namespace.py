@@ -34,6 +34,9 @@ class TohuNamespace:
     def __getitem__(self, key):
         return self.generators[key]
 
+    def __contains__(self, g):
+        return g in self.generators.inv
+
     def add_generator(self, g, name=None):
         if name is None:
             name = f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.tohu_id}"
