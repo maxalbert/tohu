@@ -1,5 +1,6 @@
-PATH_TO_NOTEBOOKS ?= notebooks/v4
-PATH_TO_TESTS ?= tests/v4
+VERSION ?= v4
+PATH_TO_NOTEBOOKS ?= notebooks/$(VERSION)
+PATH_TO_TESTS ?= tests/$(VERSION)
 
 all: test
 
