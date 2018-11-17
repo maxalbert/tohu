@@ -21,6 +21,7 @@ class Apply(DerivedGenerator):
 
         self.arg_gens = [g.clone() for g in self.arg_gens_orig]
         self.kwarg_gens = {name: g.clone() for name, g in self.kwarg_gens_orig.items()}
+        self._input_generators = [g for g in self.arg_gens_orig] + [g for g in self.kwarg_gens_orig.values()]
         self._constituents = [g for g in self.arg_gens] + [g for g in self.kwarg_gens.values()]
 
     def __next__(self):
