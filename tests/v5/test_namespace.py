@@ -1,7 +1,7 @@
 import pytest
 
 from .context import tohu
-from tohu.v5.namespace import Namespace, TohuNamespaceError
+from tohu.v5.namespace import TohuNamespace, TohuNamespaceError
 from tohu.v5.primitive_generators import Integer
 
 
@@ -9,7 +9,7 @@ def test_add_generator_with_explicit_name():
     """
     Adding a generator with an explicit name to the namespace.
     """
-    n = Namespace()
+    n = TohuNamespace()
     g = Integer(100, 200)
     assert len(n) == 0
     n.add_generator(g, name="foobar")
@@ -21,7 +21,7 @@ def test_add_generator_without_explicit_name():
     """
 
     """
-    n = Namespace()
+    n = TohuNamespace()
     g = Integer(100, 200)
     assert len(n) == 0
     n.add_generator(g, name=None)
@@ -32,7 +32,7 @@ def test_add_generator_without_explicit_name():
 def test_add_generator_twice_with_the_same_explicit_name():
     """
     """
-    n = Namespace()
+    n = TohuNamespace()
     g = Integer(100, 200)
     assert len(n) == 0
     n.add_generator(g, name="foobar")
@@ -45,7 +45,7 @@ def test_add_generator_twice_with_the_same_explicit_name():
 def test_add_generator_twice_with_first_name_anonymous():
     """
     """
-    n = Namespace()
+    n = TohuNamespace()
     g = Integer(100, 200)
     assert len(n) == 0
     n.add_generator(g, name=None)
@@ -58,7 +58,7 @@ def test_add_generator_twice_with_first_name_anonymous():
 def test_add_generator_twice_with_second_name_anonymous():
     """
     """
-    n = Namespace()
+    n = TohuNamespace()
     g = Integer(100, 200)
     assert len(n) == 0
     n.add_generator(g, name="foobar")
@@ -71,7 +71,7 @@ def test_add_generator_twice_with_second_name_anonymous():
 def test_add_generator_twice_with_both_names_anonymous():
     """
     """
-    n = Namespace()
+    n = TohuNamespace()
     g = Integer(100, 200)
     assert len(n) == 0
     n.add_generator(g, name=None)
@@ -84,7 +84,7 @@ def test_add_generator_twice_with_both_names_anonymous():
 def test_add_two_different_generators_with_the_same_name():
     """
     """
-    n = Namespace()
+    n = TohuNamespace()
     g1 = Integer(100, 200)
     g2 = Integer(100, 200)
     assert len(n) == 0

@@ -11,7 +11,7 @@ class TohuNamespaceError(Exception):
     """
 
 
-class Namespace:
+class TohuNamespace:
 
     def __init__(self):
         self.generators = bidict()
