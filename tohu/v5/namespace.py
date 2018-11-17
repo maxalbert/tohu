@@ -1,3 +1,5 @@
+from mako.template import Template
+import textwrap
 from bidict import bidict, ValueDuplicationError
 
 
@@ -15,6 +17,16 @@ class TohuNamespace:
 
     def __init__(self):
         self.generators = bidict()
+
+    def __repr__(self):
+        s = Template(textwrap.dedent("""\
+            <TohuNameSpace:
+               %for name, g in items:
+               ${name}: ${g}
+               %endfor
+            >
+            """)).render(items=self.generators.items())
+        return s
 
     def __len__(self):
         return len(self.generators)
