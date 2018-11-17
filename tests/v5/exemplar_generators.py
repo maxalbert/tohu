@@ -1,5 +1,6 @@
 from .context import tohu
 from tohu.v5.primitive_generators import *
+from tohu.v5.derived_generators import *
 
 
 EXEMPLAR_PRIMITIVE_GENERATORS = [
@@ -13,4 +14,10 @@ EXEMPLAR_PRIMITIVE_GENERATORS = [
     FakerGenerator(method="name"),
 ]
 
-EXEMPLAR_GENERATORS = EXEMPLAR_PRIMITIVE_GENERATORS
+EXEMPLAR_DERIVED_GENERATORS = [
+    Apply(lambda x, y: x + y, Integer(100, 200), Integer(300, 400)),
+    Lookup(Integer(1, 5), {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e'}),
+    SelectOneDerived(Constant(['a', 'b', 'c'])),
+]
+
+EXEMPLAR_GENERATORS = EXEMPLAR_PRIMITIVE_GENERATORS + EXEMPLAR_DERIVED_GENERATORS
