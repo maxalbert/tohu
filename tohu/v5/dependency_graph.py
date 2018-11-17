@@ -20,13 +20,13 @@ class DependencyGraph:
             self.node_indices[node] = str(self.cnt)
         for n in node.parent_chain:
             self.add_node(n)
-        for n in node._constituents:
+        for n in node._constituent_generators:
             self.add_node(n)
 
     def __repr__(self):
         parent_chains = [self.get_parent_chain(n) for n in self.leaf_nodes if n.parent is not None]
-        constituents = {self.node_indices[n]: [self.node_indices[c] for c in n._constituents] for n in self.node_indices if
-                        n._constituents != []}
+        constituents = {self.node_indices[n]: [self.node_indices[c] for c in n._constituent_generators] for n in self.node_indices if
+                        n._constituent_generators != []}
         return Template(textwrap.dedent("""\
             <DepGraph:
                Nodes:
@@ -61,6 +61,6 @@ class DependencyGraph:
         #             n = n.parent
         return chain
 
-    def get_constituents(self, node):
+    def get_constituent_generators(self, node):
         assert node in self.node_indices
-        return [self.node_indices[n] for n in node._constituents]
+        return [self.node_indices[n] for n in node._constituent_generators]

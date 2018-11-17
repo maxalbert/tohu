@@ -49,7 +49,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
     def __init__(self):
         self.parent = None
         self._clones = []
-        self._constituents = []
+        self._constituent_generators = []
         self.tohu_name = None
         self.seed_generator = SeedGenerator()
 
