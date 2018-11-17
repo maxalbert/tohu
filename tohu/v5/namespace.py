@@ -22,7 +22,7 @@ class Namespace:
     def __getitem__(self, key):
         return self.generators[key]
 
-    def add_generator(self, g, name):
+    def add_generator(self, g, name=None):
         if name is None:
             name = f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.tohu_id}"
 
@@ -35,3 +35,10 @@ class Namespace:
             existing_name = self.generators.inv[g]
             if is_anonymous(existing_name) and not is_anonymous(name):
                 self.generators.inv[g] = name
+
+
+    def add_generator_with_dependencies(self, g, name=None):
+        self.add_generator(g, name=name)
+
+        for c in g._input_generators:
+            self.add_generator(c)
