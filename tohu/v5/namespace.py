@@ -65,9 +65,10 @@ class TohuNamespace:
             self.add_generator(c)
 
     def spawn(self):
-        n = TohuNamespace()
+        n_new = TohuNamespace()
         spawn_mapping = SpawnMapping()
         for name, g in self.named_generators.items():
             g_spawned = g.spawn(spawn_mapping)
-            n.add_generator(g_spawned, name=name)
-        return n
+            n_new.add_generator(g_spawned, name=name)
+            spawn_mapping.add_mapping(g, g_spawned)
+        return n_new

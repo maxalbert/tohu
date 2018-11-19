@@ -3,6 +3,7 @@ import pytest
 from .context import tohu
 from tohu.v5.namespace import TohuNamespace, TohuNamespaceError
 from tohu.v5.primitive_generators import Integer, HashDigest, FakerGenerator
+from tohu.v5.derived_generators import Apply
 
 
 def test_add_generator_with_explicit_name():
@@ -159,3 +160,27 @@ def test_spawning_of_namespace_with_cloned_generator():
 
     assert n_spawned["g2"].parent is n_spawned["g1"]
     assert n_spawned["g3"].parent is n_spawned["g1"]
+
+
+def test_spawning_of_namespace_with_derived_generator():
+    n = TohuNamespace()
+    aa = Integer(100, 200).set_tohu_name("aa")
+    bb = Integer(300, 400).set_tohu_name("bb")
+    cc = Apply(lambda x, y: x+y, aa, bb)
+    n.add_generator(aa, "aa")
+    n.add_generator(bb, "bb")
+    n.add_generator(cc, "cc")
+
+    n_spawned = n.spawn()
+    assert isinstance(n_spawned, TohuNamespace)
+    assert len(n_spawned) == 3
+    assert isinstance(n_spawned["aa"], Integer)
+    assert isinstance(n_spawned["bb"], Integer)
+    assert isinstance(n_spawned["cc"], Apply)
+    assert n_spawned["aa"] is not aa
+    assert n_spawned["bb"] is not bb
+    assert n_spawned["cc"] is not cc
+
+    assert n_spawned["cc"]._input_generators == [n_spawned["aa"], n_spawned["bb"]]
+    assert n_spawned["cc"]._constituent_generators[0].parent == n_spawned["aa"]
+    assert n_spawned["cc"]._constituent_generators[1].parent == n_spawned["bb"]

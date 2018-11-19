@@ -15,11 +15,11 @@ class Apply(DerivedGenerator):
 
     def __init__(self, callable, *arg_gens, spawn_mapping=None, **kwarg_gens):
         super().__init__()
-        self.callable = callable
-        self.arg_gens_orig = arg_gens
-        self.kwarg_gens_orig = kwarg_gens
-
         spawn_mapping = spawn_mapping or SpawnMapping()
+        self.callable = callable
+        self.arg_gens_orig = [spawn_mapping.get_spawn_or_orig(g) for g in arg_gens]
+        self.kwarg_gens_orig = {name: spawn_mapping.get_spawn_or_orig(g) for name, g in kwarg_gens.items()}
+
         self.arg_gens = [g.clone(spawn_mapping) for g in self.arg_gens_orig]
         self.kwarg_gens = {name: g.clone(spawn_mapping) for name, g in self.kwarg_gens_orig.items()}
         self._input_generators = [g for g in self.arg_gens_orig] + [g for g in self.kwarg_gens_orig.values()]

@@ -21,8 +21,32 @@ class SpawnMapping:
     def __init__(self):
         self.mapping = {}
 
+    def __repr__(self):
+        return repr(self.mapping)
+
     def add_mapping(self, g, g_spawned):
         self.mapping[g] = g_spawned
+
+    def spawn_generator(self, g):
+        """
+        Return a fresh spawn of g unless g is already
+        contained in this SpawnMapping, in which case
+        return the previously spawned generator.
+        """
+        try:
+            return self.mapping[g]
+        except KeyError:
+            return g._spawn(self)
+
+    def get_spawn_or_orig(self, g):
+        """
+        If a mapping exists for g, return the previously
+        spawned generator, otherwise return g itself.
+        """
+        try:
+            return self.mapping[g]
+        except KeyError:
+            return g
 
     def __contains__(self, item):
         return item in self.mapping
@@ -161,8 +185,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
             else:
                 raise TohuCloneError("Cannot spawn a cloned generator without being able to map its parent.")
         else:
-            new_obj = self._spawn(spawn_mapping)
-            spawn_mapping.add_mapping(self, new_obj)
+            new_obj = spawn_mapping.spawn_generator(self)
             return new_obj
 
     @abstractmethod
