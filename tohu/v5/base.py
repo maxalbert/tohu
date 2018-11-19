@@ -10,8 +10,25 @@ from .logging import logger
 __all__ = ['SeedGenerator', 'TohuBaseGenerator']
 
 
-class NullSpawnMapping:
-    pass
+class TohuCloneError(Exception):
+    """
+    Custom exception
+    """
+
+
+class SpawnMapping:
+
+    def __init__(self):
+        self.mapping = {}
+
+    def add_mapping(self, g, g_spawned):
+        self.mapping[g] = g_spawned
+
+    def __contains__(self, item):
+        return item in self.mapping
+
+    def __getitem__(self, key):
+        return self.mapping[key]
 
 
 class SeedGenerator:
@@ -128,18 +145,36 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         self.seed_generator._set_random_state_from(other.seed_generator)
 
     def spawn(self, spawn_mapping=None):
-        spawn_mapping = spawn_mapping or NullSpawnMapping()
+        """
+        Return an exact copy of this generator which behaves the same way
+        (i.e., produces the same elements in the same order) but is otherwise
+        independent, i.e. there is no link between the two generators
+        (as opposed to a cloned generator, which is automatically reset
+        whenever the original generator is reset).
+        """
+        spawn_mapping = spawn_mapping or SpawnMapping()
 
         if self.parent is not None:
-            raise NotImplementedError("TODO: this is a clone; spawn it using the spawn_mapping for the parent lookup")
+            if self.parent in spawn_mapping:
+                # Return new clone of the mapped parent
+                return spawn_mapping[self.parent].clone()
+            else:
+                raise TohuCloneError("Cannot spawn a cloned generator without being able to map its parent.")
         else:
-            return self._spawn(spawn_mapping)
+            new_obj = self._spawn(spawn_mapping)
+            spawn_mapping.add_mapping(self, new_obj)
+            return new_obj
 
     @abstractmethod
     def _spawn(self, spawn_mapping):
-        raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
+        raise NotImplementedError("Class {} does not implement method '_spawn'.".format(self.__class__.__name__))
 
     def clone(self, spawn_mapping=None):
+        """
+        Return an exact copy of this generator which behaves the same way
+        (i.e., produces the same elements in the same order) and which is
+        automatically reset whenever the original generator is reset.
+        """
         c = self.spawn(spawn_mapping)
         self.register_clone(c)
         c.register_parent(self)

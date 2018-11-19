@@ -1,5 +1,5 @@
 from random import Random
-from .base import TohuBaseGenerator, NullSpawnMapping
+from .base import TohuBaseGenerator, SpawnMapping
 from .extras import as_tohu_generator
 
 __all__ = ['Apply', 'DerivedGenerator', 'Lookup', 'SelectOneDerived']
@@ -19,7 +19,7 @@ class Apply(DerivedGenerator):
         self.arg_gens_orig = arg_gens
         self.kwarg_gens_orig = kwarg_gens
 
-        spawn_mapping = spawn_mapping or NullSpawnMapping()
+        spawn_mapping = spawn_mapping or SpawnMapping()
         self.arg_gens = [g.clone(spawn_mapping) for g in self.arg_gens_orig]
         self.kwarg_gens = {name: g.clone(spawn_mapping) for name, g in self.kwarg_gens_orig.items()}
         self._input_generators = [g for g in self.arg_gens_orig] + [g for g in self.kwarg_gens_orig.values()]

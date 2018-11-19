@@ -1,6 +1,8 @@
-from mako.template import Template
 import textwrap
 from bidict import bidict, ValueDuplicationError
+from mako.template import Template
+
+from .base import SpawnMapping
 
 
 def is_anonymous(name):
@@ -37,6 +39,10 @@ class TohuNamespace:
     def __contains__(self, g):
         return g in self.generators.inv
 
+    @property
+    def named_generators(self):
+        return {name: g for (name, g) in self.generators.items() if not is_anonymous(name)}
+
     def add_generator(self, g, name=None):
         if name is None:
             name = f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.tohu_id}"
@@ -60,7 +66,8 @@ class TohuNamespace:
 
     def spawn(self):
         n = TohuNamespace()
-        for name, g in self.generators.items():
-            g_spawned = g.spawn()
+        spawn_mapping = SpawnMapping()
+        for name, g in self.named_generators.items():
+            g_spawned = g.spawn(spawn_mapping)
             n.add_generator(g_spawned, name=name)
         return n

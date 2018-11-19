@@ -135,7 +135,6 @@ def test_spawning_of_namespace_with_multiple_independent_generators():
     assert n_spawned["g3"] is not g3
 
 
-@pytest.mark.xfail(reason="Spawning of cloned generators is not yet implemented")
 def test_spawning_of_namespace_with_cloned_generator():
     n = TohuNamespace()
     g1 = Integer(100, 200)
