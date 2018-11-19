@@ -10,6 +10,10 @@ from .logging import logger
 __all__ = ['SeedGenerator', 'TohuBaseGenerator']
 
 
+class NullSpawnMapping:
+    pass
+
+
 class SeedGenerator:
     """
     This class is used in custom generators to create a collection of
@@ -123,12 +127,20 @@ class TohuBaseGenerator(metaclass=ABCMeta):
     def _set_random_state_from(self, other):
         self.seed_generator._set_random_state_from(other.seed_generator)
 
+    def spawn(self, spawn_mapping=None):
+        spawn_mapping = spawn_mapping or NullSpawnMapping()
+
+        if self.parent is not None:
+            raise NotImplementedError("TODO: this is a clone; spawn it using the spawn_mapping for the parent lookup")
+        else:
+            return self._spawn(spawn_mapping)
+
     @abstractmethod
-    def spawn(self):
+    def _spawn(self, spawn_mapping):
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
 
-    def clone(self):
-        c = self.spawn()
+    def clone(self, spawn_mapping=None):
+        c = self.spawn(spawn_mapping)
         self.register_clone(c)
         c.register_parent(self)
         return c

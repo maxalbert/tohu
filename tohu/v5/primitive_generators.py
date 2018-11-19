@@ -37,7 +37,7 @@ class Constant(PrimitiveGenerator):
     def __next__(self):
         return self.value
 
-    def spawn(self):
+    def _spawn(self, spawn_mapping):
         return Constant(self.value)
 
     def _set_random_state_from(self, other):
@@ -68,7 +68,7 @@ class Boolean(PrimitiveGenerator):
     def __next__(self):
         return self.randgen.random() < self.p
 
-    def spawn(self):
+    def _spawn(self, spawn_mapping):
         new_obj = Boolean(self.p)
         new_obj._set_random_state_from(self)
         return new_obj
@@ -105,7 +105,7 @@ class Integer(PrimitiveGenerator):
     def __next__(self):
         return self.randgen.randint(self.low, self.high)
 
-    def spawn(self):
+    def _spawn(self, spawn_mapping):
         new_obj = Integer(self.low, self.high)
         new_obj._set_random_state_from(self)
         return new_obj
@@ -142,7 +142,7 @@ class Float(PrimitiveGenerator):
     def __next__(self):
         return self.randgen.uniform(self.low, self.high)
 
-    def spawn(self):
+    def _spawn(self, spawn_mapping):
         new_obj = Float(self.low, self.high)
         new_obj._set_random_state_from(self)
         return new_obj
@@ -187,7 +187,7 @@ class CharString(PrimitiveGenerator):
             self.charset = charset
         self.char_gen = Random()
 
-    def spawn(self):
+    def _spawn(self, spawn_mapping):
         new_obj = CharString(length=self.length, charset=self.charset)
         new_obj._set_random_state_from(self)
         return new_obj
@@ -221,7 +221,7 @@ class DigitString(CharString):
         charset = "0123456789"
         super().__init__(length=length, charset=charset)
 
-    def spawn(self):
+    def _spawn(self, spawn_mapping):
         new_obj = DigitString(length=self.length)
         new_obj._set_random_state_from(self)
         return new_obj
@@ -268,7 +268,7 @@ class HashDigest(PrimitiveGenerator):
         val = self.randgen.bytes(self._internal_length)
         return self._maybe_convert_to_uppercase(self._maybe_convert_to_hex(val))
 
-    def spawn(self):
+    def _spawn(self, spawn_mapping):
         new_obj = HashDigest(length=self.length, as_bytes=self.as_bytes, uppercase=self.uppercase)
         new_obj._set_random_state_from(self)
         return new_obj
@@ -317,7 +317,7 @@ class FakerGenerator(PrimitiveGenerator):
     def __next__(self):
         return self.randgen(**self.faker_args)
 
-    def spawn(self):
+    def _spawn(self, spawn_mapping):
         new_obj = FakerGenerator(self.method, locale=self.locale, **self.faker_args)
         new_obj._set_random_state_from(self)
         return new_obj
@@ -396,7 +396,7 @@ class SelectOnePrimitive(PrimitiveGenerator):
         self.randgen.seed(next(self.seed_generator))
         return self
 
-    def spawn(self):
+    def _spawn(self, spawn_mapping):
         new_obj = SelectOnePrimitive(self.values, p=self.p)
         new_obj._set_random_state_from(self)
         return new_obj
