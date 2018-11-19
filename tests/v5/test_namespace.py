@@ -133,3 +133,30 @@ def test_spawning_of_namespace_with_multiple_independent_generators():
     assert n_spawned["g1"] is not g1
     assert n_spawned["g2"] is not g2
     assert n_spawned["g3"] is not g3
+
+
+@pytest.mark.xfail(reason="Spawning of cloned generators is not yet implemented")
+def test_spawning_of_namespace_with_cloned_generator():
+    n = TohuNamespace()
+    g1 = Integer(100, 200)
+    g2 = g1.clone()
+    g3 = g1.clone()
+    n.add_generator(g1, "g1")
+    n.add_generator(g2, "g2")
+    n.add_generator(g3, "g3")
+
+    n_spawned = n.spawn()
+    assert isinstance(n_spawned, TohuNamespace)
+    assert len(n_spawned) == 3
+    assert isinstance(n_spawned["g1"], Integer)
+    assert isinstance(n_spawned["g2"], Integer)
+    assert isinstance(n_spawned["g3"], Integer)
+    assert n_spawned["g1"] is not g1
+    assert n_spawned["g2"] is not g2
+    assert n_spawned["g3"] is not g3
+
+    assert n["g2"].parent is g1
+    assert n["g3"].parent is g1
+
+    assert n_spawned["g2"].parent is n_spawned["g1"]
+    assert n_spawned["g3"].parent is n_spawned["g1"]
