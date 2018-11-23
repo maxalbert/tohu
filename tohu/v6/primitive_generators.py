@@ -1,6 +1,8 @@
+from random import Random
+
 from .base import TohuBaseGenerator
 
-__all__ = ['Constant']
+__all__ = ['Constant', 'Integer']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -36,3 +38,40 @@ class Constant(PrimitiveGenerator):
 
     def _set_random_state_from(self, other):
         pass
+
+
+class Integer(PrimitiveGenerator):
+    """
+    Generator which produces random integers k in the range low <= k <= high.
+    """
+
+    def __init__(self, low, high):
+        """
+        Parameters
+        ----------
+        low: integer
+            Lower bound (inclusive).
+        high: integer
+            Upper bound (inclusive).
+        """
+        super().__init__()
+        self.low = low
+        self.high = high
+        self.randgen = Random()
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(next(self.seed_generator))
+        return self
+
+    def __next__(self):
+        return self.randgen.randint(self.low, self.high)
+
+    def spawn(self):
+        new_obj = Integer(self.low, self.high)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.randgen.setstate(other.randgen.getstate())
