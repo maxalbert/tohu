@@ -88,6 +88,10 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         return self
 
     @abstractmethod
+    def __next__(self):
+        raise NotImplementedError("Class {} does not implement method '__next__'.".format(self.__class__.__name__))
+
+    @abstractmethod
     def reset(self, seed):
         """
         Reset this generator's seed generator and any clones.
