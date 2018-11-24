@@ -179,3 +179,17 @@ class FakerGenerator(PrimitiveGenerator):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.fake.random.setstate(other.fake.random.getstate())
+
+
+def as_tohu_generator(g):
+    """
+    Helper function to ensure that a given input is a tohu generator.
+
+    If g is already a tohu generator then it is returned unchanged,
+    otherwise it is wrapped in a Constant generator.
+    """
+
+    if isinstance(g, TohuBaseGenerator):
+        return g
+    else:
+        return Constant(g)
