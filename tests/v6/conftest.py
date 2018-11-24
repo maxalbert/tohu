@@ -5,13 +5,13 @@ from tohu.v6.primitive_generators import Integer, HashDigest, FakerGenerator
 from tohu.v6.custom_generator import CustomGenerator
 
 
-class QuuxGenerator1(CustomGenerator):
+class Quux1Generator(CustomGenerator):
     aa = Integer(1, 7)
     bb = HashDigest(length=8)
     cc = FakerGenerator(method="name")
 
 
-class QuuxGenerator2(CustomGenerator):
+class Quux2Generator(CustomGenerator):
     aa = Integer(1, 7)
     bb = HashDigest(length=8)
 
@@ -22,9 +22,9 @@ class QuuxGenerator2(CustomGenerator):
 
 @pytest.fixture(scope="module")
 def quux_gen_1():
-    return QuuxGenerator1()
+    return Quux1Generator()
 
 
 @pytest.fixture(scope="module")
 def quux_gen_2():
-    return QuuxGenerator2(method="name")
+    return Quux2Generator(method="name")
