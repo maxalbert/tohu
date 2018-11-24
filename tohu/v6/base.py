@@ -48,6 +48,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     def __init__(self):
         self.tohu_name = None
+        self.owner = None
         self.parent = None
         self.clones = []
         self.seed_generator = SeedGenerator()
@@ -55,7 +56,8 @@ class TohuBaseGenerator(metaclass=ABCMeta):
     def __repr__(self):
         clsname = self.__class__.__name__
         name = '' if self.tohu_name is None else f'{self.tohu_name}: '
-        return f'<{name}{clsname} (id={self.tohu_id})>'
+        owned_by = '' if self.owner is None else f' [owned by: {self.owner}] '
+        return f'<{name}{clsname} (id={self.tohu_id}){owned_by}>'
 
     def __format__(self, fmt):
         return self.__repr__()
