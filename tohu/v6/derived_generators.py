@@ -61,8 +61,8 @@ class Lookup(Apply):
 
         super().__init__(f_lookup, self.g, self.mapping)
 
-    def spawn(self):
-        return Lookup(self.g, self.mapping)
+    # def spawn(self):
+    #     return Lookup(self.g, self.mapping)
 
 
 class SelectMultiple(Apply):
