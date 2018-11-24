@@ -17,7 +17,8 @@ def add(x, y):
 
 
 EXEMPLAR_DERIVED_GENERATORS = [
-    Apply(add, Integer(10, 99), Integer(10, 99)),
+    Apply(add, Integer(10, 99).set_tohu_name('xx'), Integer(10, 99).set_tohu_name('yy')),
+    Lookup(Integer(1, 5).set_tohu_name('xx'), mapping=Constant({1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e'}).set_tohu_name('mm'))
 ]
 
 EXEMPLAR_CUSTOM_GENERATORS = [Quux1Generator(), Quux2Generator(method="name")]
