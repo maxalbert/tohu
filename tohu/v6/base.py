@@ -29,6 +29,7 @@ class SeedGenerator:
 
     def reset(self, seed):
         self.randgen.seed(seed)
+        return self
 
     def __iter__(self):
         return self

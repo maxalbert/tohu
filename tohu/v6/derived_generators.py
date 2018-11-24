@@ -1,6 +1,6 @@
 from random import Random
 
-from .base import TohuBaseGenerator
+from .base import TohuBaseGenerator, SeedGenerator
 from .primitive_generators import as_tohu_generator
 
 __all__ = ['Apply', 'Lookup', 'SelectMultiple']
@@ -10,6 +10,17 @@ class DerivedGenerator(TohuBaseGenerator):
     """
     Base class for all derived generators
     """
+
+    def reset_input_generators(self, seed):
+        """
+        Helper method which explicitly resets all input generators
+        to the derived generator. This should only ever be called
+        for testing or debugging.
+        """
+        seed_generator = SeedGenerator().reset(seed=seed)
+
+        for gen in self.input_generators:
+            gen.reset(next(seed_generator))
 
 
 class Apply(DerivedGenerator):
@@ -22,8 +33,8 @@ class Apply(DerivedGenerator):
 
         self.arg_gens = [g.clone() for g in self.arg_gens_orig]
         self.kwarg_gens = {name: g.clone() for name, g in self.kwarg_gens_orig.items()}
-        self._input_generators = [g for g in self.arg_gens_orig] + [g for g in self.kwarg_gens_orig.values()]
-        self._constituent_generators = [g for g in self.arg_gens] + [g for g in self.kwarg_gens.values()]
+        self.input_generators = [g for g in self.arg_gens_orig] + [g for g in self.kwarg_gens_orig.values()]
+        self.constituent_generators = [g for g in self.arg_gens] + [g for g in self.kwarg_gens.values()]
 
     def __next__(self):
         args = [next(g) for g in self.arg_gens]

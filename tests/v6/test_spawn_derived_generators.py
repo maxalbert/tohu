@@ -4,6 +4,7 @@ from .context import tohu
 from tohu.v6.primitive_generators import Integer
 from tohu.v6.derived_generators import Apply
 
+
 def test_spawn_apply_generator():
     """
     Test that an Apply generator can be spawned and the spawned version produces the same elements.
