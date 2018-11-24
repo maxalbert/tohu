@@ -1,22 +1,13 @@
 import pytest
-#from .exemplar_generators import EXEMPLAR_PRIMITIVE_GENERATORS
-from .context import tohu
-from tohu.v6.primitive_generators import Integer
-from tohu.v6.derived_generators import Apply
+from .exemplar_generators import EXEMPLAR_DERIVED_GENERATORS
 
 
-def test_spawn_apply_generator():
+@pytest.mark.parametrize("g", EXEMPLAR_DERIVED_GENERATORS)
+def test_spawn_derived_generators(g):
     """
     Test that an Apply generator can be spawned and the spawned version produces the same elements.
     """
     num_items = 50
-
-    def add(x, y):
-        return x + y
-
-    a = Integer(10, 99)
-    b = Integer(10, 99)
-    g = Apply(add, a, b)
 
     g.reset(seed=12345)
     g.reset_input_generators(seed=99999)
