@@ -1,6 +1,6 @@
 from .base import TohuBaseGenerator
 
-__all__ = ['Apply']
+__all__ = ['Apply', 'Lookup']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -32,3 +32,18 @@ class Apply(DerivedGenerator):
 
     def spawn(self):
         return Apply(self.callable, *self.arg_gens, **self.kwarg_gens)
+
+
+class Lookup(Apply):
+
+    def __init__(self, g, mapping):
+        self.g = g
+        self.mapping = mapping
+
+        def f_lookup(key):
+            return mapping[key]
+
+        super().__init__(f_lookup, g)
+
+    def spawn(self):
+        return Lookup(self.g, self.mapping)
