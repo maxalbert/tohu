@@ -31,4 +31,4 @@ class Apply(DerivedGenerator):
         super().reset(seed)
 
     def spawn(self):
-        return Apply(self.callable, *self.arg_gens_orig, **self.kwarg_gens_orig)
+        return Apply(self.callable, *self.arg_gens, **self.kwarg_gens)
