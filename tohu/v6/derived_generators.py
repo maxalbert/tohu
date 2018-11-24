@@ -53,13 +53,13 @@ class Apply(DerivedGenerator):
 class Lookup(Apply):
 
     def __init__(self, g, mapping):
-        self.g = g
-        self.mapping = mapping
+        self.g = as_tohu_generator(g)
+        self.mapping = as_tohu_generator(mapping)
 
-        def f_lookup(key):
+        def f_lookup(key, mapping):
             return mapping[key]
 
-        super().__init__(f_lookup, g)
+        super().__init__(f_lookup, self.g, self.mapping)
 
     def spawn(self):
         return Lookup(self.g, self.mapping)
