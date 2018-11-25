@@ -91,35 +91,29 @@ def test_adding_generator_twice_with_the_same_name_ignores_the_second_time():
 
 def test_adding_generators_twice_with_different_names_raises_error():
     ns = TohuNamespace()
-    g1 = Integer(100, 200)
-    g2 = HashDigest(length=8)
-    expected_error_msg = "Cannot add generator because it already exists with a different name"
+    g1 = Integer(100, 200).set_tohu_name("g1")
+    g2 = HashDigest(length=8).set_tohu_name("g2")
+    expected_error_msg = "because it already exists with a different name"
 
     assert len(ns) == 0
 
     # Add g1 for the first time (with an explicit name)
     ns.add_generator(g1, name="aa")
-    assert len(ns) == 1
+    assert ["aa"] == ns.names
 
     # Try to add g1 again with a different name
     with pytest.raises(TohuNamespaceError, match=expected_error_msg):
         ns.add_generator(g1, name="aa_new")
-    assert len(ns) == 1
+    assert ["aa"] == ns.names
 
-    # Try to add g1 again, this time anonymously
-    with pytest.raises(TohuNamespaceError, match=expected_error_msg):
-        ns.add_generator(g1, name=None)
-    assert len(ns) == 1
+    # Adding g1 again anonymously should succeed but not add the generator again
+    ns.add_generator(g1, name=None)
+    assert ["aa"] == ns.names
 
     # Add g2 for the first time (anonymously)
     ns.add_generator(g2, name=None)
-    assert len(ns) == 2
+    assert ["aa", "ANONYMOUS_ANONYMOUS_ANONYMOUS_g2"] == ns.names
 
-    # Try to add g2 again with an explicit name
-    with pytest.raises(TohuNamespaceError, match=expected_error_msg):
-        ns.add_generator(g2, name="anonynomous_new")
-    assert len(ns) == 2
-
-    # Trying to add g2 again anonymously should succeed but not add the generator again
-    ns.add_generator(g2, name=None)
-    assert len(ns) == 2
+    # Adding g2 again with an explicit name should update the name
+    ns.add_generator(g2, name="g2_new")
+    assert ["aa", "g2_new"] == ns.names
