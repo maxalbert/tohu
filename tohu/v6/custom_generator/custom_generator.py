@@ -67,8 +67,9 @@ class CustomGenerator(TohuBaseGenerator):
 
     def reset(self, seed):
         super().reset(seed)
-        # for gen in self.field_generators.values():
-        #     gen.reset(next(self.seed_generator))
+        for gen in self.field_generators.values():
+            gen.reset(next(self.seed_generator))
+        return self
 
     def spawn(self):
         new_obj = self.__class__(*self.orig_args, **self.orig_kwargs)
