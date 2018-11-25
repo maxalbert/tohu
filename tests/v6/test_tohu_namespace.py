@@ -59,3 +59,29 @@ def test_add_anonymous_generator():
 
     assert ns[names_expected[0]] is g1
     assert ns[names_expected[1]] is g2
+
+
+def test_adding_generator_twice_with_the_same_name_ignores_the_second_time():
+    ns = TohuNamespace()
+
+    g1 = Integer(100, 200)
+    g2 = HashDigest(length=8)
+
+    assert len(ns) == 0
+
+    # Add generators for the first time
+    ns.add_generator(g1, "aa")
+    ns.add_generator(g2, None)
+    assert 2 == len(ns)
+    assert 2 == len(ns.names)
+    assert "aa" == ns.names[0]
+    assert ns.names[1].startswith('ANONYMOUS_ANONYMOUS_ANONYMOUS_')
+
+    # Add generator for the second time with the same names.
+    # This should not change anything.
+    ns.add_generator(g1, "aa")
+    ns.add_generator(g2, None)
+    assert 2 == len(ns)
+    assert 2 == len(ns.names)
+    assert "aa" == ns.names[0]
+    assert ns.names[1].startswith('ANONYMOUS_ANONYMOUS_ANONYMOUS_')
