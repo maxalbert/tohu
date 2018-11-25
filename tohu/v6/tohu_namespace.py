@@ -38,6 +38,14 @@ class TohuNamespace:
     def __getitem__(self, name):
         return self.generators[name]
 
+    def to_str(self):
+        s = ""
+        for name, g in self.generators.items():
+            prefix = "    " if self.is_anonymous(g) else f"{name}: "
+            suffix = " (anonymous)" if self.is_anonymous(g) else ""
+            s += f"{prefix}{g}{suffix}\n"
+        return s
+
     def contains_generator(self, g):
         return (g in self.generators.inv)
 
