@@ -2,8 +2,8 @@ import pytest
 
 from .context import tohu
 from tohu.v6.tohu_namespace import TohuNamespace, TohuNamespaceError
-from tohu.v6.primitive_generators import Integer, HashDigest
-from tohu.v6.derived_generators import Apply
+from tohu.v6.primitive_generators import Constant, Integer, HashDigest
+from tohu.v6.derived_generators import Apply, Lookup, SelectMultiple
 
 
 def test_add_generators_with_explicit_names():
@@ -133,4 +133,36 @@ def test_adding_derived_generators_also_adds_their_input_generators():
 
     names_expected = ['ANONYMOUS_ANONYMOUS_ANONYMOUS_a', 'ANONYMOUS_ANONYMOUS_ANONYMOUS_b', 'g']
     assert len(ns) == 3
+    assert names_expected == ns.names
+
+
+def test_adding_generators_with_complex_dependencies():
+    ns = TohuNamespace()
+
+    mapping = {
+        1: ['a', 'aa', 'aaa', 'aaaa', 'aaaaa'],
+        2: ['b', 'bb', 'bbb', 'bbbb', 'bbbbb'],
+        3: ['c', 'cc', 'ccc', 'cccc', 'ccccc'],
+    }
+
+    n_vals = Integer(1, 5)
+    g = SelectMultiple(
+        Lookup(
+            g=Integer(1, 3).set_tohu_name("key_gen"),
+            mapping=Constant(mapping).set_tohu_name("mapping")
+        ).set_tohu_name("lookup"),
+        num=n_vals.set_tohu_name("n_vals")
+    )
+
+    ns.add_generator(n_vals, name="aa")
+    ns.add_generator(g, name="bb")
+
+    names_expected = [
+        "aa",
+        "ANONYMOUS_ANONYMOUS_ANONYMOUS_key_gen",
+        "ANONYMOUS_ANONYMOUS_ANONYMOUS_mapping",
+        "ANONYMOUS_ANONYMOUS_ANONYMOUS_lookup",
+        "bb"
+    ]
+    assert 5 == len(ns)
     assert names_expected == ns.names
