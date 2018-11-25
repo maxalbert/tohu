@@ -12,23 +12,23 @@ class Quux1Generator(CustomGenerator):
 
 
 class Quux2Generator(CustomGenerator):
-    aa = Integer(1, 7)
-    bb = HashDigest(length=8)
+    dd = Integer(1, 7)
+    ee = HashDigest(length=8)
 
     def __init__(self, *, method):
-        self.cc = FakerGenerator(method=method)
+        self.ff = FakerGenerator(method=method)
         super().__init__(method=method)
 
 
 class Quux3Generator(CustomGenerator):
     __tohu_items_name__ = 'MyQuux3Item'
-    __fields__ = ['aa', 'cc']
+    __fields__ = ['xx', 'zz']
 
-    aa = Integer(1, 7)
-    bb = HashDigest(length=8)
+    xx = Integer(1, 7)
+    yy = HashDigest(length=8)
 
     def __init__(self, method):
-        self.cc = FakerGenerator(method=method)
+        self.zz = FakerGenerator(method=method)
         super().__init__(method)
 
 
