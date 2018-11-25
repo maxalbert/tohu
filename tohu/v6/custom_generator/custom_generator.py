@@ -13,9 +13,6 @@ class CustomGenerator(TohuBaseGenerator):
         self.orig_args = args
         self.orig_kwargs = kwargs
 
-        self._extract_constituent_generator_templates()
-        self._extract_constituent_generators()
-
         self._extract_namespace_for_constituent_generator_templates()
         self._extract_namespace_for_constituent_generators()
 
@@ -36,30 +33,6 @@ class CustomGenerator(TohuBaseGenerator):
 
     def _extract_namespace_for_constituent_generators(self):
         self.ns_gens = TohuNamespace.from_dict({name: gen.spawn() for name, gen in self.ns_gen_templates.items()})
-
-    def _extract_constituent_generator_templates(self):
-        """
-        Set the `constituent_generator_templates` attribute to a dictionary
-        of the form `{name: constituen_generator}` which contains all tohu
-        generators defined in the class and instance namespaces of
-        this custom generator.
-        """
-        gen_templates = {}
-
-        # Extract constituent generators from class dict
-        for name, g in self.__class__.__dict__.items():
-            if isinstance(g, TohuBaseGenerator):
-                gen_templates[name] = g.set_tohu_name(f'{name} (TPL)')
-
-        # Extract constituent generators from instance dict
-        for name, g in self.__dict__.items():
-            if isinstance(g, TohuBaseGenerator):
-                gen_templates[name] = g.set_tohu_name(f'{name} (TPL)')
-
-        self.constituent_generator_templates = gen_templates
-
-    def _extract_constituent_generators(self):
-        self.constituent_generators = {name: gen.spawn() for name, gen in self.constituent_generator_templates.items()}
 
     def _set_field_names(self):
         constituent_generator_names = list(self.ns_gens.names)
@@ -88,8 +61,6 @@ class CustomGenerator(TohuBaseGenerator):
     def reset(self, seed):
         super().reset(seed)
         self.ns_gens.reset(seed)
-        # for gen in self.constituent_generators.values():
-        #     gen.reset(next(self.seed_generator))
         return self
 
     def spawn(self):
@@ -110,8 +81,5 @@ class CustomGenerator(TohuBaseGenerator):
 
         # TODO: should also set random state for anonymous/implicit constituent generators
         #        (these can occur in chains of derived generators)
-        #for name in self.constituent_generators.keys():
-        #    self.constituent_generators[name]._set_random_state_from(other.constituent_generators[name])
         for key in self.ns_gens.keys():
             self.ns_gens[key]._set_random_state_from(other.ns_gens[key])
-            #self.constituent_generators[name]._set_random_state_from(other.constituent_generators[name])
