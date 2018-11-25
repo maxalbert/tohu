@@ -1,6 +1,6 @@
 from bidict import bidict
 
-from .base import TohuBaseGenerator
+from .base import TohuBaseGenerator, SeedGenerator
 from .logging import logger
 
 
@@ -24,6 +24,7 @@ class TohuNamespace:
 
     def __init__(self):
         self.generators = bidict()
+        self.seed_generator = SeedGenerator()
 
     @classmethod
     def from_dict(cls, d):
@@ -93,3 +94,8 @@ class TohuNamespace:
                 else:
                     raise TohuNamespaceError(
                         f"Cannot add generator {g} with new name {new_name} because it already exists with a different name: {g}. Existing name: '{existing_name}'")
+
+    def reset(self, seed):
+        self.seed_generator.reset(seed)
+        for g in self.generators.values():
+            g.reset(seed=next(self.seed_generator))

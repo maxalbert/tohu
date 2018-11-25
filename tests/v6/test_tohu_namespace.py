@@ -1,5 +1,7 @@
 import pytest
 
+from unittest.mock import Mock
+
 from .context import tohu
 from tohu.v6.tohu_namespace import TohuNamespace, TohuNamespaceError
 from tohu.v6.primitive_generators import Constant, Integer, HashDigest
@@ -179,3 +181,22 @@ def test_initialisation_from_dictionary():
     expected_names = ["aa", "ANONYMOUS_ANONYMOUS_ANONYMOUS_g2", "cc"]
     assert 3 == len(ns)
     assert expected_names == ns.names
+
+
+def test_resetting():
+    g1 = Integer(1, 5).set_tohu_name("g1")
+    g2 = Constant(['a', 'b', 'c', 'd', 'e']).set_tohu_name("g2")
+    g3 = SelectMultiple(values=g2, num=g1).set_tohu_name("g3")
+
+    ns = TohuNamespace()
+    ns.add_generator(g1, name="aa")
+    ns.add_generator(g3, name="bb")
+
+    g1.reset = Mock(side_effect=g1.reset)
+    g2.reset = Mock(side_effect=g2.reset)
+    g3.reset = Mock(side_effect=g3.reset)
+
+    ns.reset(seed=12345)
+    g1.reset.assert_called_once_with(seed=831769172)
+    g2.reset.assert_called_once_with(seed=2430986565)
+    g3.reset.assert_called_once_with(seed=694443915)
