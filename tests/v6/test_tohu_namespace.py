@@ -166,3 +166,16 @@ def test_adding_generators_with_complex_dependencies():
     ]
     assert 5 == len(ns)
     assert names_expected == ns.names
+
+
+def test_initialisation_from_dictionary():
+    g1 = Integer(1, 5).set_tohu_name("g1")
+    g2 = Constant(['a', 'b', 'c', 'd', 'e']).set_tohu_name("g2")
+    g3 = SelectMultiple(values=g2, num=g1).set_tohu_name("g3")
+
+    ns_dict = {"aa": g1, "bb": 12345, "cc": g3, "dd": "foobar"}
+    ns = TohuNamespace.from_dict(ns_dict)
+
+    expected_names = ["aa", "ANONYMOUS_ANONYMOUS_ANONYMOUS_g2", "cc"]
+    assert 3 == len(ns)
+    assert expected_names == ns.names

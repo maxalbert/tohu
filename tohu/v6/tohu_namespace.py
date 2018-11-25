@@ -25,6 +25,17 @@ class TohuNamespace:
     def __init__(self):
         self.generators = bidict()
 
+    @classmethod
+    def from_dict(cls, d):
+        ns = cls()
+        ns.update_from_dict(d)
+        return ns
+
+    def update_from_dict(self, d):
+        for name, value in d.items():
+            if isinstance(value, TohuBaseGenerator):
+                self.add_generator(value, name)
+
     @property
     def names(self):
         return list(self.generators.keys())
