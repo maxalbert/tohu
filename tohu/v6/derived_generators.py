@@ -47,7 +47,13 @@ class Apply(DerivedGenerator):
         super().reset(seed)
 
     def spawn(self):
-        return Apply(self.callable, *self.arg_gens, **self.kwarg_gens)
+        new_obj = Apply(self.callable, *self.arg_gens, **self.kwarg_gens)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        for g_self, g_other in zip(self.constituent_generators, other.constituent_generators):
+            g_self._set_random_state_from(g_other)
 
 
 class Lookup(Apply):
@@ -61,28 +67,29 @@ class Lookup(Apply):
 
         super().__init__(f_lookup, self.g, self.mapping)
 
-    # def spawn(self):
-    #     return Lookup(self.g, self.mapping)
+    def spawn(self):
+        new_obj = Lookup(self.g, self.mapping)
+        new_obj._set_random_state_from(self)
+        return new_obj
 
 
 class SelectMultiple(Apply):
 
-    def __init__(self, parent, num):
-        parent = as_tohu_generator(parent)
-        num = as_tohu_generator(num)
-
-        self.parent = parent
-        self.num = num
+    def __init__(self, values, num):
+        self.values_gen = as_tohu_generator(values)
+        self.num_gen = as_tohu_generator(num)
         self.randgen = Random()
         func = self.randgen.choices
-        super().__init__(func, parent, k=self.num)
+        super().__init__(func, self.values_gen, k=self.num_gen)
 
     def reset(self, seed):
         super().reset(seed)
         self.randgen.seed(seed)
 
     def spawn(self):
-        return SelectMultiple(self.parent, self.num)
+        new_obj = SelectMultiple(self.values_gen, self.num_gen)
+        new_obj._set_random_state_from(self)
+        return new_obj
 
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
