@@ -18,7 +18,20 @@ class Quux2Generator(CustomGenerator):
         super().__init__(method=method)
 
 
+class Quux3Generator(CustomGenerator):
+    __tohu_items_name__ = 'MyQuux3Item'
+    __fields__ = ['aa', 'cc']
+
+    aa = Integer(1, 7)
+    bb = HashDigest(length=8)
+
+    def __init__(self, method):
+        self.cc = FakerGenerator(method=method)
+        super().__init__(method)
+
+
 EXEMPLAR_CUSTOM_GENERATORS = [
     Quux1Generator(),
-    Quux2Generator(method="name")
+    Quux2Generator(method="name"),
+    Quux3Generator(method="name"),
 ]
