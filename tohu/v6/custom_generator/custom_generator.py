@@ -35,7 +35,7 @@ class CustomGenerator(TohuBaseGenerator):
         self.ns_gen_templates.update_from_dict(self.__dict__)
 
     def _extract_namespace_for_constituent_generators(self):
-        self.ns_gens = TohuNamespace.from_dict({name: gen.spawn() for name, gen in self.constituent_generator_templates.items()})
+        self.ns_gens = TohuNamespace.from_dict({name: gen.spawn() for name, gen in self.ns_gen_templates.items()})
 
     def _extract_constituent_generator_templates(self):
         """
@@ -62,7 +62,7 @@ class CustomGenerator(TohuBaseGenerator):
         self.constituent_generators = {name: gen.spawn() for name, gen in self.constituent_generator_templates.items()}
 
     def _set_field_names(self):
-        constituent_generator_names = list(self.constituent_generators.keys())
+        constituent_generator_names = list(self.ns_gens.names)
 
         if not hasattr(self, '__fields__'):
             self.field_names = constituent_generator_names
