@@ -21,15 +21,15 @@ def test_add_generators_with_explicit_names():
     assert "bb" not in ns
 
     assert len(ns) == 0
-    assert [] == ns.names
+    assert [] == ns.keys()
 
     ns.add_generator(g1, name="aa")
     assert len(ns) == 1
-    assert ["aa"] == ns.names
+    assert ["aa"] == ns.keys()
 
     ns.add_generator(g2, name="bb")
     assert len(ns) == 2
-    assert ["aa", "bb"] == ns.names
+    assert ["aa", "bb"] == ns.keys()
 
     assert ns["aa"] is g1
     assert ns["bb"] is g2
@@ -60,7 +60,7 @@ def test_add_anonymous_generator():
         f"ANONYMOUS_ANONYMOUS_ANONYMOUS_g1",
         f"ANONYMOUS_ANONYMOUS_ANONYMOUS_g2",
     ]
-    assert names_expected == ns.names
+    assert names_expected == ns.keys()
 
     assert ns[names_expected[0]] is g1
     assert ns[names_expected[1]] is g2
@@ -79,16 +79,16 @@ def test_adding_generator_twice_with_the_same_name_ignores_the_second_time():
     ns.add_generator(g1, "aa")
     ns.add_generator(g2, None)
     assert 2 == len(ns)
-    assert 2 == len(ns.names)
-    assert expected_names == ns.names
+    assert 2 == len(ns.keys())
+    assert expected_names == ns.keys()
 
     # Add generator for the second time with the same names.
     # This should not change anything.
     ns.add_generator(g1, "aa")
     ns.add_generator(g2, None)
     assert 2 == len(ns)
-    assert 2 == len(ns.names)
-    assert expected_names == ns.names
+    assert 2 == len(ns.keys())
+    assert expected_names == ns.keys()
 
 
 def test_adding_generators_twice_with_different_names_raises_error():
@@ -101,24 +101,24 @@ def test_adding_generators_twice_with_different_names_raises_error():
 
     # Add g1 for the first time (with an explicit name)
     ns.add_generator(g1, name="aa")
-    assert ["aa"] == ns.names
+    assert ["aa"] == ns.keys()
 
     # Try to add g1 again with a different name
     with pytest.raises(TohuNamespaceError, match=expected_error_msg):
         ns.add_generator(g1, name="aa_new")
-    assert ["aa"] == ns.names
+    assert ["aa"] == ns.keys()
 
     # Adding g1 again anonymously should succeed but not add the generator again
     ns.add_generator(g1, name=None)
-    assert ["aa"] == ns.names
+    assert ["aa"] == ns.keys()
 
     # Add g2 for the first time (anonymously)
     ns.add_generator(g2, name=None)
-    assert ["aa", "ANONYMOUS_ANONYMOUS_ANONYMOUS_g2"] == ns.names
+    assert ["aa", "ANONYMOUS_ANONYMOUS_ANONYMOUS_g2"] == ns.keys()
 
     # Adding g2 again with an explicit name should update the name
     ns.add_generator(g2, name="g2_new")
-    assert ["aa", "g2_new"] == ns.names
+    assert ["aa", "g2_new"] == ns.keys()
 
 
 def test_adding_derived_generators_also_adds_their_input_generators():
@@ -135,7 +135,7 @@ def test_adding_derived_generators_also_adds_their_input_generators():
 
     names_expected = ['ANONYMOUS_ANONYMOUS_ANONYMOUS_a', 'ANONYMOUS_ANONYMOUS_ANONYMOUS_b', 'g']
     assert len(ns) == 3
-    assert names_expected == ns.names
+    assert names_expected == ns.keys()
 
 
 def test_adding_generators_with_complex_dependencies():
@@ -167,7 +167,7 @@ def test_adding_generators_with_complex_dependencies():
         "bb"
     ]
     assert 5 == len(ns)
-    assert names_expected == ns.names
+    assert names_expected == ns.keys()
 
 
 def test_initialisation_from_dictionary():
@@ -180,7 +180,7 @@ def test_initialisation_from_dictionary():
 
     expected_names = ["aa", "ANONYMOUS_ANONYMOUS_ANONYMOUS_g2", "cc"]
     assert 3 == len(ns)
-    assert expected_names == ns.names
+    assert expected_names == ns.keys()
 
 
 def test_resetting():

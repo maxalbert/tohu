@@ -112,6 +112,6 @@ class CustomGenerator(TohuBaseGenerator):
         #        (these can occur in chains of derived generators)
         #for name in self.constituent_generators.keys():
         #    self.constituent_generators[name]._set_random_state_from(other.constituent_generators[name])
-        for name in self.ns_gens.names:
-            self.ns_gens[name]._set_random_state_from(other.ns_gens[name])
+        for key in self.ns_gens.keys():
+            self.ns_gens[key]._set_random_state_from(other.ns_gens[key])
             #self.constituent_generators[name]._set_random_state_from(other.constituent_generators[name])

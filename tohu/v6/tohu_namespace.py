@@ -37,8 +37,7 @@ class TohuNamespace:
             if isinstance(value, TohuBaseGenerator):
                 self.add_generator(value, name)
 
-    @property
-    def names(self):
+    def keys(self):
         return list(self.generators.keys())
 
     def __len__(self):
