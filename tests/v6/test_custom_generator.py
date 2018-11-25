@@ -103,3 +103,16 @@ def test_tohu_items_can_be_initialised_with_expected_field_elements(quux_gen_1, 
     assert "Quux2" == item2.__class__.__name__
     assert "MyQuux3Item" == item3.__class__.__name__
     assert "Quux4" == item4.__class__.__name__
+
+
+def test_generators_produce_items_with_fields_in_the_correct_order(quux_gen_1, quux_gen_2, quux_gen_3, quux_gen_4):
+    item1 = next(quux_gen_1.reset(seed=11111))
+    item2 = next(quux_gen_2.reset(seed=22222))
+    item3 = next(quux_gen_3.reset(seed=33333))
+    item4 = next(quux_gen_4.reset(seed=44444))
+
+    # Check that fields are in the correct order
+    assert item1 == (7, '7551AA72', 'Michelle Miller')
+    assert item2 == (4, 'B0C4F475', 'April Henderson')
+    assert item3 == (1, 'Erica Brown')
+    assert item4 == ('6C02EEEC', 151, 'William Roberts')  # the order of the elements should reflect the order in quux_gen_4.__fields__

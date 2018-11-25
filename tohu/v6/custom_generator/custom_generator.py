@@ -63,7 +63,8 @@ class CustomGenerator(TohuBaseGenerator):
             self.__class__.tohu_items_cls = make_tohu_items_class(self.__tohu_items_name__, self.field_names)
 
     def __next__(self):
-        return None
+        field_values = {name: next(self.field_generators[name]) for name in self.field_names}
+        return self.tohu_items_cls(**field_values)
 
     def reset(self, seed):
         super().reset(seed)
