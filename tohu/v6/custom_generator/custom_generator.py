@@ -13,26 +13,14 @@ class CustomGenerator(TohuBaseGenerator):
         self.orig_args = args
         self.orig_kwargs = kwargs
 
-        self._extract_namespace_for_constituent_generator_templates()
-        self._extract_namespace_for_constituent_generators()
+        self.ns_gen_templates = TohuNamespace()
+        self.ns_gen_templates.update_from_dict(self.__class__.__dict__)
+        self.ns_gen_templates.update_from_dict(self.__dict__)
+        self.ns_gens = TohuNamespace.from_dict({name: gen.spawn() for name, gen in self.ns_gen_templates.items()})
 
         self._set_field_names()
         self._set_tohu_items_name()
         self._set_tohu_items_cls()
-
-    def _extract_namespace_for_constituent_generator_templates(self):
-        """
-        Set the `constituent_generator_templates` attribute to a dictionary
-        of the form `{name: constituent_generator}` which contains all tohu
-        generators defined in the class and instance namespaces of
-        this custom generator.
-        """
-        self.ns_gen_templates = TohuNamespace()
-        self.ns_gen_templates.update_from_dict(self.__class__.__dict__)
-        self.ns_gen_templates.update_from_dict(self.__dict__)
-
-    def _extract_namespace_for_constituent_generators(self):
-        self.ns_gens = TohuNamespace.from_dict({name: gen.spawn() for name, gen in self.ns_gen_templates.items()})
 
     def _set_field_names(self):
         constituent_generator_names = list(self.ns_gens.names)
@@ -78,4 +66,4 @@ class CustomGenerator(TohuBaseGenerator):
 
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
-        self.ns_gens.__set_random_state_from(other.ns_gens)
+        self.ns_gens._set_random_state_from(other.ns_gens)
