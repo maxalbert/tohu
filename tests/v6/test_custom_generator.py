@@ -14,36 +14,36 @@ def test_constituent_generator_templates(quux_gen_1, quux_gen_2, quux_gen_3, quu
     constituent_generator_templates_expected_3 = {'xx': quux_gen_3.xx, 'yy': quux_gen_3.yy, 'zz': quux_gen_3.zz}
     constituent_generator_templates_expected_4 = {'aa': quux_gen_4.aa, 'bb': quux_gen_4.bb, 'cc': quux_gen_4.cc, 'dd': quux_gen_4.dd}
 
-    assert constituent_generator_templates_expected_1 == quux_gen_1.constituent_generator_templates
-    assert constituent_generator_templates_expected_2 == quux_gen_2.constituent_generator_templates
-    assert constituent_generator_templates_expected_3 == quux_gen_3.constituent_generator_templates
-    assert constituent_generator_templates_expected_4 == quux_gen_4.constituent_generator_templates
+    assert constituent_generator_templates_expected_1 == quux_gen_1.ns_gen_templates.named_generators
+    assert constituent_generator_templates_expected_2 == quux_gen_2.ns_gen_templates.named_generators
+    assert constituent_generator_templates_expected_3 == quux_gen_3.ns_gen_templates.named_generators
+    assert constituent_generator_templates_expected_4 == quux_gen_4.ns_gen_templates.named_generators
 
 
 def test_constituent_generators(quux_gen_1, quux_gen_2, quux_gen_3, quux_gen_4):
     """
     Test that a couple of example custom generators contain field generators with the expected names and types.
     """
-    assert list(quux_gen_1.constituent_generators.keys()) == ['aa', 'bb', 'cc']
-    assert isinstance(quux_gen_1.constituent_generators['aa'], Integer)
-    assert isinstance(quux_gen_1.constituent_generators['bb'], HashDigest)
-    assert isinstance(quux_gen_1.constituent_generators['cc'], FakerGenerator)
+    assert quux_gen_1.ns_gens.names == ['aa', 'bb', 'cc']
+    assert isinstance(quux_gen_1.ns_gens['aa'], Integer)
+    assert isinstance(quux_gen_1.ns_gens['bb'], HashDigest)
+    assert isinstance(quux_gen_1.ns_gens['cc'], FakerGenerator)
 
-    assert list(quux_gen_2.constituent_generators.keys()) == ['dd', 'ee', 'ff']
-    assert isinstance(quux_gen_2.constituent_generators['dd'], Integer)
-    assert isinstance(quux_gen_2.constituent_generators['ee'], HashDigest)
-    assert isinstance(quux_gen_2.constituent_generators['ff'], FakerGenerator)
+    assert quux_gen_2.ns_gens.names == ['dd', 'ee', 'ff']
+    assert isinstance(quux_gen_2.ns_gens['dd'], Integer)
+    assert isinstance(quux_gen_2.ns_gens['ee'], HashDigest)
+    assert isinstance(quux_gen_2.ns_gens['ff'], FakerGenerator)
 
-    assert list(quux_gen_3.constituent_generators.keys()) == ['xx', 'zz', 'yy']
-    assert isinstance(quux_gen_3.constituent_generators['xx'], Integer)
-    assert isinstance(quux_gen_3.constituent_generators['zz'], FakerGenerator)
-    assert isinstance(quux_gen_3.constituent_generators['yy'], HashDigest)
+    assert quux_gen_3.ns_gens.names == ['xx', 'zz', 'yy']
+    assert isinstance(quux_gen_3.ns_gens['xx'], Integer)
+    assert isinstance(quux_gen_3.ns_gens['zz'], FakerGenerator)
+    assert isinstance(quux_gen_3.ns_gens['yy'], HashDigest)
 
-    assert list(quux_gen_4.constituent_generators.keys()) == ['aa', 'bb', 'cc', 'dd']
-    assert isinstance(quux_gen_4.constituent_generators['aa'], Constant)
-    assert isinstance(quux_gen_4.constituent_generators['bb'], HashDigest)
-    assert isinstance(quux_gen_4.constituent_generators['cc'], FakerGenerator)
-    assert isinstance(quux_gen_4.constituent_generators['dd'], Integer)
+    assert quux_gen_4.ns_gens.names == ['aa', 'bb', 'cc', 'dd']
+    assert isinstance(quux_gen_4.ns_gens['aa'], Constant)
+    assert isinstance(quux_gen_4.ns_gens['bb'], HashDigest)
+    assert isinstance(quux_gen_4.ns_gens['cc'], FakerGenerator)
+    assert isinstance(quux_gen_4.ns_gens['dd'], Integer)
 
 
 def test_field_names(quux_gen_1, quux_gen_2, quux_gen_3, quux_gen_4):
