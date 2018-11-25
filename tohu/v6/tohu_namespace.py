@@ -1,10 +1,19 @@
+from bidict import bidict
+
 from .base import TohuBaseGenerator
+from .logging import logger
+
+
+class TohuNamespaceError(Exception):
+    """
+    Custom exception for TohuNamespace.
+    """
 
 
 class TohuNamespace:
 
     def __init__(self):
-        self.generators = {}
+        self.generators = bidict()
 
     @property
     def names(self):
@@ -26,4 +35,13 @@ class TohuNamespace:
         assert isinstance(g, TohuBaseGenerator)
 
         name = name or f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.tohu_id}"
+
+        if g in self.generators.inv:
+            existing_name = self.generators.inv[g]
+            if name == existing_name:
+                logger.debug(f"Not adding generator to namespace because it already exists with the same name: {g}")
+            else:
+                raise TohuNamespaceError("Cannot add generator because it already exists with a different name: {g} "
+                                         "(existing name: {existing_name}")
+
         self.generators[name] = g
