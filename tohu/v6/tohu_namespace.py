@@ -39,6 +39,17 @@ class TohuNamespace:
     def __getitem__(self, name):
         return self.generators[name]
 
+    def contains_generator(self, g):
+        return (g in self.generators.inv)
+
+    def is_anonymous(self, g):
+        try:
+            existing_name = self.generators.inv[g]
+        except KeyError:
+            raise TohuNamespaceError(f"Namespace does not contain generator: {g}")
+
+        return existing_name.startswith("ANONYMOUS_ANONYMOUS_ANONYMOUS_")
+
     def add_generator(self, g, name):
         """
         Add generator `g` to namespace under the given name.
