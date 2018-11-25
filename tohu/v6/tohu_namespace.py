@@ -51,6 +51,12 @@ class TohuNamespace:
     def named_generators(self):
         return {name: self.generators[name] for name in self.names}
 
+    def get_name(self, g):
+        try:
+            return self.generators.inv[g]
+        except KeyError:
+            raise KeyError(f"Generator not present in namespace: {g}")
+
     def __len__(self):
         return len(self.generators)
 

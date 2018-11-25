@@ -225,3 +225,15 @@ def test_named_generators():
     ns.add_generator(g3, name="bb")
 
     assert ns.named_generators == {"aa": g1, "bb": g3}
+
+
+def test_get_name_for_generator():
+    g1 = Integer(100, 200).set_tohu_name("g1")
+    g2 = HashDigest(length=8).set_tohu_name("g2")
+
+    ns = TohuNamespace()
+    ns.add_generator(g1, name="aa")
+    ns.add_generator(g2, name=None)
+
+    assert ns.get_name(g1) == "aa"
+    assert ns.get_name(g2) == "ANONYMOUS_ANONYMOUS_ANONYMOUS_g2"
