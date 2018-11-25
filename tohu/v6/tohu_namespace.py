@@ -6,6 +6,9 @@ class TohuNamespace:
     def __init__(self):
         self.generators = {}
 
+    def __len__(self):
+        return len(self.generators)
+
     def __iter__(self):
         yield from self.generators.keys()
 

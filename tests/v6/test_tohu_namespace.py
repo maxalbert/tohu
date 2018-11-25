@@ -15,8 +15,11 @@ def test_add_generators_with_explicit_names():
     assert "aa" not in ns
     assert "bb" not in ns
 
+    assert len(ns) == 0
     ns.add_generator(g1, name="aa")
+    assert len(ns) == 1
     ns.add_generator(g2, name="bb")
+    assert len(ns) == 2
 
     assert ns["aa"] is g1
     assert ns["bb"] is g2
