@@ -58,6 +58,9 @@ class TohuNamespace:
 
         new_name = name or get_anonymous_name_for(g)
 
+        for g_input in g.input_generators:
+            self.add_generator(g_input, name=None)
+
         if not self.contains_generator(g):
             self.generators[new_name] = g
         else:

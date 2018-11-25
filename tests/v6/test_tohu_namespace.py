@@ -117,3 +117,20 @@ def test_adding_generators_twice_with_different_names_raises_error():
     # Adding g2 again with an explicit name should update the name
     ns.add_generator(g2, name="g2_new")
     assert ["aa", "g2_new"] == ns.names
+
+
+def test_adding_derived_generators_also_adds_their_input_generators():
+    ns = TohuNamespace()
+
+    a = Integer(100, 200).set_tohu_name("a")
+    b = Integer(300, 400).set_tohu_name("b")
+    g = Apply(lambda x, y: x + y, a, b).set_tohu_name("g")
+
+    assert len(ns) == 0
+
+    # Add g, which should implicitly also add its input generators a and b
+    ns.add_generator(g, "g")
+
+    names_expected = ['ANONYMOUS_ANONYMOUS_ANONYMOUS_a', 'ANONYMOUS_ANONYMOUS_ANONYMOUS_b', 'g']
+    assert len(ns) == 3
+    assert names_expected == ns.names
