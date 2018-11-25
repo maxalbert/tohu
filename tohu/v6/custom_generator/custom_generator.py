@@ -78,8 +78,4 @@ class CustomGenerator(TohuBaseGenerator):
 
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
-
-        # TODO: should also set random state for anonymous/implicit constituent generators
-        #        (these can occur in chains of derived generators)
-        for key in self.ns_gens.keys():
-            self.ns_gens[key]._set_random_state_from(other.ns_gens[key])
+        self.ns_gens.__set_random_state_from(other.ns_gens)

@@ -109,3 +109,17 @@ class TohuNamespace:
         self.seed_generator.reset(seed)
         for g in self.generators.values():
             g.reset(seed=next(self.seed_generator))
+
+    def _set_random_state_from(self, other):
+        assert isinstance(other, TohuNamespace)
+
+        if self.keys() != other.keys():
+            raise TohuNamespaceError("Namespaces must contain the same keys.")
+
+        for key, g_self in self.generators.items():
+            g_other = other[key]
+
+            if type(g_self) is not type(g_other):
+                raise TohuNamespaceError("Generators in both namespaces must have be of the same types.")
+
+            g_self._set_random_state_from(g_other)
