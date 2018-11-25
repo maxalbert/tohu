@@ -99,14 +99,14 @@ class TohuNamespace:
         if not self.contains_generator(g):
             self.generators[new_name] = g
         else:
-            existing_name = self.generators.inv[g]
+            existing_name = self.get_name(g)
             if new_name == existing_name:
                 logger.debug(f"Not adding generator to namespace because it already exists with the same name: {g}")
             else:
                 if self.is_anonymous(g):
                     self.generators.inv[g] = new_name  # update anonymous name with explicit one
                 elif name is None:
-                    pass  # no update needed here (the existing name is explicit and the new one would be anonymous)
+                    pass  # no update needed here (the existing name is already explicit and the new one would be anonymous)
                 else:
                     raise TohuNamespaceError(
                         f"Cannot add generator {g} with new name {new_name} because it already exists with a different name: {g}. Existing name: '{existing_name}'")
