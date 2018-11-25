@@ -17,8 +17,7 @@ def get_anonymous_name_for(g):
     if g.tohu_name is not None:
         return f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.tohu_name}"
     else:
-        return f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.tohu_id}"
-
+        return f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.__class__.__name__}_{g.tohu_id}"
 
 
 class TohuNamespace:
