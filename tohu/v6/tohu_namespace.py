@@ -10,6 +10,17 @@ class TohuNamespaceError(Exception):
     """
 
 
+def get_anonymous_name_for(g):
+    """
+    Return a string that can be used as an anonymous name in a tohu namespace.
+    """
+    if g.tohu_name is not None:
+        return f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.tohu_name}"
+    else:
+        return f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.tohu_id}"
+
+
+
 class TohuNamespace:
 
     def __init__(self):
@@ -34,7 +45,7 @@ class TohuNamespace:
         """
         assert isinstance(g, TohuBaseGenerator)
 
-        name = name or f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.tohu_id}"
+        name = name or get_anonymous_name_for(g)
 
         if g in self.generators.inv:
             existing_name = self.generators.inv[g]

@@ -3,6 +3,7 @@ import pytest
 from .context import tohu
 from tohu.v6.tohu_namespace import TohuNamespace, TohuNamespaceError
 from tohu.v6.primitive_generators import Integer, HashDigest
+from tohu.v6.derived_generators import Apply
 
 
 def test_add_generators_with_explicit_names():
@@ -36,8 +37,8 @@ def test_add_anonymous_generator():
     """
     Generators can be added to the namespace without an explicit name.
     """
-    g1 = Integer(100, 200)
-    g2 = HashDigest(length=8)
+    g1 = Integer(100, 200).set_tohu_name("g1")
+    g2 = HashDigest(length=8).set_tohu_name("g2")
 
     tohu_id_g1 = g1.tohu_id
     tohu_id_g2 = g2.tohu_id
@@ -54,8 +55,8 @@ def test_add_anonymous_generator():
     assert len(ns) == 2
 
     names_expected = [
-        f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{tohu_id_g1}",
-        f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{tohu_id_g2}",
+        f"ANONYMOUS_ANONYMOUS_ANONYMOUS_g1",
+        f"ANONYMOUS_ANONYMOUS_ANONYMOUS_g2",
     ]
     assert names_expected == ns.names
 
@@ -66,8 +67,9 @@ def test_add_anonymous_generator():
 def test_adding_generator_twice_with_the_same_name_ignores_the_second_time():
     ns = TohuNamespace()
 
-    g1 = Integer(100, 200)
-    g2 = HashDigest(length=8)
+    g1 = Integer(100, 200).set_tohu_name("g1")
+    g2 = HashDigest(length=8).set_tohu_name("g2")
+    expected_names = ["aa", "ANONYMOUS_ANONYMOUS_ANONYMOUS_g2"]
 
     assert len(ns) == 0
 
@@ -76,8 +78,7 @@ def test_adding_generator_twice_with_the_same_name_ignores_the_second_time():
     ns.add_generator(g2, None)
     assert 2 == len(ns)
     assert 2 == len(ns.names)
-    assert "aa" == ns.names[0]
-    assert ns.names[1].startswith('ANONYMOUS_ANONYMOUS_ANONYMOUS_')
+    assert expected_names == ns.names
 
     # Add generator for the second time with the same names.
     # This should not change anything.
@@ -85,8 +86,7 @@ def test_adding_generator_twice_with_the_same_name_ignores_the_second_time():
     ns.add_generator(g2, None)
     assert 2 == len(ns)
     assert 2 == len(ns.names)
-    assert "aa" == ns.names[0]
-    assert ns.names[1].startswith('ANONYMOUS_ANONYMOUS_ANONYMOUS_')
+    assert expected_names == ns.names
 
 
 def test_adding_generators_twice_with_different_names_raises_error():
