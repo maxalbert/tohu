@@ -63,8 +63,8 @@ def test_different_instances_share_the_same_tohu_items_class():
     g2 = Quux2Generator(method="name")
     h2 = Quux2Generator(method="name")
 
-    g3 = Quux3Generator(method="name")
-    h3 = Quux3Generator(method="name")
+    g3 = Quux3Generator(length=10)
+    h3 = Quux3Generator(length=10)
 
     assert g1.tohu_items_cls is h1.tohu_items_cls
     assert g2.tohu_items_cls is h2.tohu_items_cls
@@ -78,7 +78,7 @@ def test_different_instances_share_the_same_tohu_items_class():
 def test_tohu_items_can_be_initialised_with_expected_elements():
     g1 = Quux1Generator()
     g2 = Quux2Generator(method="name")
-    g3 = Quux3Generator(method="name")
+    g3 = Quux3Generator(length=10)
 
     # The following calls should succeed
     item1 = g1.tohu_items_cls(aa=42, bb='C851F707', cc='Jane Dae')

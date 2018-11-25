@@ -25,15 +25,15 @@ class Quux3Generator(CustomGenerator):
     __fields__ = ['xx', 'zz']
 
     xx = Integer(1, 7)
-    yy = HashDigest(length=8)
+    zz = FakerGenerator(method="name")
 
-    def __init__(self, method):
-        self.zz = FakerGenerator(method=method)
-        super().__init__(method)
+    def __init__(self, length):
+        self.yy = HashDigest(length=length)
+        super().__init__(length)
 
 
 EXEMPLAR_CUSTOM_GENERATORS = [
     Quux1Generator(),
     Quux2Generator(method="name"),
-    Quux3Generator(method="name"),
+    Quux3Generator(length=10),
 ]

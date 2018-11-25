@@ -18,4 +18,4 @@ def quux_gen_2():
 
 @pytest.fixture(scope="module")
 def quux_gen_3():
-    return Quux3Generator(method="name")
+    return Quux3Generator(length=10)
