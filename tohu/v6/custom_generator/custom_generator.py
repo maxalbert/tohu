@@ -1,4 +1,5 @@
 from ..base import TohuBaseGenerator
+from ..tohu_namespace import TohuNamespace
 from .utils import make_tohu_items_class, get_tohu_items_name
 
 __all__ = ['CustomGenerator']
@@ -14,9 +15,27 @@ class CustomGenerator(TohuBaseGenerator):
 
         self._extract_constituent_generator_templates()
         self._extract_constituent_generators()
+
+        self._extract_namespace_for_constituent_generator_templates()
+        self._extract_namespace_for_constituent_generators()
+
         self._set_field_names()
         self._set_tohu_items_name()
         self._set_tohu_items_cls()
+
+    def _extract_namespace_for_constituent_generator_templates(self):
+        """
+        Set the `constituent_generator_templates` attribute to a dictionary
+        of the form `{name: constituent_generator}` which contains all tohu
+        generators defined in the class and instance namespaces of
+        this custom generator.
+        """
+        self.ns_gen_templates = TohuNamespace()
+        self.ns_gen_templates.update_from_dict(self.__class__.__dict__)
+        self.ns_gen_templates.update_from_dict(self.__dict__)
+
+    def _extract_namespace_for_constituent_generators(self):
+        self.ns_gens = TohuNamespace.from_dict({name: gen.spawn() for name, gen in self.constituent_generator_templates.items()})
 
     def _extract_constituent_generator_templates(self):
         """
@@ -63,13 +82,14 @@ class CustomGenerator(TohuBaseGenerator):
             self.__class__.tohu_items_cls = make_tohu_items_class(self.__tohu_items_name__, self.field_names)
 
     def __next__(self):
-        field_values = {name: next(self.constituent_generators[name]) for name in self.field_names}
+        field_values = {name: next(self.ns_gens[name]) for name in self.field_names}
         return self.tohu_items_cls(**field_values)
 
     def reset(self, seed):
         super().reset(seed)
-        for gen in self.constituent_generators.values():
-            gen.reset(next(self.seed_generator))
+        self.ns_gens.reset(seed)
+        # for gen in self.constituent_generators.values():
+        #     gen.reset(next(self.seed_generator))
         return self
 
     def spawn(self):
@@ -90,5 +110,8 @@ class CustomGenerator(TohuBaseGenerator):
 
         # TODO: should also set random state for anonymous/implicit constituent generators
         #        (these can occur in chains of derived generators)
-        for name in self.constituent_generators.keys():
-            self.constituent_generators[name]._set_random_state_from(other.constituent_generators[name])
+        #for name in self.constituent_generators.keys():
+        #    self.constituent_generators[name]._set_random_state_from(other.constituent_generators[name])
+        for name in self.ns_gens.names:
+            self.ns_gens[name]._set_random_state_from(other.ns_gens[name])
+            #self.constituent_generators[name]._set_random_state_from(other.constituent_generators[name])
