@@ -213,3 +213,15 @@ def test_names_vs_keys():
 
     assert ["cc", "aa"] == ns.names
     assert ["cc", "ANONYMOUS_ANONYMOUS_ANONYMOUS_g2", "aa"] == ns.keys()
+
+
+def test_named_generators():
+    g1 = Integer(1, 5).set_tohu_name("g1")
+    g2 = Constant(['a', 'b', 'c', 'd', 'e']).set_tohu_name("g2")
+    g3 = SelectMultiple(values=g2, num=g1).set_tohu_name("g3")
+
+    ns = TohuNamespace()
+    ns.add_generator(g1, name="aa")
+    ns.add_generator(g3, name="bb")
+
+    assert ns.named_generators == {"aa": g1, "bb": g3}
