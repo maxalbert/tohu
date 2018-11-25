@@ -15,7 +15,8 @@ class CustomGenerator(TohuBaseGenerator):
         self._set_tohu_item_class()
 
     def _set_tohu_item_class(self):
-        self.tohu_item_cls = make_tohu_item_class(self.__tohu_items_name__, self.field_names)
+        #self.tohu_item_cls = make_tohu_item_class(self.__tohu_items_name__, self.field_names)
+        pass
 
     def __next__(self):
         # field_values = [next(g) for g in self.field_generators.values()]
