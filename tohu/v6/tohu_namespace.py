@@ -25,4 +25,5 @@ class TohuNamespace:
         """
         assert isinstance(g, TohuBaseGenerator)
 
+        name = name or f"ANONYMOUS_ANONYMOUS_ANONYMOUS_{g.tohu_id}"
         self.generators[name] = g
