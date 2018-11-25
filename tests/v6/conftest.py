@@ -1,9 +1,6 @@
 import pytest
 
-from .context import tohu
-from tohu.v6.primitive_generators import Integer, HashDigest, FakerGenerator
-from tohu.v6.custom_generator import CustomGenerator
-from .exemplar_generators.exemplar_custom_generators import Quux1Generator, Quux2Generator, Quux3Generator
+from .exemplar_generators.exemplar_custom_generators import *
 
 
 @pytest.fixture(scope="module")
@@ -19,3 +16,8 @@ def quux_gen_2():
 @pytest.fixture(scope="module")
 def quux_gen_3():
     return Quux3Generator(length=10)
+
+
+@pytest.fixture(scope="module")
+def quux_gen_4():
+    return Quux4Generator()
