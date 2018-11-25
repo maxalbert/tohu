@@ -51,6 +51,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         self.owner = None
         self.parent = None
         self.clones = []
+        self.input_generators = []
         self.seed_generator = SeedGenerator()
 
     def __repr__(self):
