@@ -54,3 +54,22 @@ def test_tohu_items_name(quux_gen_1, quux_gen_2, quux_gen_3):
     assert 'Quux1' == quux_gen_1.__tohu_items_name__
     assert 'Quux2' == quux_gen_2.__tohu_items_name__
     assert 'MyQuux3Item' == quux_gen_3.__tohu_items_name__
+
+
+def test_different_instances_share_the_same_tohu_items_class():
+    g1 = Quux1Generator()
+    h1 = Quux1Generator()
+
+    g2 = Quux2Generator(method="name")
+    h2 = Quux2Generator(method="name")
+
+    g3 = Quux3Generator(method="name")
+    h3 = Quux3Generator(method="name")
+
+    assert g1.tohu_items_cls is h1.tohu_items_cls
+    assert g2.tohu_items_cls is h2.tohu_items_cls
+    assert g3.tohu_items_cls is h3.tohu_items_cls
+
+    assert g1.tohu_items_cls is not g2.tohu_items_cls
+    assert g1.tohu_items_cls is not g3.tohu_items_cls
+    assert g2.tohu_items_cls is not g3.tohu_items_cls

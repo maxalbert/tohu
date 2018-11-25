@@ -1,5 +1,5 @@
 from ..base import TohuBaseGenerator
-from .utils import make_tohu_item_class, get_tohu_items_name
+from .utils import make_tohu_items_class, get_tohu_items_name
 
 __all__ = ['CustomGenerator']
 
@@ -16,6 +16,7 @@ class CustomGenerator(TohuBaseGenerator):
         self._extract_field_generators()
         self._set_field_names()
         self._set_tohu_items_name()
+        self._set_tohu_items_cls()
 
     def _extract_field_generator_templates(self):
         """
@@ -56,6 +57,10 @@ class CustomGenerator(TohuBaseGenerator):
 
     def _set_tohu_items_name(self):
         self.__class__.__tohu_items_name__ = get_tohu_items_name(self.__class__)
+
+    def _set_tohu_items_cls(self):
+        if not hasattr(self.__class__, 'tohu_items_cls'):
+            self.__class__.tohu_items_cls = make_tohu_items_class(self.__tohu_items_name__, self.field_names)
 
     def __next__(self):
         return None

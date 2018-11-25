@@ -5,10 +5,10 @@ import re
 from ..base import TohuBaseGenerator
 from ..logging import logger
 
-__all__ = ['get_tohu_items_name', 'make_tohu_item_class']
+__all__ = ['get_tohu_items_name', 'make_tohu_items_class']
 
 
-def make_tohu_item_class(clsname, attr_names):
+def make_tohu_items_class(clsname, attr_names):
     """
     Parameters
     ----------
