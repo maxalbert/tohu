@@ -200,3 +200,16 @@ def test_resetting():
     g1.reset.assert_called_once_with(seed=831769172)
     g2.reset.assert_called_once_with(seed=2430986565)
     g3.reset.assert_called_once_with(seed=694443915)
+
+
+def test_names_vs_keys():
+    g1 = Integer(1, 5).set_tohu_name("g1")
+    g2 = Constant(['a', 'b', 'c', 'd', 'e']).set_tohu_name("g2")
+    g3 = SelectMultiple(values=g2, num=g1).set_tohu_name("g3")
+
+    ns = TohuNamespace()
+    ns.add_generator(g1, name="cc")
+    ns.add_generator(g3, name="aa")
+
+    assert ["cc", "aa"] == ns.names
+    assert ["cc", "ANONYMOUS_ANONYMOUS_ANONYMOUS_g2", "aa"] == ns.keys()
