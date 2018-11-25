@@ -40,6 +40,9 @@ class TohuNamespace:
     def keys(self):
         return list(self.generators.keys())
 
+    def items(self):
+        return list(self.generators.items())
+
     @property
     def names(self):
         return [name for name, g in self.generators.items() if not self.is_anonymous(g)]
