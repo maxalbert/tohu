@@ -73,3 +73,19 @@ def test_different_instances_share_the_same_tohu_items_class():
     assert g1.tohu_items_cls is not g2.tohu_items_cls
     assert g1.tohu_items_cls is not g3.tohu_items_cls
     assert g2.tohu_items_cls is not g3.tohu_items_cls
+
+
+def test_tohu_items_can_be_initialised_with_expected_elements():
+    g1 = Quux1Generator()
+    g2 = Quux2Generator(method="name")
+    g3 = Quux3Generator(method="name")
+
+    # The following calls should succeed
+    item1 = g1.tohu_items_cls(aa=42, bb='C851F707', cc='Jane Dae')
+    item2 = g2.tohu_items_cls(aa=42, bb='C851F707', cc='John Doe')
+    item3 = g3.tohu_items_cls(aa=42, cc='Kate Foo')
+
+    # Double-check that the item class names are as expected
+    assert "Quux1" == item1.__class__.__name__
+    assert "Quux2" == item2.__class__.__name__
+    assert "MyQuux3Item" == item3.__class__.__name__
