@@ -99,11 +99,11 @@ class CustomGenerator(TohuBaseGenerator):
             The custom generator class for which to create an item-class
         """
         self._set_tohu_items_name()
-        self.item_cls = make_tohu_item_class(self.__tohu_items_name__, self.field_names)
+        self.tohu_item_cls = make_tohu_item_class(self.__tohu_items_name__, self.field_names)
 
     def __next__(self):
         field_values = [next(g) for g in self.field_generators.values()]
-        return self.item_cls(*field_values)
+        return self.tohu_item_cls(*field_values)
 
     def reset(self, seed):
         super().reset(seed)
@@ -119,7 +119,7 @@ class CustomGenerator(TohuBaseGenerator):
         # generated items will return False even though they contain
         # the same elements (because the underlying attr classes are
         # different, so attr plays it safe).
-        new_obj.item_cls = self.item_cls
+        new_obj.tohu_item_cls = self.tohu_item_cls
 
         return new_obj
 
