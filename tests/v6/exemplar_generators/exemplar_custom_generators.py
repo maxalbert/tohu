@@ -1,5 +1,6 @@
 from ..context import tohu
 from tohu.v6.primitive_generators import *
+from tohu.v6.derived_generators import *
 from tohu.v6.custom_generator import CustomGenerator
 
 __all__ = ['EXEMPLAR_CUSTOM_GENERATORS', 'Quux1Generator', 'Quux2Generator', 'Quux3Generator', 'Quux4Generator']
@@ -58,9 +59,24 @@ class Quux4Generator(CustomGenerator):
     dd = Integer(100, 200)
 
 
+class Quux5Generator(CustomGenerator):
+    """
+    Custom generator with more complex, nested dependencies.
+    """
+    mapping = {
+        1: ['a', 'aa', 'aaa', 'aaaa', 'aaaaa'],
+        2: ['b', 'bb', 'bbb', 'bbbb', 'bbbbb'],
+        3: ['c', 'cc', 'ccc', 'cccc', 'ccccc'],
+    }
+
+    n_vals = Integer(1, 5)
+    g = SelectMultiple(Lookup(g=Integer(1, 3), mapping=mapping), num=n_vals)
+
+
 EXEMPLAR_CUSTOM_GENERATORS = [
     Quux1Generator(),
     Quux2Generator(method="name"),
     Quux3Generator(length=10),
     Quux4Generator(),
+    Quux5Generator(),
 ]
