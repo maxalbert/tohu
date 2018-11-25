@@ -53,7 +53,7 @@ def test_field_names(quux_gen_1, quux_gen_2, quux_gen_3, quux_gen_4):
     assert ['aa', 'bb', 'cc'] == quux_gen_1.field_names
     assert ['dd', 'ee', 'ff'] == quux_gen_2.field_names
     assert ['xx', 'zz'] == quux_gen_3.field_names
-    assert ['dd', 'bb', 'cc'] == quux_gen_4.field_names
+    assert ['bb', 'dd', 'cc'] == quux_gen_4.field_names
 
 
 def test_tohu_items_name(quux_gen_1, quux_gen_2, quux_gen_3, quux_gen_4):
@@ -96,7 +96,7 @@ def test_tohu_items_can_be_initialised_with_expected_field_elements(quux_gen_1, 
     assert item1 == (42, 'C851F707', 'Jane Dae')
     assert item2 == (23, 'C851F707', 'John Doe')
     assert item3 == (10, 'Kate Foo')
-    assert item4 == (99, 'C851F707', 'James Quux')
+    assert item4 == ('C851F707', 99, 'James Quux')
 
     # Double-check that the item class names are as expected
     assert "Quux1" == item1.__class__.__name__
