@@ -38,14 +38,19 @@ class TohuNamespace:
             existing_name = self._gens2names[g]
             if existing_name is None:
                 raise TohuNamespaceError(
-                    "Trying to add generator with name which was previously added anonymously. "
-                    "This is currently not allowed.")
+                    "Trying to add named generator which was previously added anonymously. "
+                    f"This is currently not allowed. Generator: {g}"
+                )
             elif name != existing_name:
                 raise TohuNamespaceError(f"Generator already exists with a different name. Existing name: {existing_name}")
             else:
                 logger.debug("Not adding generator to namespace because it already exists with the same name.")
         except KeyError:
             # generator does not exist yet
+
+            for g_input in g.input_generators:
+                self.add_anonymously(g_input)
+
             self._gens2names[g] = name
             self._names2gens[name] = g
 
@@ -53,4 +58,6 @@ class TohuNamespace:
         if g in self._gens2names:
             logger.debug("Not adding generator anonymously because it already exists with an explicit name.")
         else:
+            for g_input in g.input_generators:
+                self.add_anonymously(g_input)
             self._gens2names[g] = None

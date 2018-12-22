@@ -17,13 +17,23 @@ def g2():
 
 
 @pytest.fixture
-def h1():
-    return Integer(300, 400).set_tohu_name("h1")
+def g3():
+    def add(x, y):
+        return x + y
+
+    xx = Integer(100, 200).set_tohu_name("xx")
+    yy = Integer(300, 400).set_tohu_name("yy")
+    return Apply(add, xx, yy).set_tohu_name("g3")
 
 
 @pytest.fixture
-def h2():
-    return HashDigest(length=8).set_tohu_name("h2")
+def g1_anon():
+    return Integer(300, 400).set_tohu_name("g1_anon")
+
+
+@pytest.fixture
+def g2_anon():
+    return HashDigest(length=8).set_tohu_name("g2_anon")
 
 
 def test_new_namespace_is_empty():
@@ -51,46 +61,46 @@ def test_add_named_generators(g1, g2):
     assert g2 in ns
 
 
-def test_add_anonymous_generators(h1, h2):
+def test_add_anonymous_generators(g1_anon, g2_anon):
     ns = TohuNamespace()
 
     assert len(ns) == 0
-    assert h1 not in ns
-    assert h2 not in ns
+    assert g1_anon not in ns
+    assert g2_anon not in ns
 
-    ns.add_anonymously(h1)
+    ns.add_anonymously(g1_anon)
 
     assert len(ns) == 1
-    assert h1 in ns
-    assert h2 not in ns
+    assert g1_anon in ns
+    assert g2_anon not in ns
 
-    ns.add_anonymously(h2)
+    ns.add_anonymously(g2_anon)
 
     assert len(ns) == 2
-    assert h1 in ns
-    assert h2 in ns
+    assert g1_anon in ns
+    assert g2_anon in ns
 
 
-def test_add_both_named_and_anonymous_generators(g1, g2, h1, h2):
+def test_add_both_named_and_anonymous_generators(g1, g2, g1_anon, g2_anon):
     ns = TohuNamespace()
 
     ns.add_with_name(g1, name="bb")
     assert len(ns) == 1
-    ns.add_anonymously(h1)
+    ns.add_anonymously(g1_anon)
     assert len(ns) == 2
     ns.add_with_name(g2, name="aa")
     assert len(ns) == 3
-    ns.add_anonymously(h2)
+    ns.add_anonymously(g2_anon)
     assert len(ns) == 4
 
 
-def test_retrieve_named_generators(g1, g2, h1, h2):
+def test_retrieve_named_generators(g1, g2, g1_anon, g2_anon):
     ns = TohuNamespace()
 
     ns.add_with_name(g1, name="bb")
-    ns.add_anonymously(h1)
+    ns.add_anonymously(g1_anon)
     ns.add_with_name(g2, name="aa")
-    ns.add_anonymously(h2)
+    ns.add_anonymously(g2_anon)
     assert ns["bb"] is g1
     assert ns["aa"] is g2
 
@@ -130,5 +140,18 @@ def test_adding_same_generator_first_anonymously_and_then_with_explicit_name_rai
     ns = TohuNamespace()
     ns.add_anonymously(g1)
 
-    with pytest.raises(TohuNamespaceError, match="Trying to add generator with name which was previously added anonymously"):
+    with pytest.raises(TohuNamespaceError, match="Trying to add named generator which was previously added anonymously"):
         ns.add_with_name(g1, name="aa")
+
+
+def test_adding_derived_generator_also_adds_its_input_generators(g3):
+    ns = TohuNamespace()
+    assert len(ns) == 0
+    ns.add_with_name(g3, name="aa")
+    assert len(ns) == 3
+    assert ns["aa"] is g3
+
+    ns = TohuNamespace()
+    assert len(ns) == 0
+    ns.add_anonymously(g3)
+    assert len(ns) == 3
