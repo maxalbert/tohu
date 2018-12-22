@@ -1,6 +1,6 @@
 from bidict import bidict
 
-from .base import TohuBaseGenerator
+from .base import TohuBaseGenerator, SeedGenerator
 from .logging import logger
 
 
@@ -15,6 +15,7 @@ class TohuNamespace:
         # _names2gens is a dict with entries of the form {name -> generator} (excludes anonymous generators!)
         self._gens2names = {}
         self._names2gens = {}
+        self.seed_generator = SeedGenerator()
 
     def __len__(self):
         return len(self._gens2names)
@@ -29,6 +30,11 @@ class TohuNamespace:
         if not isinstance(name, str):
             raise ValueError("Name of the generator must be a string. Got: {type(name)}")
         return self._names2gens[name]
+
+    def reset(self, seed):
+        self.seed_generator.reset(seed)
+        for g in self._gens2names.keys():
+            g.reset(seed=next(self.seed_generator))
 
     def add_with_name(self, g, name):
         assert isinstance(g, TohuBaseGenerator)
