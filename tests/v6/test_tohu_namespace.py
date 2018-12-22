@@ -155,3 +155,12 @@ def test_adding_derived_generator_also_adds_its_input_generators(g3):
     assert len(ns) == 0
     ns.add_anonymously(g3)
     assert len(ns) == 3
+
+
+def test_update_from_dict(g1, g3):
+    ns = TohuNamespace()
+    assert len(ns) == 0
+    ns.update_from_dict({"aa": g1, "bb": g3})
+    assert len(ns) == 4
+    assert ns["aa"] is g1
+    assert ns["bb"] is g3

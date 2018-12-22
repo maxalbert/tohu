@@ -61,3 +61,7 @@ class TohuNamespace:
             for g_input in g.input_generators:
                 self.add_anonymously(g_input)
             self._gens2names[g] = None
+
+    def update_from_dict(self, d):
+        for name, g in d.items():
+            self.add_with_name(g, name=name)
