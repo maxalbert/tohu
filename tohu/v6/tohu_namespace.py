@@ -31,6 +31,14 @@ class TohuNamespace:
             raise ValueError("Name of the generator must be a string. Got: {type(name)}")
         return self._names2gens[name]
 
+    @property
+    def names(self):
+        return list(self._names2gens.keys())
+
+    @property
+    def named_generators(self):
+        return self._names2gens
+
     def reset(self, seed):
         self.seed_generator.reset(seed)
         for g in self._gens2names.keys():
