@@ -93,3 +93,42 @@ def test_retrieve_named_generators(g1, g2, h1, h2):
     ns.add_anonymously(h2)
     assert ns["bb"] is g1
     assert ns["aa"] is g2
+
+
+def test_adding_named_generators_multiple_times(g1):
+    ns = TohuNamespace()
+
+    assert len(ns) == 0
+    ns.add_with_name(g1, name="aa")
+    assert len(ns) == 1
+    ns.add_with_name(g1, name="aa")
+    assert len(ns) == 1
+
+
+def test_adding_same_generator_with_different_names_raises_error(g1):
+    ns = TohuNamespace()
+
+    ns.add_with_name(g1, name="aa")
+
+    with pytest.raises(TohuNamespaceError, match="Generator already exists with a different name"):
+        ns.add_with_name(g1, name="bb")
+
+
+def test_adding_same_generator_first_with_name_and_then_anonymously_only_adds_it_once(g1):
+    ns = TohuNamespace()
+
+    assert len(ns) == 0
+    ns.add_with_name(g1, name="aa")
+    assert len(ns) == 1
+    ns.add_anonymously(g1)
+    assert len(ns) == 1
+
+    assert ns["aa"] is g1
+
+
+def test_adding_same_generator_first_anonymously_and_then_with_explicit_name_raises_error(g1):
+    ns = TohuNamespace()
+    ns.add_anonymously(g1)
+
+    with pytest.raises(TohuNamespaceError, match="Trying to add generator with name which was previously added anonymously"):
+        ns.add_with_name(g1, name="aa")
