@@ -65,3 +65,9 @@ class TohuNamespace:
     def update_from_dict(self, d):
         for name, g in d.items():
             self.add_with_name(g, name=name)
+
+    @classmethod
+    def from_dict(cls, d):
+        ns = TohuNamespace()
+        ns.update_from_dict(d)
+        return ns

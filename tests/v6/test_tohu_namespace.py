@@ -17,12 +17,20 @@ def g2():
 
 
 @pytest.fixture
-def g3():
+def xx():
+    return Integer(100, 200).set_tohu_name("xx")
+
+
+@pytest.fixture
+def yy():
+    return Integer(300, 400).set_tohu_name("yy")
+
+
+@pytest.fixture
+def g3(xx, yy):
     def add(x, y):
         return x + y
 
-    xx = Integer(100, 200).set_tohu_name("xx")
-    yy = Integer(300, 400).set_tohu_name("yy")
     return Apply(add, xx, yy).set_tohu_name("g3")
 
 
@@ -164,3 +172,11 @@ def test_update_from_dict(g1, g3):
     assert len(ns) == 4
     assert ns["aa"] is g1
     assert ns["bb"] is g3
+
+
+def test_initialise_from_dict(g1, xx, g3):
+    ns = TohuNamespace.from_dict({"aa": g1, "xx": xx, "bb": g3})
+    assert len(ns) == 4
+    assert ns["aa"] is g1
+    assert ns["bb"] is g3
+    assert ns["xx"] is xx
