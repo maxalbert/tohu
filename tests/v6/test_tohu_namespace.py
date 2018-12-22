@@ -175,7 +175,9 @@ def test_update_from_dict(g1, g3):
 
 
 def test_initialise_from_dict(g1, xx, g3):
-    ns = TohuNamespace.from_dict({"aa": g1, "xx": xx, "bb": g3})
+    # Note that the keys yy and cc should be ignored because their values are not tohu generators.
+    d = {"aa": g1, "xx": xx, "yy": 11111, "bb": g3, "cc": None}
+    ns = TohuNamespace.from_dict(d)
     assert len(ns) == 4
     assert ns["aa"] is g1
     assert ns["bb"] is g3
