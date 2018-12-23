@@ -1,7 +1,10 @@
+import pandas as pd
 import pytest
 
 from .context import tohu
 from tohu.v6.primitive_generators import Constant, Integer, HashDigest, FakerGenerator
+from tohu.v6.derived_generators import Lookup, SelectMultiple
+from tohu.v6.custom_generator import CustomGenerator
 from .exemplar_generators.exemplar_custom_generators import *
 
 
@@ -116,3 +119,38 @@ def test_generators_produce_items_with_fields_in_the_correct_order(quux_gen_1, q
     assert item2 == (4, 'B0C4F475', 'April Henderson')
     assert item3 == (1, 'Erica Brown')
     assert item4 == ('6C02EEEC', 151, 'William Roberts')  # the order of the elements should reflect the order in quux_gen_4.__fields__
+
+
+def test_compare_structure_of_two_custom_generators_with_complex_dependencies():
+    """
+    Test that custom generator with implicitly created internal generators produces same output as explicit one.
+    """
+
+    mapping = {
+        1: ['a', 'aa', 'aaa', 'aaaa', 'aaaaa'],
+        2: ['b', 'bb', 'bbb', 'bbbb', 'bbbbb'],
+        3: ['c', 'cc', 'ccc', 'cccc', 'ccccc'],
+        4: ['d', 'dd', 'ddd', 'dddd', 'ddddd'],
+        5: ['e', 'ee', 'eee', 'eeee', 'eeeee'],
+        6: ['f', 'ff', 'fff', 'ffff', 'fffff'],
+        7: ['g', 'gg', 'ggg', 'gggg', 'ggggg'],
+    }
+
+    class Quux1Generator(CustomGenerator):
+        nn = Integer(1, 5)
+        aa = SelectMultiple(Lookup(Integer(1, 7), mapping), num=nn)
+
+    class Quux2Generator(CustomGenerator):
+        nn = Integer(1, 5)
+        key_gen = Integer(1, 7)
+        mapping_gen = Constant(mapping)
+        lookup = Lookup(key_gen, mapping_gen)
+        aa = SelectMultiple(lookup, num=nn)
+
+    g1 = Quux1Generator()
+    g2 = Quux2Generator()
+
+    df1 = g1.generate(100, seed=12345).to_df()
+    df2 = g2.generate(100, seed=12345).to_df()
+
+    pd.util.testing.assert_frame_equal(df1, df2[["nn", "aa"]])
