@@ -39,4 +39,6 @@ class TohuNamespace:
                 logger.debug("Trying to add existing generator with a different name. Adding a clone instead.")
                 self._ns[g.clone()] = name
         else:
+            for g_input in g.input_generators:
+                self._ns[g_input] = None
             self._ns[g] = name

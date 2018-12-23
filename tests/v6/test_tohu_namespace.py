@@ -44,3 +44,17 @@ def test_adding_same_generator_with_different_name_should_create_clone():
     assert ns["aa"] is g
     assert ns["bb"] is not g
     assert ns["bb"].parent is g
+
+
+def test_adding_derived_generators_also_adds_all_input_generators():
+    def add(x, y):
+        return x + y
+    xx = Integer(100, 200)
+    yy = Integer(300, 400)
+    g = Apply(add, xx, yy)
+
+    ns = TohuNamespace()
+    assert len(ns) == 0
+    ns["aa"] = g
+    assert len(ns) == 3
+    assert ns.all_generators == {xx: None, yy: None, g: "aa"}
