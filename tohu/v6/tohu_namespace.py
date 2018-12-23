@@ -3,7 +3,7 @@ from .logging import logger
 from .spawn_mapping import SpawnMapping
 
 
-class TohuNamespaceError:
+class TohuNamespaceError(Exception):
     """
     Custom exception for TohuNamespace
     """
