@@ -1,3 +1,5 @@
+from itertools import count
+
 from .base import TohuBaseGenerator, SeedGenerator
 from .logging import logger
 from .spawn_mapping import SpawnMapping
@@ -11,9 +13,15 @@ class TohuNamespaceError(Exception):
 
 class TohuNamespace:
 
+    _global_count = count(start=1)
+
     def __init__(self):
         self._ns = {}
         self.seed_generator = SeedGenerator()
+        self._idx = next(self._global_count)
+
+    def __repr__(self):
+        return f"<TohuNamespace #{self._idx}>"
 
     @classmethod
     def from_dict(cls, d):
