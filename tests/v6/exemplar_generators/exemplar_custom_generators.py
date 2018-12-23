@@ -70,7 +70,7 @@ class Quux5Generator(CustomGenerator):
     }
 
     n_vals = Integer(1, 5)
-    g = SelectMultiple(Lookup(g=Integer(1, 3), mapping=mapping), num=n_vals)
+    g = SelectMultiple(Lookup(key=Integer(1, 3), mapping=mapping), num=n_vals)
 
 
 EXEMPLAR_CUSTOM_GENERATORS = [

@@ -62,18 +62,18 @@ class Apply(DerivedGenerator):
 
 class Lookup(Apply):
 
-    def __init__(self, g, mapping):
-        self.g = as_tohu_generator(g)
+    def __init__(self, key, mapping):
+        self.key = as_tohu_generator(key)
         self.mapping = as_tohu_generator(mapping)
 
         def f_lookup(key, mapping):
             return mapping[key]
 
-        super().__init__(f_lookup, self.g, self.mapping)
+        super().__init__(f_lookup, self.key, self.mapping)
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
-        new_obj = Lookup(spawn_mapping[self.g], spawn_mapping[self.mapping])
+        new_obj = Lookup(spawn_mapping[self.key], spawn_mapping[self.mapping])
         new_obj._set_random_state_from(self)
         return new_obj
 
