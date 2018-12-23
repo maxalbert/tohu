@@ -81,3 +81,31 @@ def test_complex_dependencies():
     assert ns["bb"] is g
     assert xx in ns
     assert h in ns
+
+
+def test_spawning_of_namespace_with_independent_generators():
+    g1 = Integer(100, 200)
+    g2 = HashDigest(length=8)
+
+    ns = TohuNamespace()
+    ns["aa"] = g1
+    ns["bb"] = g2
+
+    ns_spawned = ns.spawn()
+    assert isinstance(ns_spawned["aa"], Integer)
+    assert isinstance(ns_spawned["bb"], HashDigest)
+
+
+def test_spawning_of_namespace_with_clone():
+    g = Integer(100, 200)
+
+    ns = TohuNamespace()
+    ns["aa"] = g
+    ns["bb"] = g
+    assert ns["bb"].parent is ns["aa"]
+
+    ns_spawned = ns.spawn()
+    assert len(ns_spawned) == 2
+    assert isinstance(ns_spawned["aa"], Integer)
+    assert isinstance(ns_spawned["bb"], Integer)
+    assert ns_spawned["bb"].parent is ns_spawned["aa"]

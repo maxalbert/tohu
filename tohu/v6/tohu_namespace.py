@@ -34,6 +34,10 @@ class TohuNamespace:
     def all_generators(self):
         return self._ns
 
+    @property
+    def names(self):
+        return [x for x in self._ns.values() if x is not None]
+
     def __getitem__(self, key):
         for g, name in self._ns.items():
             if name == key:
@@ -58,3 +62,26 @@ class TohuNamespace:
                 self._ns[g.clone()] = name
         else:
             self._add(g, name)
+
+    def spawn_generator(self, g, ns_new):
+        name = self._ns[g]
+
+        if name in ns_new.names:
+            # generator was spawned before; simply return it
+            return ns_new[name]
+        else:
+            if g.parent is None:
+                # Simply spawn the generator
+                ns_new[name] = g.spawn()
+            else:
+                # Re-wire clone
+                assert g.parent in self
+                parent_name = self._ns[g.parent]
+                ns_new[name] = ns_new[parent_name].clone()
+
+    def spawn(self):
+        ns_spawned = TohuNamespace()
+        for g, name in self._ns.items():
+            self.spawn_generator(g, ns_spawned)
+            #ns_spawned[name] = g.spawn()
+        return ns_spawned
