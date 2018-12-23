@@ -71,7 +71,7 @@ class TohuNamespace:
             self._add(g_input, name=None)
 
         if g not in self._ns:
-            logger.debug(f"Adding generator to namespace: {g} (name='{name}')")
+            logger.debug(f"Adding generator to {self}: {g} (name='{name}')")
             self._ns[g] = name
 
     def __setitem__(self, name, g):
@@ -87,6 +87,7 @@ class TohuNamespace:
             self._add(g, name)
 
     def spawn_generator(self, g, spawn_mapping, ns_spawned):
+        logger.debug(f"Spawning generator in {self}: {g}")
         name = self._ns[g]
 
         if g in ns_spawned:
