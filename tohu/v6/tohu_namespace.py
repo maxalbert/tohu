@@ -85,13 +85,13 @@ class TohuNamespace:
             # Generator was spawned before; nothing to do
             return
         else:
-            if g.parent is None:
+            if g.parent is not None:
+                # Re-wire the clone
+                assert g.parent in spawn_mapping
+                g_new = spawn_mapping[g.parent].clone()
+            else:
                 # Simply spawn the generator
                 g_new = g.spawn(spawn_mapping)
-            else:
-                assert g.parent in spawn_mapping
-                # Re-wire the clone
-                g_new = spawn_mapping[g.parent].clone()
 
             spawn_mapping[g] = g_new
             ns_spawned[name] = g_new
