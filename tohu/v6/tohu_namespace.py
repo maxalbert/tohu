@@ -35,6 +35,10 @@ class TohuNamespace:
         return self._ns
 
     @property
+    def named_generators(self):
+        return {name: g for g, name in self._ns.items() if name is not None}
+
+    @property
     def names(self):
         return [x for x in self._ns.values() if x is not None]
 
