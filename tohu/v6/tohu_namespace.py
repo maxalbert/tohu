@@ -13,6 +13,7 @@ class TohuNamespace:
 
     def __init__(self):
         self._ns = {}
+        self.seed_generator = SeedGenerator()
 
     @classmethod
     def from_dict(cls, d):
@@ -62,6 +63,7 @@ class TohuNamespace:
             self._add(g_input, name=None)
 
         if g not in self._ns:
+            logger.debug(f"Adding generator to namespace: {g} (name='{name}')")
             self._ns[g] = name
 
     def __setitem__(self, name, g):
@@ -117,3 +119,12 @@ class TohuNamespace:
             self.spawn_generator(g, spawn_mapping, ns_spawned)
             #ns_spawned[name] = g.spawn()
         return ns_spawned
+
+    def reset(self, seed):
+        self.seed_generator.reset(seed)
+        for g in self.all_generators.keys():
+            g.reset(next(self.seed_generator))
+
+    def _set_random_state_from(self, other):
+        #raise NotImplementedError("TODO: Traverse the dependencies in both namespaces and transfer the state!")
+        pass
