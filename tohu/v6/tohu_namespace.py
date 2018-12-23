@@ -31,6 +31,14 @@ class TohuNamespace:
     def __contains__(self, g):
         return g in self._ns.keys()
 
+    def to_str(self):
+        s = ""
+        for g, name in self._ns.items():
+            prefix = "    " if name is None else f"{name}: "
+            suffix = " (anonymous)" if name is None else ""
+            s += f"{prefix}{g}{suffix}\n"
+        return s
+
     @property
     def all_generators(self):
         return self._ns
