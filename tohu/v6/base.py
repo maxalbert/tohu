@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from .item_list import ItemList
 from .logging import logger
+from .spawn_mapping import SpawnMapping
 
 
 class SeedGenerator:
@@ -130,7 +131,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         self.seed_generator._set_random_state_from(other.seed_generator)
 
     @abstractmethod
-    def spawn(self):
+    def spawn(self, spawn_mapping):
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
 
     def clone(self):
@@ -139,7 +140,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         (i.e., produces the same elements in the same order) and which is
         automatically reset whenever the original generator is reset.
         """
-        c = self.spawn()
+        c = self.spawn(spawn_mapping=SpawnMapping())
         self.register_clone(c)
         c.register_parent(self)
         return c

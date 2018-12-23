@@ -1,6 +1,7 @@
 from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
+from .logging import logger
 from .primitive_generators import as_tohu_generator
 
 __all__ = ['Apply', 'Lookup', 'SelectMultiple']
@@ -46,8 +47,10 @@ class Apply(DerivedGenerator):
     def reset(self, seed):
         super().reset(seed)
 
-    def spawn(self):
-        new_obj = Apply(self.callable, *self.arg_gens, **self.kwarg_gens)
+    def spawn(self, spawn_mapping):
+        new_arg_gens = [spawn_mapping[g] for g in self.arg_gens]
+        new_kwarg_gens = {name: spawn_mapping[g] for name, g in self.kwarg_gens}
+        new_obj = Apply(self.callable, *new_arg_gens, **new_kwarg_gens)
         new_obj._set_random_state_from(self)
         return new_obj
 
@@ -67,8 +70,8 @@ class Lookup(Apply):
 
         super().__init__(f_lookup, self.g, self.mapping)
 
-    def spawn(self):
-        new_obj = Lookup(self.g, self.mapping)
+    def spawn(self, spawn_mapping):
+        new_obj = Lookup(spawn_mapping[self.g], spawn_mapping[self.mapping])
         new_obj._set_random_state_from(self)
         return new_obj
 
@@ -86,8 +89,8 @@ class SelectMultiple(Apply):
         super().reset(seed)
         self.randgen.seed(seed)
 
-    def spawn(self):
-        new_obj = SelectMultiple(self.values_gen, self.num_gen)
+    def spawn(self, spawn_mapping):
+        new_obj = SelectMultiple(spawn_mapping[self.values_gen], spawn_mapping[self.num_gen])
         new_obj._set_random_state_from(self)
         return new_obj
 

@@ -1,5 +1,6 @@
-from .base import TohuBaseGenerator
+from .base import TohuBaseGenerator, SeedGenerator
 from .logging import logger
+from .spawn_mapping import SpawnMapping
 
 
 class TohuNamespaceError:
@@ -102,7 +103,7 @@ class TohuNamespace:
         #         ns_spawned[name] = ns_spawned[parent_name].clone()
 
     def spawn(self):
-        spawn_mapping = {}
+        spawn_mapping = SpawnMapping()
         ns_spawned = TohuNamespace()
         for g, name in self._ns.items():
             self.spawn_generator(g, spawn_mapping, ns_spawned)
