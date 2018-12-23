@@ -58,3 +58,26 @@ def test_adding_derived_generators_also_adds_all_input_generators():
     ns["aa"] = g
     assert len(ns) == 3
     assert ns.all_generators == {xx: None, yy: None, g: "aa"}
+
+
+def test_complex_dependencies():
+    mapping = {
+        1: ['a', 'aa', 'aaa', 'aaaa', 'aaaaa'],
+        2: ['b', 'bb', 'bbb', 'bbbb', 'bbbbb'],
+        3: ['c', 'cc', 'ccc', 'cccc', 'ccccc'],
+    }
+
+    n_vals = Integer(1, 5)
+    xx = Integer(1, 3)
+    h = Lookup(xx, mapping=mapping)
+    g = SelectMultiple(h, num=n_vals)
+
+    ns = TohuNamespace()
+    ns["aa"] = n_vals
+    ns["bb"] = g
+
+    assert 5 == len(ns)
+    assert ns["aa"] is n_vals
+    assert ns["bb"] is g
+    assert xx in ns
+    assert h in ns

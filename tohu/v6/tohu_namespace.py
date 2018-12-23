@@ -29,6 +29,13 @@ class TohuNamespace:
                 return g
         raise KeyError(f"No generator with name '{key}' exists in this namespace.")
 
+    def _add(self, g, name):
+        for g_input in g.input_generators:
+            self._add(g_input, name=None)
+
+        if g not in self._ns:
+            self._ns[g] = name
+
     def __setitem__(self, name, g):
         assert isinstance(g, TohuBaseGenerator)
         if g in self:
@@ -39,6 +46,4 @@ class TohuNamespace:
                 logger.debug("Trying to add existing generator with a different name. Adding a clone instead.")
                 self._ns[g.clone()] = name
         else:
-            for g_input in g.input_generators:
-                self._ns[g_input] = None
-            self._ns[g] = name
+            self._add(g, name)
