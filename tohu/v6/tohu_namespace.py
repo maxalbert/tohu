@@ -63,25 +63,44 @@ class TohuNamespace:
         else:
             self._add(g, name)
 
-    def spawn_generator(self, g, ns_new):
+    def spawn_generator(self, g, spawn_mapping, ns_spawned):
         name = self._ns[g]
 
-        if name in ns_new.names:
-            # generator was spawned before; simply return it
-            return ns_new[name]
+        if g in ns_spawned:
+            # Generator was spawned before; nothing to do
+            return
         else:
             if g.parent is None:
                 # Simply spawn the generator
-                ns_new[name] = g.spawn()
+                g_new = g.spawn(spawn_mapping)
             else:
-                # Re-wire clone
-                assert g.parent in self
-                parent_name = self._ns[g.parent]
-                ns_new[name] = ns_new[parent_name].clone()
+                assert g.parent in spawn_mapping
+                # Re-wire the clone
+                g_new = spawn_mapping[g.parent].clone()
+
+            spawn_mapping[g] = g_new
+            ns_spawned[name] = g_new
+        #
+        #
+        #
+        # if name in ns_spawned.names:
+        #     # generator was spawned before; simply return it
+        #     return ns_spawned[name]
+        # else:
+        #     if g.parent is None:
+        #         # Simply spawn the generator
+        #         spawn_mapping = {"TODO TODO TODO"}
+        #         ns_spawned[name] = g.spawn()
+        #     else:
+        #         # Re-wire clone
+        #         assert g.parent in self
+        #         parent_name = self._ns[g.parent]
+        #         ns_spawned[name] = ns_spawned[parent_name].clone()
 
     def spawn(self):
+        spawn_mapping = {}
         ns_spawned = TohuNamespace()
         for g, name in self._ns.items():
-            self.spawn_generator(g, ns_spawned)
+            self.spawn_generator(g, spawn_mapping, ns_spawned)
             #ns_spawned[name] = g.spawn()
         return ns_spawned

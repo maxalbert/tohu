@@ -109,3 +109,27 @@ def test_spawning_of_namespace_with_clone():
     assert isinstance(ns_spawned["aa"], Integer)
     assert isinstance(ns_spawned["bb"], Integer)
     assert ns_spawned["bb"].parent is ns_spawned["aa"]
+
+
+def test_spawning_of_namespace_with_complex_dependencies():
+    mapping = {
+        1: ['a', 'aa', 'aaa', 'aaaa', 'aaaaa'],
+        2: ['b', 'bb', 'bbb', 'bbbb', 'bbbbb'],
+        3: ['c', 'cc', 'ccc', 'cccc', 'ccccc'],
+    }
+
+    n_vals = Integer(1, 5)
+    xx = Integer(1, 3)
+    h = Lookup(xx, mapping=mapping)
+    g = SelectMultiple(h, num=n_vals)
+
+    ns = TohuNamespace()
+    ns["aa"] = n_vals
+    ns["xx"] = xx
+    ns["bb"] = g
+    assert len(ns) == 5
+
+    ns_spawned = ns.spawn()
+    assert len(ns_spawned) == 5
+    assert ns_spawned["bb"].input_generators[0].input_generators is ns_spawned["xx"]
+    assert ns_spawned["bb"].input_generators[1] is ns_spawned["aa"]
