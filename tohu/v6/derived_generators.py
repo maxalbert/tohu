@@ -4,7 +4,7 @@ from .base import TohuBaseGenerator, SeedGenerator
 from .primitive_generators import as_tohu_generator
 from .spawn_mapping import SpawnMapping
 
-__all__ = ['Apply', 'Lookup', 'SelectMultiple']
+__all__ = ['Apply', 'Lookup', 'SelectMultiple', 'SelectOne']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -76,6 +76,30 @@ class Lookup(Apply):
         new_obj = Lookup(spawn_mapping[self.key], spawn_mapping[self.mapping])
         new_obj._set_random_state_from(self)
         return new_obj
+
+
+class SelectOne(Apply):
+
+    def __init__(self, values):
+        self.values_gen = as_tohu_generator(values)
+        self.randgen = Random()
+        func = self.randgen.choice
+        super().__init__(func, self.values_gen)
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(seed)
+
+    def spawn(self, spawn_mapping=None):
+        spawn_mapping = spawn_mapping or SpawnMapping()
+        new_obj = SelectOne(spawn_mapping[self.values_gen])
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.randgen.setstate(other.randgen.getstate())
+
 
 
 class SelectMultiple(Apply):
