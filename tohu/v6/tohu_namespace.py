@@ -13,6 +13,17 @@ class TohuNamespace:
     def __init__(self):
         self._ns = {}
 
+    @classmethod
+    def from_dict(cls, d):
+        ns = TohuNamespace()
+        ns.update_from_dict(d)
+        return ns
+
+    def update_from_dict(self, d):
+        for name, g in d.items():
+            if isinstance(g, TohuBaseGenerator):
+                self[name] = g
+
     def __len__(self):
         return len(self._ns)
 
