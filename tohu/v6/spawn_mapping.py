@@ -5,6 +5,9 @@ class SpawnMapping:
     def __init__(self):
         self.mapping = dict()
 
+    def __repr__(self):
+        return f"<SpawnMapping: {self.mapping}>"
+
     def __contains__(self, g):
         return g in self.mapping.keys()
 
