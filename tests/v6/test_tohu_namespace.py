@@ -131,5 +131,5 @@ def test_spawning_of_namespace_with_complex_dependencies():
 
     ns_spawned = ns.spawn()
     assert len(ns_spawned) == 5
-    assert ns_spawned["bb"].input_generators[0].input_generators is ns_spawned["xx"]
+    assert ns_spawned["bb"].input_generators[0].input_generators[0] is ns_spawned["xx"]
     assert ns_spawned["bb"].input_generators[1] is ns_spawned["aa"]
