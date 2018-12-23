@@ -26,3 +26,21 @@ def test_add_generators_with_explicit_names():
     assert len(ns) == 2
 
     assert ns.all_generators == {g1: "aa", g2: "bb"}
+
+
+def test_adding_same_generator_with_different_name_should_create_clone():
+    """
+    Adding the same generator with a different name should create a clone instead.
+    """
+    g = Integer(100, 200)
+
+    ns = TohuNamespace()
+    assert len(ns) == 0
+    ns["aa"] = g
+    assert len(ns) == 1
+    ns["bb"] = g
+    assert len(ns) == 2
+
+    assert ns["aa"] is g
+    assert ns["bb"] is not g
+    assert ns["bb"].parent is g
