@@ -52,7 +52,7 @@ class CustomGenerator(TohuBaseGenerator):
         self.ns_gens.reset(seed)
         return self
 
-    def spawn(self):
+    def spawn(self, spawn_mapping=None):
         new_obj = self.__class__(*self.orig_args, **self.orig_kwargs)
         new_obj._set_random_state_from(self)
 
