@@ -10,6 +10,8 @@ if StrictVersion(python_version()) < StrictVersion(min_supported_python_version)
     )
     raise RuntimeError(error_msg)
 
+from . import v6
+
 from .v4.base import *
 from .v4.primitive_generators import *
 from .v4.derived_generators import *
