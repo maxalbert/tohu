@@ -1,6 +1,6 @@
 from tohu.v6.primitive_generators import Constant, Integer, HashDigest, FakerGenerator
 
-NUM_PARAMS = [100, 100_000]
+from .common import NUM_PARAMS
 
 
 class TimeConstant:
