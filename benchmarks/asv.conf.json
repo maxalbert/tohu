@@ -1,0 +1,15 @@
+{
+    "project": "tohu",
+    "project_url": "https://github.com/maxalbert/tohu",
+    "repo": "..",
+    "branches": ["master"],
+    "dvcs": "git",
+    "environment_type": "virtualenv",
+    "show_commit_url": "https://github.com/maxalbert/tohu/commit/",
+    "pythons": ["3.7"],
+    "benchmark_dir": "benchmarks",
+    "env_dir": "env",
+    "results_dir": "results",
+    "html_dir": "html",
+    "version": 1
+}

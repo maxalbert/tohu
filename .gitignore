@@ -5,5 +5,7 @@ __pycache__
 build/
 dist/
 debugging/
+benchmarks/env/
+benchmarks/html/
 playground/
 tohu.egg-info
