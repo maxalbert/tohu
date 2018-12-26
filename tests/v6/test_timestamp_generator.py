@@ -61,7 +61,7 @@ def test_raises_error_if_start_is_later_than_end():
         Timestamp(start="2018-01-01 11:22:33", end="2018-01-01 10:09:08")
 
 
-def test_raises_error_if_start_generator_produces_timestamps_later_than_end_generator_v2():
+def test_raises_error_if_start_generator_produces_timestamps_later_than_end_generator():
     g_start = Timestamp(start="2018-01-01", end="2018-01-30")
     g_end = Timestamp(start="2018-01-02", end="2018-01-31")
 
