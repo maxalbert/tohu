@@ -208,7 +208,7 @@ def check_start_before_end(start_gen, end_gen):
     latest_start_value = get_latest_value(start_gen)
     earliest_end_value = get_earliest_value(end_gen)
 
-    if latest_start_value >= earliest_end_value:
+    if latest_start_value > earliest_end_value:
         error_msg = (
             "Latest start value must be before earliest end value. "
             f"Got: latest start value: {latest_start_value}, earliest end value: {earliest_end_value}"

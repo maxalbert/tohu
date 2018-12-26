@@ -50,6 +50,12 @@ def test_can_pass_dates_for_start_and_end():
     assert not all([(x == y) for x, y in zip(timestamps_1, timestamps_4)])
 
 
+def test_start_can_be_equal_to_end():
+    g = Timestamp(start="2018-01-01 11:22:33", end="2018-01-01 11:22:33")
+    timestamps = g.generate(10, seed=12345)
+    assert all([x == dt.datetime(2018, 1, 1, 11, 22, 33) for x in timestamps])
+
+
 def test_raises_error_if_start_is_later_than_end():
     with pytest.raises(TimestampError, match="Latest start value must be before earliest end value"):
         Timestamp(start="2018-01-01 11:22:33", end="2018-01-01 10:09:08")
