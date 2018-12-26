@@ -1,7 +1,8 @@
 import datetime as dt
+import pytest
 
 from .context import tohu
-from tohu.v6.derived_generators import Timestamp
+from tohu.v6.derived_generators import Timestamp, TimestampError
 
 
 def test_initialising_with_string_and_timestamp_yields_same_results():
@@ -47,3 +48,17 @@ def test_can_pass_dates_for_start_and_end():
     assert all([(x == y) for x, y in zip(timestamps_1, timestamps_2)])
     assert not all([(x == y) for x, y in zip(timestamps_1, timestamps_3)])
     assert not all([(x == y) for x, y in zip(timestamps_1, timestamps_4)])
+
+
+def test_raises_error_if_start_is_later_than_end():
+    with pytest.raises(TimestampError):
+        Timestamp(start="2018-01-01 11:22:33", end="2018-01-01 10:09:08")
+
+
+def test_raises_error_if_start_generator_produces_timestamps_later_than_end_generator():
+    g_start = Timestamp(start="2018-01-01", end="2018-01-30")
+    g_end = Timestamp(start="2018-01-02", end="2018-01-31")
+    g = Timestamp(start=g_start, end=g_end)
+
+    with pytest.raises(TimestampError, match="Start generator produced timestamp later than end generator"):
+        g.generate(3, seed=12345)

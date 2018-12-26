@@ -129,6 +129,21 @@ class SelectMultiple(Apply):
         self.randgen.setstate(other.randgen.getstate())
 
 
+def parse_datetime_string(s, optional_offset=None):
+    try:
+        ts = dt.datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        optional_offset = optional_offset or dt.timedelta(seconds=0)
+        try:
+            ts = dt.datetime.strptime(s, "%Y-%m-%d") + optional_offset
+        except ValueError:
+            raise ValueError(
+                "If input is a string, it must represent a timestamp of the form 'YYYY-MM-DD HH:MM:SS' "
+                f"or a date of the form YYYY-MM-DD. Got: '{s}'"
+            )
+    return ts
+
+
 def as_tohu_timestamp_generator(x, optional_offset=None):
     """
     Helper function which ensures that the returned
@@ -144,17 +159,7 @@ def as_tohu_timestamp_generator(x, optional_offset=None):
     The argument `optional_offset`
     """
     if isinstance(x, str):
-        try:
-            ts = dt.datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            optional_offset = optional_offset or dt.timedelta(seconds=0)
-            try:
-                ts = dt.datetime.strptime(x, "%Y-%m-%d") + optional_offset
-            except ValueError:
-                raise ValueError(
-                    "If input is a string, it must represent a timestamp of the form 'YYYY-MM-DD HH:MM:SS' "
-                    f"or a date of the form YYYY-MM-DD. Got: '{x}'"
-                )
+        ts = parse_datetime_string(x, optional_offset)
         return as_tohu_generator(ts)
     elif isinstance(x, dt.datetime):
         return as_tohu_generator(x)
@@ -175,17 +180,39 @@ def as_tohu_timestamp_generator(x, optional_offset=None):
         raise ValueError(f"Cannot convert input argument to timestamp: {x}")
 
 
+class TimestampError(Exception):
+    """
+    Custom exception for tohu Timestamps.
+    """
+
+
+def check_start_before_end(start, end):
+    if isinstance(start, str):
+        start = parse_datetime_string(start)
+
+    if isinstance(end, str):
+        end = parse_datetime_string(end)
+
+    if isinstance(start, dt.datetime) and isinstance(end, dt.datetime):
+        if start > end:
+            raise TimestampError("Start must not be later than end. Got: start={start}, end={end}")
+
+
 class Timestamp(Apply):
 
     def __init__(self, start, end):
+        check_start_before_end(start, end)
         self.start_gen = as_tohu_timestamp_generator(start)
         self.end_gen = as_tohu_timestamp_generator(end, optional_offset=dt.timedelta(hours=23, minutes=59, seconds=59))
         self.offset_randgen = Random()
 
         def func(start, end):
             interval = (end - start).total_seconds()
-            next_offset = self.offset_randgen.randint(0, interval)
-            ts = (start + dt.timedelta(seconds=next_offset))
+            try:
+                offset = self.offset_randgen.randint(0, interval)
+            except ValueError:
+                raise TimestampError(f"Start generator produced timestamp later than end generator: start={start}, end={end}")
+            ts = (start + dt.timedelta(seconds=offset))
             return ts
 
         super().__init__(func, self.start_gen, self.end_gen)
