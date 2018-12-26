@@ -51,14 +51,13 @@ def test_can_pass_dates_for_start_and_end():
 
 
 def test_raises_error_if_start_is_later_than_end():
-    with pytest.raises(TimestampError):
+    with pytest.raises(TimestampError, match="Latest start value must be before earliest end value"):
         Timestamp(start="2018-01-01 11:22:33", end="2018-01-01 10:09:08")
 
 
-def test_raises_error_if_start_generator_produces_timestamps_later_than_end_generator():
+def test_raises_error_if_start_generator_produces_timestamps_later_than_end_generator_v2():
     g_start = Timestamp(start="2018-01-01", end="2018-01-30")
     g_end = Timestamp(start="2018-01-02", end="2018-01-31")
-    g = Timestamp(start=g_start, end=g_end)
 
-    with pytest.raises(TimestampError, match="Start generator produced timestamp later than end generator"):
-        g.generate(3, seed=12345)
+    with pytest.raises(TimestampError, match="Latest start value must be before earliest end value"):
+        Timestamp(start=g_start, end=g_end)

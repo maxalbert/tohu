@@ -186,24 +186,42 @@ class TimestampError(Exception):
     """
 
 
-def check_start_before_end(start, end):
-    if isinstance(start, str):
-        start = parse_datetime_string(start)
+def get_earliest_value(g):
+    if isinstance(g, Constant):
+        return g.value
+    elif isinstance(g, Timestamp):
+        return get_earliest_value(g.start_gen)
+    else:
+        raise TypeError("This should not occur.")
 
-    if isinstance(end, str):
-        end = parse_datetime_string(end)
 
-    if isinstance(start, dt.datetime) and isinstance(end, dt.datetime):
-        if start > end:
-            raise TimestampError("Start must not be later than end. Got: start={start}, end={end}")
+def get_latest_value(g):
+    if isinstance(g, Constant):
+        return g.value
+    elif isinstance(g, Timestamp):
+        return get_latest_value(g.end_gen)
+    else:
+        raise TypeError("This should not occur.")
+
+
+def check_start_before_end(start_gen, end_gen):
+    latest_start_value = get_latest_value(start_gen)
+    earliest_end_value = get_earliest_value(end_gen)
+
+    if latest_start_value >= earliest_end_value:
+        error_msg = (
+            "Latest start value must be before earliest end value. "
+            f"Got: latest start value: {latest_start_value}, earliest end value: {earliest_end_value}"
+        )
+        raise TimestampError(error_msg)
 
 
 class Timestamp(Apply):
 
     def __init__(self, start, end):
-        check_start_before_end(start, end)
         self.start_gen = as_tohu_timestamp_generator(start)
         self.end_gen = as_tohu_timestamp_generator(end, optional_offset=dt.timedelta(hours=23, minutes=59, seconds=59))
+        check_start_before_end(self.start_gen, self.end_gen)
         self.offset_randgen = Random()
 
         def func(start, end):
