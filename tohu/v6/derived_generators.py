@@ -6,6 +6,7 @@ from random import Random
 from .base import TohuBaseGenerator, SeedGenerator
 from .primitive_generators import as_tohu_generator, Constant
 from .spawn_mapping import SpawnMapping
+from .utils import parse_datetime_string
 
 __all__ = ['Apply', 'Lookup', 'SelectMultiple', 'SelectOne', 'Timestamp']
 
@@ -127,21 +128,6 @@ class SelectMultiple(Apply):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.randgen.setstate(other.randgen.getstate())
-
-
-def parse_datetime_string(s, optional_offset=None):
-    try:
-        ts = dt.datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
-    except ValueError:
-        optional_offset = optional_offset or dt.timedelta(seconds=0)
-        try:
-            ts = dt.datetime.strptime(s, "%Y-%m-%d") + optional_offset
-        except ValueError:
-            raise ValueError(
-                "If input is a string, it must represent a timestamp of the form 'YYYY-MM-DD HH:MM:SS' "
-                f"or a date of the form YYYY-MM-DD. Got: '{s}'"
-            )
-    return ts
 
 
 def as_tohu_timestamp_generator(x, optional_offset=None):

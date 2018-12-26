@@ -1,3 +1,4 @@
+import datetime as dt
 from collections import namedtuple
 
 __all__ = ['identity', 'print_generated_sequence']
@@ -40,3 +41,18 @@ def make_dummy_tuples(chars='abcde'):
     Quux = namedtuple('Quux', ['x', 'y'])
     some_tuples = [Quux((c*2).upper(), c*2) for c in chars]
     return some_tuples
+
+
+def parse_datetime_string(s, optional_offset=None):
+    try:
+        ts = dt.datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        optional_offset = optional_offset or dt.timedelta(seconds=0)
+        try:
+            ts = dt.datetime.strptime(s, "%Y-%m-%d") + optional_offset
+        except ValueError:
+            raise ValueError(
+                "If input is a string, it must represent a timestamp of the form 'YYYY-MM-DD HH:MM:SS' "
+                f"or a date of the form YYYY-MM-DD. Got: '{s}'"
+            )
+    return ts
