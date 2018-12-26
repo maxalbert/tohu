@@ -1,10 +1,13 @@
+import datetime as dt
+import pandas as pd
+
 from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
-from .primitive_generators import as_tohu_generator
+from .primitive_generators import as_tohu_generator, Constant
 from .spawn_mapping import SpawnMapping
 
-__all__ = ['Apply', 'Lookup', 'SelectMultiple', 'SelectOne']
+__all__ = ['Apply', 'Lookup', 'SelectMultiple', 'SelectOne', 'Timestamp']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -124,3 +127,79 @@ class SelectMultiple(Apply):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.randgen.setstate(other.randgen.getstate())
+
+
+def as_tohu_timestamp_generator(x, optional_offset=None):
+    """
+    Helper function which ensures that the returned
+
+    Allowed input types:
+
+      - datetime string of the form "YYYY-MM-DD HH:MM:SS"
+      - date string of the form "YYYY-MM-DD"
+      - datetime.datetime object
+      - pandas.Timestamp object
+      - tohu generator which
+
+    The argument `optional_offset`
+    """
+    if isinstance(x, str):
+        try:
+            ts = dt.datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            optional_offset = optional_offset or dt.timedelta(seconds=0)
+            try:
+                ts = dt.datetime.strptime(x, "%Y-%m-%d") + optional_offset
+            except ValueError:
+                raise ValueError(
+                    "If input is a string, it must represent a timestamp of the form 'YYYY-MM-DD HH:MM:SS' "
+                    f"or a date of the form YYYY-MM-DD. Got: '{x}'"
+                )
+        return as_tohu_generator(ts)
+    elif isinstance(x, dt.datetime):
+        return as_tohu_generator(x)
+    elif isinstance(x, pd.Timestamp):
+        return as_tohu_generator(x.to_pydatetime())
+    elif isinstance(x, TohuBaseGenerator):
+        if isinstance(x, Timestamp):
+            return x
+        elif isinstance(x, Constant):
+            if isinstance(x.value, dt.datetime):
+               return x
+            else:
+                raise ValueError(f"If input is a Constant tohu generator, its return value "
+                                 f"must be of type datetime.datetime. Got: '{type(x.value)}'")
+        else:
+            raise TypeError(f"If input is a tohu generator it must be of type 'Timestamp' or 'Constant'. Got: '{type(x)}'")
+    else:
+        raise ValueError(f"Cannot convert input argument to timestamp: {x}")
+
+
+class Timestamp(Apply):
+
+    def __init__(self, start, end):
+        self.start_gen = as_tohu_timestamp_generator(start)
+        self.end_gen = as_tohu_timestamp_generator(end, optional_offset=dt.timedelta(hours=23, minutes=59, seconds=59))
+        self.offset_randgen = Random()
+
+        def func(start, end):
+            interval = (end - start).total_seconds()
+            next_offset = self.offset_randgen.randint(0, interval)
+            ts = (start + dt.timedelta(seconds=next_offset))
+            return ts
+
+        super().__init__(func, self.start_gen, self.end_gen)
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.offset_randgen.seed(next(self.seed_generator))
+
+    def spawn(self, spawn_mapping=None):
+        spawn_mapping = spawn_mapping or SpawnMapping()
+        new_obj = Timestamp(spawn_mapping[self.start_gen], spawn_mapping[self.end_gen])
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.offset_randgen.setstate(other.offset_randgen.getstate())
