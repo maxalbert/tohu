@@ -248,3 +248,7 @@ class Timestamp(Apply):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.offset_randgen.setstate(other.offset_randgen.getstate())
+
+    def strftime(self, fmt):
+        func = lambda x: x.strftime(fmt)
+        return Apply(func, self)
