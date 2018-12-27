@@ -1,8 +1,8 @@
+import datetime as dt
 import pandas as pd
-import pytest
 
 from .context import tohu
-from tohu.v6.primitive_generators import Constant, Integer, HashDigest, FakerGenerator
+from tohu.v6.primitive_generators import Constant, Integer, HashDigest, FakerGenerator, TimestampPrimitive
 from tohu.v6.derived_generators import Lookup, SelectMultiple
 from tohu.v6.custom_generator import CustomGenerator
 from .exemplar_generators.exemplar_custom_generators import *
@@ -177,3 +177,29 @@ def test_references_by_name_creates_clones():
     ]
 
     assert expected_items == items
+
+
+def test_clones_in_custom_generators():
+    """
+    Regression test to check that all properties of clones inside a custom generator are preserved.
+    """
+
+    # Previously there was a bug which meant that the string formatting
+    # for generator 'bb' was not honoured correctly.
+    class QuuxGenerator(CustomGenerator):
+        aa = TimestampPrimitive(date="2018-01-01").set_tohu_name("aa")
+        bb = aa.strftime("%Y-%m-%d %H:%M:%S").set_tohu_name("bb")
+
+    g = QuuxGenerator()
+    Quux = g.tohu_items_cls
+    items = list(g.generate(num=5, seed=12345))
+
+    items_expected = [
+        Quux(aa=dt.datetime(2018, 1, 1, 5, 19, 55), bb='2018-01-01 05:19:55'),
+        Quux(aa=dt.datetime(2018, 1, 1, 10, 2, 11), bb='2018-01-01 10:02:11'),
+        Quux(aa=dt.datetime(2018, 1, 1, 1, 5, 28), bb='2018-01-01 01:05:28'),
+        Quux(aa=dt.datetime(2018, 1, 1, 4, 57, 20), bb='2018-01-01 04:57:20'),
+        Quux(aa=dt.datetime(2018, 1, 1, 19, 35, 26), bb='2018-01-01 19:35:26'),
+    ]
+
+    assert items_expected == items

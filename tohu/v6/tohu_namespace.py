@@ -107,8 +107,16 @@ class TohuNamespace:
         else:
             if g.parent is not None:
                 # Re-wire the clone
-                assert g.parent in spawn_mapping
-                g_new = spawn_mapping[g.parent].clone()
+                if g.parent not in spawn_mapping:
+                    raise TohuNamespaceError(
+                        f"The cloned generator {g} is present in the tohu namespace "
+                        f"but its parent {g.parent} is not. This should never happen."
+                    )
+                g_new = g.clone()
+                new_parent = spawn_mapping[g.parent]
+                g.unregister_clone(g_new)
+                g_new.register_parent(new_parent)
+                new_parent.register_clone(g_new)
             else:
                 # Sanity check that all input generators of g have already been spawned before.
                 for g_input in g.input_generators:
