@@ -27,6 +27,8 @@ def get_start_generator(start, date):
     elif isinstance(start, str):
         start_value = dt.datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
         start_gen = Constant(start_value)
+    elif isinstance(start, dt.datetime):
+        return Constant(start)
     elif isinstance(start, Constant):
         return get_start_generator(start.value, date)
     elif isinstance(start, TimestampPrimitive):
@@ -47,6 +49,8 @@ def get_end_generator(end, date):
     elif isinstance(end, str):
         end_value = dt.datetime.strptime(end, "%Y-%m-%d %H:%M:%S")
         end_gen = Constant(end_value)
+    elif isinstance(end, dt.datetime):
+        return Constant(end)
     elif isinstance(end, Constant):
         return get_start_generator(end.value, date)
     elif isinstance(end, TimestampPrimitive):
