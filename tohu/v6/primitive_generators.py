@@ -5,7 +5,7 @@ from faker import Faker
 from random import Random
 
 from .base import TohuBaseGenerator
-from .utils import ensure_is_date_object, identity, parse_datetime_string
+from .utils import ensure_is_date_object, identity, ensure_is_datetime_object
 
 __all__ = ['Constant', 'FakerGenerator', 'Date', 'HashDigest', 'Integer', 'Timestamp']
 
@@ -206,8 +206,8 @@ class Timestamp(TohuBaseGenerator):
 
     def __init__(self, start, end):
         super().__init__()
-        self.start = parse_datetime_string(start)
-        self.end = parse_datetime_string(end, optional_offset=dt.timedelta(hours=23, minutes=59, seconds=59))
+        self.start = ensure_is_datetime_object(start)
+        self.end = ensure_is_datetime_object(end, optional_offset=dt.timedelta(hours=23, minutes=59, seconds=59))
         self.interval = (self.end - self.start).total_seconds()
         self.offset_randgen = Random()
         self._check_start_before_end()
