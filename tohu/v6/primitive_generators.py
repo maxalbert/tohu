@@ -263,7 +263,7 @@ class TimestampPrimitive(TohuBaseGenerator):
         self.offset_randgen.seed(next(self.seed_generator))
 
     def spawn(self, spawn_mapping=None):
-        new_obj = TimestampPrimitive(start=self.start, end=self.end)
+        new_obj = TimestampPrimitive(start=self.start, end=self.end, fmt=self.fmt, uppercase=self.uppercase)
         new_obj._set_random_state_from(self)
         return new_obj
 
@@ -314,7 +314,7 @@ class DatePrimitive(TohuBaseGenerator):
         self.offset_randgen.seed(next(self.seed_generator))
 
     def spawn(self, spawn_mapping=None):
-        new_obj = DatePrimitive(self.start, self.end)
+        new_obj = DatePrimitive(self.start, self.end, fmt=self.fmt, uppercase=self.uppercase)
         new_obj._set_random_state_from(self)
         return new_obj
 
