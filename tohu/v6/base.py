@@ -42,6 +42,12 @@ class SeedGenerator:
         self.randgen.setstate(other.randgen.getstate())
 
 
+class TohuCloneError(Exception):
+    """
+    Custom exception
+    """
+
+
 class TohuBaseGenerator(metaclass=ABCMeta):
     """
     Base class for all of tohu's generators.
@@ -154,6 +160,12 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
         if len(self.clones) != len(set(self.clones)):
             raise RuntimeError(f"Duplicate clone added: {self}  -->  {clone}")
+
+    def unregister_clone(self, clone):
+        try:
+            self.clones.remove(clone)
+        except ValueError:
+            raise TohuCloneError(f"Cannot unregister clone {clone} because it is not a clone of parent {self}")
 
     def register_parent(self, parent):
         self.parent = parent
