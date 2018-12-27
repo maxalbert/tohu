@@ -228,12 +228,26 @@ def get_start_and_end_values(start, end, date):
 
 class TimestampPrimitive(TohuBaseGenerator):
 
-    def __init__(self, *, start=None, end=None, date=None):
+    def __init__(self, *, start=None, end=None, date=None, fmt=None, uppercase=None):
         super().__init__()
         self.start, self.end = get_start_and_end_values(start, end, date)
         self.interval = (self.end - self.start).total_seconds()
         self.offset_randgen = Random()
         self._check_start_before_end()
+
+        self.fmt = fmt
+        self.uppercase = uppercase
+
+        if self.fmt is None:
+            self._maybe_format_timestamp = identity
+        else:
+            if not isinstance(self.fmt, str):
+                raise ValueError(f"Argument 'fmt' must be of type string, got '{type(self.fmt)}'")
+
+            if uppercase:
+                self._maybe_format_timestamp = lambda ts: ts.strftime(self.fmt).upper()
+            else:
+                self._maybe_format_timestamp = lambda ts: ts.strftime(self.fmt)
 
     def _check_start_before_end(self):
         if self.start > self.end:
@@ -241,7 +255,8 @@ class TimestampPrimitive(TohuBaseGenerator):
 
     def __next__(self):
         offset = self.offset_randgen.randint(0, self.interval)
-        return self.start + dt.timedelta(seconds=offset)
+        ts = self.start + dt.timedelta(seconds=offset)
+        return self._maybe_format_timestamp(ts)
 
     def reset(self, seed):
         super().reset(seed)
@@ -256,16 +271,35 @@ class TimestampPrimitive(TohuBaseGenerator):
         super()._set_random_state_from(other)
         self.offset_randgen.setstate(other.offset_randgen.getstate())
 
+    def strftime(self, fmt='%Y-%m-%d %H:%M:%S', uppercase=False):
+        g = TimestampPrimitive(start=self.start, end=self.end, fmt=fmt, uppercase=uppercase)
+        self.register_clone(g)
+        return g
+
 
 class DatePrimitive(TohuBaseGenerator):
 
-    def __init__(self, start, end):
+    def __init__(self, start, end, *, fmt=None, uppercase=None):
         super().__init__()
         self.start = ensure_is_date_object(start)
         self.end = ensure_is_date_object(end)
         self.interval = (self.end - self.start).days
         self.offset_randgen = Random()
         self._check_start_before_end()
+
+        self.fmt = fmt
+        self.uppercase = uppercase
+
+        if self.fmt is None:
+            self._maybe_format_timestamp = identity
+        else:
+            if not isinstance(self.fmt, str):
+                raise ValueError(f"Argument 'fmt' must be of type string, got '{type(self.fmt)}'")
+
+            if uppercase:
+                self._maybe_format_timestamp = lambda ds: ds.strftime(self.fmt).upper()
+            else:
+                self._maybe_format_timestamp = lambda ds: ds.strftime(self.fmt)
 
     def _check_start_before_end(self):
         if self.start > self.end:
@@ -287,3 +321,8 @@ class DatePrimitive(TohuBaseGenerator):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.offset_randgen.setstate(other.offset_randgen.getstate())
+
+    def strftime(self, fmt='%Y-%m-%d', uppercase=False):
+        g = TimestampPrimitive(start=self.start, end=self.end, fmt=fmt, uppercase=uppercase)
+        self.register_clone(g)
+        return g
