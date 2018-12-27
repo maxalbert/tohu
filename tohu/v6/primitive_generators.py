@@ -5,9 +5,9 @@ from faker import Faker
 from random import Random
 
 from .base import TohuBaseGenerator
-from .utils import identity, parse_datetime_string
+from .utils import ensure_is_date_object, identity, parse_datetime_string
 
-__all__ = ['Constant', 'FakerGenerator', 'HashDigest', 'Integer', 'Timestamp']
+__all__ = ['Constant', 'FakerGenerator', 'Date', 'HashDigest', 'Integer', 'Timestamp']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -226,6 +226,38 @@ class Timestamp(TohuBaseGenerator):
 
     def spawn(self, spawn_mapping=None):
         new_obj = Timestamp(self.start, self.end)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.offset_randgen.setstate(other.offset_randgen.getstate())
+
+
+class Date(TohuBaseGenerator):
+
+    def __init__(self, start, end):
+        super().__init__()
+        self.start = ensure_is_date_object(start)
+        self.end = ensure_is_date_object(end)
+        self.interval = (self.end - self.start).days
+        self.offset_randgen = Random()
+        self._check_start_before_end()
+
+    def _check_start_before_end(self):
+        if self.start > self.end:
+            raise TimestampError(f"Start value must be before end value. Got: start={self.start}, end={self.end}")
+
+    def __next__(self):
+        offset = self.offset_randgen.randint(0, self.interval)
+        return self.start + dt.timedelta(days=offset)
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.offset_randgen.seed(next(self.seed_generator))
+
+    def spawn(self, spawn_mapping=None):
+        new_obj = Date(self.start, self.end)
         new_obj._set_random_state_from(self)
         return new_obj
 

@@ -1,7 +1,8 @@
 import datetime as dt
+import pandas as pd
 from collections import namedtuple
 
-__all__ = ['identity', 'print_generated_sequence']
+__all__ = ['ensure_is_date_object', 'identity', 'print_generated_sequence', 'parse_date_string', 'parse_datetime_string']
 
 
 def identity(x):
@@ -41,6 +42,28 @@ def make_dummy_tuples(chars='abcde'):
     Quux = namedtuple('Quux', ['x', 'y'])
     some_tuples = [Quux((c*2).upper(), c*2) for c in chars]
     return some_tuples
+
+
+def parse_date_string(s):
+    try:
+        timestamp = dt.datetime.strptime(s, "%Y-%m-%d")
+    except ValueError:
+        raise ValueError(
+            "If input is a string, it must represent a timestamp of the form 'YYYY-MM-DD HH:MM:SS' "
+            f"or a date of the form YYYY-MM-DD. Got: '{s}'"
+        )
+    return timestamp.date()
+
+
+def ensure_is_date_object(x):
+    if isinstance(x, dt.date):
+        return x
+    elif isinstance(x, pd.Timestamp):
+        return x.to_pydatetime()
+    elif isinstance(x, str):
+        return parse_date_string(x)
+    else:
+        raise TypeError(f"Cannot convert input to date object: {x} (type: {type(x)})")
 
 
 def parse_datetime_string(s, optional_offset=None):
