@@ -112,11 +112,6 @@ def parse_datetime_string(s, optional_offset=None):
 
 
 def ensure_is_datetime_object(x, optional_offset=None):
-    if optional_offset is not None and not (is_date_object(x) or is_date_string(x)):
-        raise TohuTimestampError(
-            "Nonzero optional_offset values are only allowed with inputs of type "
-            f"datetime.date or strings of the form 'YYYY-MM-DD'. Got: {x}")
-
     error_msg = f"Cannot convert input to datetime object: {x} (type: {type(x)})"
 
     if isinstance(x, dt.datetime):

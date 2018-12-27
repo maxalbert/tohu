@@ -100,13 +100,13 @@ def test_timestamp_from_date_object(input, optional_offset, expected_value):
     assert d == expected_value
 
 
-@pytest.mark.parametrize("input", [
-    "2018-03-09 04:05:06",
-    dt.datetime(2018, 4, 12, 10, 33, 55),
-    dt.datetime(2018, 4, 12, 0, 0, 0),
+@pytest.mark.parametrize("input, expected_value", [
+    ("2018-03-09 04:05:06", dt.datetime(2018, 3, 9, 4, 5, 6)),
+    (dt.datetime(2018, 4, 12, 10, 33, 55), dt.datetime(2018, 4, 12, 10, 33, 55)),
+    (dt.datetime(2018, 4, 12, 0, 0, 0), dt.datetime(2018, 4, 12, 0, 0, 0)),
+    (pd.Timestamp("1999-10-05 11:42:55"), dt.datetime(1999, 10, 5, 11, 42, 55)),
 ])
-def test_timestamp_with_optional_offset_raises_error_for_input_types_that_do_not_support_it(input):
+def test_optional_offset_is_ignored_for_input_types_that_do_not_support_it(input, expected_value):
     optional_offset = dt.timedelta(hours=23, minutes=59, seconds=59)
 
-    with pytest.raises(TohuTimestampError):
-        ensure_is_datetime_object(input, optional_offset=optional_offset)
+    assert ensure_is_datetime_object(input, optional_offset) == expected_value
