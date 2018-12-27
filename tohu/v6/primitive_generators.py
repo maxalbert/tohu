@@ -308,7 +308,8 @@ class DatePrimitive(TohuBaseGenerator):
 
     def __next__(self):
         offset = self.offset_randgen.randint(0, self.interval)
-        return self.start + dt.timedelta(days=offset)
+        ds = self.start + dt.timedelta(days=offset)
+        return self._maybe_format_timestamp(ds)
 
     def reset(self, seed):
         super().reset(seed)
