@@ -3,6 +3,7 @@ from itertools import count
 from .base import TohuBaseGenerator, SeedGenerator
 from .logging import logger
 from .spawn_mapping import SpawnMapping
+from .utils import is_clone
 
 
 class TohuNamespaceError(Exception):
@@ -49,8 +50,11 @@ class TohuNamespace:
         return s
 
     @property
-    def all_generators(self):
-        return self._ns
+    def all_independent_generators(self):
+        """
+        Return all generators in this namespace which are not clones.
+        """
+        return {g: name for g, name in self._ns.items() if not is_clone(g)}
 
     @property
     def named_generators(self):
@@ -139,7 +143,7 @@ class TohuNamespace:
 
     def reset(self, seed):
         self.seed_generator.reset(seed)
-        for g in self.all_generators.keys():
+        for g in self.all_independent_generators:
             g.reset(next(self.seed_generator))
 
     def _set_random_state_from(self, other):

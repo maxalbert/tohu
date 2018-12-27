@@ -154,3 +154,26 @@ def test_compare_structure_of_two_custom_generators_with_complex_dependencies():
     df2 = g2.generate(100, seed=12345).to_df()
 
     pd.util.testing.assert_frame_equal(df1, df2[["nn", "aa"]])
+
+
+def test_references_by_name_creates_clones():
+
+    class QuuxGenerator(CustomGenerator):
+        a = Integer(100, 200)
+        b = a
+        c = a
+        d = b
+
+    g = QuuxGenerator()
+    Quux = g.tohu_items_cls
+    items = list(g.generate(5, seed=12345))
+
+    expected_items = [
+        Quux(a=118, b=118, c=118, d=118),
+        Quux(a=192, b=192, c=192, d=192),
+        Quux(a=192, b=192, c=192, d=192),
+        Quux(a=196, b=196, c=196, d=196),
+        Quux(a=135, b=135, c=135, d=135),
+    ]
+
+    assert expected_items == items
