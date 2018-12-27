@@ -21,3 +21,9 @@ def test_date_range():
         dt.date(1999, 12, 1),
     ]
     assert set(dates_expected) == set(dates)
+
+
+def test_start_and_end():
+    g = Date(start="1999-11-28", end="1999-12-01")
+    assert g.start == dt.date(1999, 11, 28)
+    assert g.end == dt.date(1999, 12, 1)
