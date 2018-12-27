@@ -116,22 +116,6 @@ class TohuNamespace:
 
             spawn_mapping[g] = g_new
             ns_spawned[name] = g_new
-        #
-        #
-        #
-        # if name in ns_spawned.names:
-        #     # generator was spawned before; simply return it
-        #     return ns_spawned[name]
-        # else:
-        #     if g.parent is None:
-        #         # Simply spawn the generator
-        #         spawn_mapping = {"TODO TODO TODO"}
-        #         ns_spawned[name] = g.spawn()
-        #     else:
-        #         # Re-wire clone
-        #         assert g.parent in self
-        #         parent_name = self._ns[g.parent]
-        #         ns_spawned[name] = ns_spawned[parent_name].clone()
 
     def spawn(self):
         spawn_mapping = SpawnMapping()
