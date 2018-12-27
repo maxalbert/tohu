@@ -18,5 +18,5 @@ class SpawnMapping:
         try:
             return self.mapping[g]
         except KeyError:
-            logger.debug(f"Generator does not occur in spawn mapping: {g}")
+            logger.debug(f"Generator does not occur in spawn mapping: {g}. Returning it unchanged.")
             return g
