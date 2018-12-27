@@ -12,7 +12,7 @@ from tohu.v6.utils import ensure_is_date_object, TohuDateError
     (dt.date(2016, 11, 28), dt.date(2016, 11, 28)),
     (dt.date(2019, 1, 13), dt.date(2019, 1, 13)),
 ])
-def test_date_from_string(input, expected_value):
+def test_date_from_string_or_date_object(input, expected_value):
     """
     Strings of the form YYYY-MM-DD and datetime.date objects are converted to the expected datetime.date objects.
     """
@@ -28,7 +28,7 @@ def test_date_from_string(input, expected_value):
     pd.Timestamp("2016-12-10 08:10:00"),
     pd.Timestamp("2016-12-10 00:00:00"),
 ])
-def test_wrong_input_raises_error(input):
+def test_wrong_date_input_raises_error(input):
     """
     Inputs of the wrong format or type raise a TohuDateError.
     """
