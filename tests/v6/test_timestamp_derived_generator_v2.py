@@ -4,7 +4,7 @@ import pytest
 from operator import attrgetter
 
 from .context import tohu
-from tohu.v6.primitive_generators import Constant, TimestampPrimitive
+from tohu.v6.primitive_generators import Constant, DatePrimitive, TimestampPrimitive
 from tohu.v6.derived_generators_v2 import TimestampDerived, TohuTimestampError
 
 
@@ -169,6 +169,13 @@ def generators_are_equivalent(x, y):
             Constant(dt.datetime(2018, 5, 9, 0, 0, 0)),
             Constant(dt.datetime(2018, 5, 9, 23, 59, 59)),
         ),
+        (
+            None,
+            None,
+            DatePrimitive(start="2018-04-11", end="2018-04-11"),
+            Constant(dt.datetime(2018, 4, 11, 0, 0, 0)),
+            Constant(dt.datetime(2018, 4, 11, 23, 59, 59)),
+        ),
     ],
 )
 def test_expected_start_and_end_value_with_varying_inputs(start, end, date, start_gen_expected, end_gen_expected):
@@ -176,3 +183,49 @@ def test_expected_start_and_end_value_with_varying_inputs(start, end, date, star
 
     assert generators_are_equivalent(start_gen_expected, g.start_gen)
     assert generators_are_equivalent(end_gen_expected, g.end_gen)
+
+
+@pytest.mark.parametrize(
+    "start, end, date, expected_msg",
+    [
+        (
+            None,
+            None,
+            None,
+            "Not all input arguments can be None",
+        ),
+        (
+            Constant("2018-01-01 11:22:33"),
+            TimestampPrimitive(start="2018-01-31 09:00:00", end="2018-04-05 18:00:00"),
+            "2018-01-01",
+            "Arguments 'start', 'end', 'date' cannot all be provided.",
+        ),
+        (
+            TimestampPrimitive(start="2018-01-01 11:22:33", end="2018-02-10 22:23:24"),
+            TimestampPrimitive(start="2018-01-31 09:00:00", end="2018-04-05 18:00:00"),
+            None,
+            "Latest possible value of 'start' generator must not be after earliest possible value of 'end' generator",
+        ),
+        (
+            TimestampPrimitive(start="2018-01-01 11:22:33", end="2018-02-10 22:23:24"),
+            None,
+            Constant("2018-01-01"),
+            "If the 'date' argument is given, all possible 'start' timestamp values must lie on that given date.",
+        ),
+        (
+            None,
+            TimestampPrimitive(start="2018-02-10 11:22:33", end="2018-02-10 22:23:24"),
+            Constant("2018-01-01"),
+            "If the 'date' argument is given, all possible 'end' timestamp values must lie on that given date.",
+        ),
+        (
+                None,
+                None,
+                DatePrimitive(start="2018-02-28", end="2018-03-01"),
+                "Argument 'date' must represent some kind of constant date object",
+        ),
+    ],
+)
+def test_invalid_input_combinations(start, end, date, expected_msg):
+    with pytest.raises(TohuTimestampError, match=expected_msg):
+        TimestampDerived(start=start, end=end, date=date)

@@ -1,18 +1,20 @@
 import datetime as dt
 
 from .base import TohuBaseGenerator
-from .primitive_generators import Constant, TimestampPrimitive
+from .primitive_generators import Constant, DatePrimitive, TimestampPrimitive
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object
 
 
 def convert_to_date_object(date):
     if isinstance(date, Constant):
         return convert_to_date_object(date.value)
+    elif isinstance(date, DatePrimitive) and date.start == date.end:
+        return date.start
     else:
         try:
             return ensure_is_date_object(date)
         except TohuDateError:
-            raise TohuDateError(f"Cannot convert input to (constant) date object: {date}")
+            raise TohuTimestampError(f"Argument 'date' must represent some kind of constant date object. Got: {date}")
 
 
 def get_start_generator(start, date):
@@ -61,11 +63,42 @@ def get_start_end_end_generator(start, end, date):
     return start_gen, end_gen
 
 
+def check_valid_inputs(start_gen, end_gen, date):
+    if date is not None:
+        date = convert_to_date_object(date)
+
+    if isinstance(start_gen, TimestampPrimitive) and isinstance(end_gen, TimestampPrimitive):
+        if start_gen.end > end_gen.start:
+            raise TohuTimestampError(
+                "Latest possible value of 'start' generator must not be after "
+                "earliest possible value of 'end' generator."
+            )
+
+    if date is not None:
+        if isinstance(start_gen, TimestampPrimitive):
+            if not (start_gen.start.date() == date and start_gen.end.date() == date):
+                raise TohuTimestampError(
+                    "If the 'date' argument is given, all possible 'start' timestamp values must lie on that given date."
+                )
+        if isinstance(end_gen, TimestampPrimitive):
+            if not (end_gen.start.date() == date and end_gen.end.date() == date):
+                raise TohuTimestampError(
+                    "If the 'date' argument is given, all possible 'end' timestamp values must lie on that given date."
+                )
+
+
 class TimestampDerived(TohuBaseGenerator):
 
-    def __init__(self, start, end, date):
+    def __init__(self, *, start=None, end=None, date=None):
         super().__init__()
+
+        if start is None and end is None and date is None:
+            raise TohuTimestampError("Not all input arguments can be None.")
+        if start is not None and end is not None and date is not None:
+            raise TohuTimestampError("Arguments 'start', 'end', 'date' cannot all be provided.")
+
         self.start_gen, self.end_gen = get_start_end_end_generator(start, end, date)
+        check_valid_inputs(self.start_gen, self.end_gen, date)
 
     def __next__(self):
         pass
