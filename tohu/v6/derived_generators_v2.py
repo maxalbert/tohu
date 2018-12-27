@@ -1,7 +1,11 @@
 import datetime as dt
 
+from random import Random
+
 from .base import TohuBaseGenerator
 from .primitive_generators import Constant, DatePrimitive, TimestampPrimitive
+from .derived_generators import Apply
+from .spawn_mapping import SpawnMapping
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object
 
 
@@ -91,11 +95,9 @@ def check_valid_inputs(start_gen, end_gen, date):
                 )
 
 
-class TimestampDerived(TohuBaseGenerator):
+class TimestampDerived(Apply):
 
     def __init__(self, *, start=None, end=None, date=None):
-        super().__init__()
-
         if start is None and end is None and date is None:
             raise TohuTimestampError("Not all input arguments can be None.")
         if start is not None and end is not None and date is not None:
@@ -104,14 +106,34 @@ class TimestampDerived(TohuBaseGenerator):
         self.start_gen, self.end_gen = get_start_end_end_generator(start, end, date)
         check_valid_inputs(self.start_gen, self.end_gen, date)
 
-    def __next__(self):
-        pass
+        self.offset_randgen = Random()
+
+        def func(start, end):
+            interval = (end - start).total_seconds()
+            try:
+                offset = self.offset_randgen.randint(0, interval)
+            except ValueError:
+                raise TohuTimestampError(f"Start generator produced timestamp later than end generator: start={start}, end={end}")
+            ts = (start + dt.timedelta(seconds=offset))
+            return ts
+
+        super().__init__(func, self.start_gen, self.end_gen)
+
 
     def reset(self, seed):
         super().reset(seed)
+        self.offset_randgen.seed(next(self.seed_generator))
 
-    def spawn(self):
-        pass
+    def spawn(self, spawn_mapping=None):
+        spawn_mapping = spawn_mapping or SpawnMapping()
+        new_obj = TimestampDerived(start=spawn_mapping[self.start_gen], end=spawn_mapping[self.end_gen])
+        new_obj._set_random_state_from(self)
+        return new_obj
 
     def _set_random_state_from(self, other):
-        pass
+        super()._set_random_state_from(other)
+        self.offset_randgen.setstate(other.offset_randgen.getstate())
+
+    def strftime(self, fmt):
+        func = lambda x: x.strftime(fmt)
+        return Apply(func, self)
