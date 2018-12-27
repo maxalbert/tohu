@@ -44,26 +44,35 @@ def make_dummy_tuples(chars='abcde'):
     return some_tuples
 
 
+class TohuDateError(Exception):
+    """
+    Custom exception
+    """
+
+
 def parse_date_string(s):
     try:
-        timestamp = dt.datetime.strptime(s, "%Y-%m-%d")
+        date = dt.datetime.strptime(s, "%Y-%m-%d").date()
     except ValueError:
-        raise ValueError(
+        raise TohuDateError(
             "If input is a string, it must represent a timestamp of the form 'YYYY-MM-DD HH:MM:SS' "
             f"or a date of the form YYYY-MM-DD. Got: '{s}'"
         )
-    return timestamp.date()
+    return date
 
 
 def ensure_is_date_object(x):
+    error_msg = f"Cannot convert input to date object: {x} (type: {type(x)})"
+
     if isinstance(x, dt.date):
-        return x
-    elif isinstance(x, pd.Timestamp):
-        return x.to_pydatetime()
+        if isinstance(x, dt.datetime):
+            raise TohuDateError(error_msg)
+        else:
+            return x
     elif isinstance(x, str):
         return parse_date_string(x)
     else:
-        raise TypeError(f"Cannot convert input to date object: {x} (type: {type(x)})")
+        raise TohuDateError(error_msg)
 
 
 def parse_datetime_string(s, optional_offset=None):
