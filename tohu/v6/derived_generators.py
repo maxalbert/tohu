@@ -198,7 +198,7 @@ def check_start_before_end(start_gen, end_gen):
 
 class Timestamp(Apply):
 
-    def __init__(self, start, end):
+    def __init__(self, *, start=None, end=None, date=None):
         self.start_gen = as_tohu_timestamp_generator(start)
         self.end_gen = as_tohu_timestamp_generator(end, optional_offset=dt.timedelta(hours=23, minutes=59, seconds=59))
         check_start_before_end(self.start_gen, self.end_gen)
