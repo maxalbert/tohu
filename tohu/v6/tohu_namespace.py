@@ -81,6 +81,9 @@ class TohuNamespace:
         for g_input in g.input_generators:
             self._add(g_input, name=None)
 
+        if g.parent is not None:
+            self._add(g.parent, name=None)
+
         if g not in self._ns:
             logger.debug(f"Adding generator to {self}: {g} (name='{name}')")
             self._ns[g] = name

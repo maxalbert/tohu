@@ -60,6 +60,17 @@ def test_adding_derived_generators_also_adds_all_input_generators():
     assert ns.all_generators == {xx: None, yy: None, g: "aa"}
 
 
+def test_adding_a_cloned_generator_also_adds_its_parent():
+    g = Integer(100, 200)
+    g_clone = g.clone()
+
+    ns = TohuNamespace()
+    assert len(ns) == 0
+    ns["aa"] = g_clone
+    assert len(ns) == 2
+    assert ns.all_generators == {g: None, g_clone: "aa"}
+
+
 def test_complex_dependencies():
     mapping = {
         1: ['a', 'aa', 'aaa', 'aaaa', 'aaaaa'],
