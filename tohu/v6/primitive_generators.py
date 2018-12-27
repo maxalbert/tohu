@@ -198,10 +198,10 @@ def as_tohu_generator(g):
 
 def get_start_and_end_values(start, end, date):
     if start is not None and end is not None and date is not None:
-        raise TohuTimestampError("Arguments start, end, date must not all be given.")
+        raise TohuTimestampError("Arguments 'start', 'end', 'date' must not all be given.")
 
     if date is None and (start is None or end is None):
-        raise TohuTimestampError("If date is not given, both start and end must be provided.")
+        raise TohuTimestampError("If argument 'date' is not given, both 'start' and 'end' must be provided.")
 
     if date is not None:
         date = ensure_is_date_object(date)
