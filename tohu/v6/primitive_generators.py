@@ -207,13 +207,12 @@ class Timestamp(TohuBaseGenerator):
     def __init__(self, start, end):
         super().__init__()
         self.start = parse_datetime_string(start)
-        self.end = parse_datetime_string(end)
+        self.end = parse_datetime_string(end, optional_offset=dt.timedelta(hours=23, minutes=59, seconds=59))
         self.interval = (self.end - self.start).total_seconds()
         self.offset_randgen = Random()
         self._check_start_before_end()
 
     def _check_start_before_end(self):
-
         if self.start > self.end:
             raise TimestampError(f"Start value must be before end value. Got: start={self.start}, end={self.end}")
 
@@ -225,7 +224,7 @@ class Timestamp(TohuBaseGenerator):
         super().reset(seed)
         self.offset_randgen.seed(next(self.seed_generator))
 
-    def spawn(self):
+    def spawn(self, spawn_mapping=None):
         new_obj = Timestamp(self.start, self.end)
         new_obj._set_random_state_from(self)
         return new_obj
