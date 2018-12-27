@@ -2,7 +2,7 @@ import datetime as dt
 import pytest
 
 from .context import tohu
-from tohu.v6.derived_generators import Timestamp, TimestampError
+from tohu.v6.derived_generators import Timestamp, TohuTimestampError
 
 
 def test_initialising_with_string_and_timestamp_yields_same_results():
@@ -57,7 +57,7 @@ def test_start_can_be_equal_to_end():
 
 
 def test_raises_error_if_start_is_later_than_end():
-    with pytest.raises(TimestampError, match="Latest start value must be before earliest end value"):
+    with pytest.raises(TohuTimestampError, match="Latest start value must be before earliest end value"):
         Timestamp(start="2018-01-01 11:22:33", end="2018-01-01 10:09:08")
 
 
@@ -65,5 +65,5 @@ def test_raises_error_if_start_generator_produces_timestamps_later_than_end_gene
     g_start = Timestamp(start="2018-01-01", end="2018-01-30")
     g_end = Timestamp(start="2018-01-02", end="2018-01-31")
 
-    with pytest.raises(TimestampError, match="Latest start value must be before earliest end value"):
+    with pytest.raises(TohuTimestampError, match="Latest start value must be before earliest end value"):
         Timestamp(start=g_start, end=g_end)

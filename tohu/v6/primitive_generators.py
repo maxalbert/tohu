@@ -5,7 +5,7 @@ from faker import Faker
 from random import Random
 
 from .base import TohuBaseGenerator
-from .utils import ensure_is_date_object, identity, ensure_is_datetime_object
+from .utils import ensure_is_date_object, identity, ensure_is_datetime_object, TohuDateError, TohuTimestampError
 
 __all__ = ['Constant', 'FakerGenerator', 'Date', 'HashDigest', 'Integer', 'Timestamp']
 
@@ -196,12 +196,6 @@ def as_tohu_generator(g):
         return Constant(g)
 
 
-class TimestampError(Exception):
-    """
-    Custom exception for tohu Timestamps.
-    """
-
-
 class Timestamp(TohuBaseGenerator):
 
     def __init__(self, start, end):
@@ -214,7 +208,7 @@ class Timestamp(TohuBaseGenerator):
 
     def _check_start_before_end(self):
         if self.start > self.end:
-            raise TimestampError(f"Start value must be before end value. Got: start={self.start}, end={self.end}")
+            raise TohuTimestampError(f"Start value must be before end value. Got: start={self.start}, end={self.end}")
 
     def __next__(self):
         offset = self.offset_randgen.randint(0, self.interval)
@@ -246,7 +240,7 @@ class Date(TohuBaseGenerator):
 
     def _check_start_before_end(self):
         if self.start > self.end:
-            raise TimestampError(f"Start value must be before end value. Got: start={self.start}, end={self.end}")
+            raise TohuDateError(f"Start value must be before end value. Got: start={self.start}, end={self.end}")
 
     def __next__(self):
         offset = self.offset_randgen.randint(0, self.interval)

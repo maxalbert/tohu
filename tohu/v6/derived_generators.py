@@ -6,7 +6,7 @@ from random import Random
 from .base import TohuBaseGenerator, SeedGenerator
 from .primitive_generators import as_tohu_generator, Constant
 from .spawn_mapping import SpawnMapping
-from .utils import parse_datetime_string
+from .utils import parse_datetime_string, TohuTimestampError
 
 __all__ = ['Apply', 'Lookup', 'SelectMultiple', 'SelectOne', 'Timestamp']
 
@@ -166,12 +166,6 @@ def as_tohu_timestamp_generator(x, optional_offset=None):
         raise ValueError(f"Cannot convert input argument to timestamp: {x}")
 
 
-class TimestampError(Exception):
-    """
-    Custom exception for tohu Timestamps.
-    """
-
-
 def get_earliest_value(g):
     if isinstance(g, Constant):
         return g.value
@@ -199,7 +193,7 @@ def check_start_before_end(start_gen, end_gen):
             "Latest start value must be before earliest end value. "
             f"Got: latest start value: {latest_start_value}, earliest end value: {earliest_end_value}"
         )
-        raise TimestampError(error_msg)
+        raise TohuTimestampError(error_msg)
 
 
 class Timestamp(Apply):
@@ -215,7 +209,7 @@ class Timestamp(Apply):
             try:
                 offset = self.offset_randgen.randint(0, interval)
             except ValueError:
-                raise TimestampError(f"Start generator produced timestamp later than end generator: start={start}, end={end}")
+                raise TohuTimestampError(f"Start generator produced timestamp later than end generator: start={start}, end={end}")
             ts = (start + dt.timedelta(seconds=offset))
             return ts
 
