@@ -50,6 +50,13 @@ class TohuNamespace:
         return s
 
     @property
+    def all_generators(self):
+        """
+        Return all generators in this namespace.
+        """
+        return self._ns
+
+    @property
     def all_independent_generators(self):
         """
         Return all generators in this namespace which are not clones.
