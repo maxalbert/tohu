@@ -1,7 +1,7 @@
 import datetime as dt
 
 from .base import TohuBaseGenerator
-from .primitive_generators import Constant
+from .primitive_generators import Constant, TimestampPrimitive
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object
 
 
@@ -27,6 +27,8 @@ def get_start_generator(start, date):
         start_gen = Constant(start_value)
     elif isinstance(start, Constant):
         return get_start_generator(start.value, date)
+    elif isinstance(start, TimestampPrimitive):
+        return start
     else:
         raise NotImplementedError()
 
@@ -45,6 +47,8 @@ def get_end_generator(end, date):
         end_gen = Constant(end_value)
     elif isinstance(end, Constant):
         return get_start_generator(end.value, date)
+    elif isinstance(end, TimestampPrimitive):
+        return end
     else:
         raise NotImplementedError()
 
@@ -60,6 +64,7 @@ def get_start_end_end_generator(start, end, date):
 class TimestampDerived(TohuBaseGenerator):
 
     def __init__(self, start, end, date):
+        super().__init__()
         self.start_gen, self.end_gen = get_start_end_end_generator(start, end, date)
 
     def __next__(self):
