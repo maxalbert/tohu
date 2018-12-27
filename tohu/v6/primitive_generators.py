@@ -196,12 +196,41 @@ def as_tohu_generator(g):
         return Constant(g)
 
 
+def get_start_and_end_values(start, end, date):
+    if start is not None and end is not None and date is not None:
+        raise TohuTimestampError("Arguments start, end, date must not all be given.")
+
+    if date is None and (start is None or end is None):
+        raise TohuTimestampError("If date is not given, both start and end must be provided.")
+
+    if date is not None:
+        date = ensure_is_date_object(date)
+
+    if start is None:
+        start = ensure_is_datetime_object(date)
+    else:
+        start = ensure_is_datetime_object(start)
+
+    if end is None:
+        end = ensure_is_datetime_object(date, optional_offset=dt.timedelta(hours=23, minutes=59, seconds=59))
+    else:
+        end = ensure_is_datetime_object(end)
+
+    if date is not None:
+        if start.date() != date:
+            raise TohuTimestampError("Date of start timestamp does not coincide with date argument.")
+        if end.date() != date:
+            raise TohuTimestampError("Date of end timestamp does not coincide with date argument.")
+
+
+    return start, end
+
+
 class Timestamp(TohuBaseGenerator):
 
-    def __init__(self, start, end):
+    def __init__(self, *, start=None, end=None, date=None):
         super().__init__()
-        self.start = ensure_is_datetime_object(start)
-        self.end = ensure_is_datetime_object(end, optional_offset=dt.timedelta(hours=23, minutes=59, seconds=59))
+        self.start, self.end = get_start_and_end_values(start, end, date)
         self.interval = (self.end - self.start).total_seconds()
         self.offset_randgen = Random()
         self._check_start_before_end()
