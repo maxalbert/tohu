@@ -36,7 +36,11 @@ def get_start_generator(start, date):
     elif isinstance(start, Constant):
         return get_start_generator(start.value, date)
     elif isinstance(start, TimestampPrimitive):
-        return start
+        # Create a new generator to strip any string formatting information in case it exists
+        start_without_formatting = TimestampPrimitive(start=start.start, end=start.end)
+        start.register_clone(start_without_formatting)
+        start_without_formatting.register_parent(start)
+        return start_without_formatting
     else:
         raise NotImplementedError()
 
@@ -58,7 +62,11 @@ def get_end_generator(end, date):
     elif isinstance(end, Constant):
         return get_start_generator(end.value, date)
     elif isinstance(end, TimestampPrimitive):
-        return end
+        # Create a new generator to strip any string formatting information in case it exists
+        end_without_formatting = TimestampPrimitive(start=end.start, end=end.end)
+        end.register_clone(end_without_formatting)
+        end_without_formatting.register_parent(end)
+        return end_without_formatting
     else:
         raise NotImplementedError()
 

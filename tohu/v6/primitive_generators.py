@@ -274,6 +274,7 @@ class TimestampPrimitive(TohuBaseGenerator):
     def strftime(self, fmt='%Y-%m-%d %H:%M:%S', uppercase=False):
         g = TimestampPrimitive(start=self.start, end=self.end, fmt=fmt, uppercase=uppercase)
         self.register_clone(g)
+        g.register_parent(self)
         return g
 
 
@@ -325,4 +326,5 @@ class DatePrimitive(TohuBaseGenerator):
     def strftime(self, fmt='%Y-%m-%d', uppercase=False):
         g = TimestampPrimitive(start=self.start, end=self.end, fmt=fmt, uppercase=uppercase)
         self.register_clone(g)
+        g.register_parent(self)
         return g

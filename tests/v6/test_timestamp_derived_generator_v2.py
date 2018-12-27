@@ -226,8 +226,8 @@ def test_expected_start_and_end_value_with_varying_inputs(start, end, date, star
     "start, end, date, start_gen_expected, end_gen_expected",
     [
         (
-            TimestampPrimitive(start="2018-01-01 11:22:33", end="2018-01-01 22:23:24", fmt="%-d %b %Y, %H:%M (%a)"),
-            TimestampPrimitive(start="2018-02-03 04:05:06", end="2018-02-05 20:00:00", fmt="%Y/%m/%d %H-%M-%S"),
+            TimestampPrimitive(start="2018-01-01 11:22:33", end="2018-01-01 22:23:24").strftime(fmt="%-d %b %Y, %H:%M (%a)"),
+            TimestampPrimitive(start="2018-02-03 04:05:06", end="2018-02-05 20:00:00").strftime(fmt="%Y/%m/%d %H-%M-%S"),
             None,
             TimestampPrimitive(start="2018-01-01 11:22:33", end="2018-01-01 22:23:24"),
             TimestampPrimitive(start="2018-02-03 04:05:06", end="2018-02-05 20:00:00"),
@@ -285,3 +285,13 @@ def test_expected_start_and_end_value_with_string_producing_inputs(start, end, d
 def test_invalid_input_combinations(start, end, date, expected_msg):
     with pytest.raises(TohuTimestampError, match=expected_msg):
         TimestampDerived(start=start, end=end, date=date)
+
+
+def test_foo():
+    start_gen = TimestampPrimitive(start="2018-01-01 11:22:33", end="2018-01-01 22:23:24").strftime(fmt="%-d %b %Y, %H:%M (%a)")
+    end_gen = TimestampPrimitive(start="2018-02-03 04:05:06", end="2018-02-05 20:00:00").strftime(fmt="%Y/%m/%d %H-%M-%S")
+    g = TimestampDerived(start=start_gen, end=end_gen)
+    start_gen.reset(seed=11111)
+    end_gen.reset(seed=22222)
+    g.reset(seed=99999)
+    assert next(g) == dt.datetime(2018, 1, 9, 16, 50, 41)
