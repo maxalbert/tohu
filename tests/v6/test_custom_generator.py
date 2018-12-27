@@ -187,8 +187,8 @@ def test_clones_in_custom_generators():
     # Previously there was a bug which meant that the string formatting
     # for generator 'bb' was not honoured correctly.
     class QuuxGenerator(CustomGenerator):
-        aa = TimestampPrimitive(date="2018-01-01").set_tohu_name("aa")
-        bb = aa.strftime("%Y-%m-%d %H:%M:%S").set_tohu_name("bb")
+        aa = TimestampPrimitive(date="2018-01-01")
+        bb = aa.strftime("%Y-%m-%d %H:%M:%S")
 
     g = QuuxGenerator()
     Quux = g.tohu_items_cls
@@ -200,6 +200,30 @@ def test_clones_in_custom_generators():
         Quux(aa=dt.datetime(2018, 1, 1, 1, 5, 28), bb='2018-01-01 01:05:28'),
         Quux(aa=dt.datetime(2018, 1, 1, 4, 57, 20), bb='2018-01-01 04:57:20'),
         Quux(aa=dt.datetime(2018, 1, 1, 19, 35, 26), bb='2018-01-01 19:35:26'),
+    ]
+
+    assert items_expected == items
+
+
+def test_clones_without_explicit_parents_are_treated_correctly():
+    """
+    Test that custom generators containing clones whose parent is not
+    an explicitly named generator produce the expected output items.
+    """
+
+    class QuuxGenerator(CustomGenerator):
+        aa = TimestampPrimitive(date="2018-01-01").strftime("%Y-%m-%d %H:%M:%S")
+
+    g = QuuxGenerator()
+    Quux = g.tohu_items_cls
+    items = list(g.generate(num=5, seed=12345))
+
+    items_expected = [
+        Quux(aa='2018-01-01 05:19:55'),
+        Quux(aa='2018-01-01 10:02:11'),
+        Quux(aa='2018-01-01 01:05:28'),
+        Quux(aa='2018-01-01 04:57:20'),
+        Quux(aa='2018-01-01 19:35:26'),
     ]
 
     assert items_expected == items
