@@ -7,7 +7,7 @@ from random import Random
 from .base import TohuBaseGenerator
 from .utils import ensure_is_date_object, identity, ensure_is_datetime_object, TohuDateError, TohuTimestampError
 
-__all__ = ['Constant', 'FakerGenerator', 'Date', 'HashDigest', 'Integer', 'Timestamp']
+__all__ = ['Constant', 'FakerGenerator', 'DatePrimitive', 'HashDigest', 'Integer', 'Timestamp']
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
@@ -257,7 +257,7 @@ class Timestamp(TohuBaseGenerator):
         self.offset_randgen.setstate(other.offset_randgen.getstate())
 
 
-class Date(TohuBaseGenerator):
+class DatePrimitive(TohuBaseGenerator):
 
     def __init__(self, start, end):
         super().__init__()
@@ -280,7 +280,7 @@ class Date(TohuBaseGenerator):
         self.offset_randgen.seed(next(self.seed_generator))
 
     def spawn(self, spawn_mapping=None):
-        new_obj = Date(self.start, self.end)
+        new_obj = DatePrimitive(self.start, self.end)
         new_obj._set_random_state_from(self)
         return new_obj
 
