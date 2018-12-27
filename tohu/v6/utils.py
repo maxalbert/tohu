@@ -112,8 +112,6 @@ def parse_datetime_string(s, optional_offset=None):
 
 
 def ensure_is_datetime_object(x, optional_offset=None):
-    error_msg = f"Cannot convert input to datetime object: {x} (type: {type(x)})"
-
     if isinstance(x, dt.datetime):
         return x
     elif isinstance(x, dt.date):
@@ -122,4 +120,4 @@ def ensure_is_datetime_object(x, optional_offset=None):
     elif isinstance(x, str):
         return parse_datetime_string(x, optional_offset)
     else:
-        raise TohuTimestampError(error_msg)
+        raise TohuTimestampError(f"Cannot convert input to datetime object: {x} (type: {type(x)})")
