@@ -13,6 +13,13 @@ def identity(x):
     return x
 
 
+def is_clone(g):
+    """
+    Return True if the generator `g` is a clone of another generator, otherwise return False.
+    """
+    return g.parent is not None
+
+
 def print_generated_sequence(gen, num, *, sep=", ", fmt='', seed=None):
     """
     Helper function which prints a sequence of `num` items
