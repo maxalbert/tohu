@@ -2,7 +2,7 @@ import datetime as dt
 import pandas as pd
 from collections import namedtuple
 
-__all__ = ['ensure_is_date_object', 'identity', 'print_generated_sequence', 'parse_date_string', 'parse_datetime_string']
+__all__ = ['ensure_is_date_object', 'ensure_is_datetime_object', 'identity', 'print_generated_sequence', 'parse_date_string', 'parse_datetime_string']
 
 
 def identity(x):
@@ -75,6 +75,27 @@ def ensure_is_date_object(x):
         raise TohuDateError(error_msg)
 
 
+class TohuTimestampError(Exception):
+    """
+    Custom exception
+    """
+
+
+def is_date_object(x):
+    return isinstance(x, dt.date) and not isinstance(x, dt.datetime)
+
+
+def is_date_string(x):
+    if not isinstance(x, str):
+        return False
+    else:
+        try:
+            dt.datetime.strptime(x, "%Y-%m-%d")
+            return True
+        except ValueError:
+            return False
+
+
 def parse_datetime_string(s, optional_offset=None):
     try:
         ts = dt.datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
@@ -88,3 +109,22 @@ def parse_datetime_string(s, optional_offset=None):
                 f"or a date of the form YYYY-MM-DD. Got: '{s}'"
             )
     return ts
+
+
+def ensure_is_datetime_object(x, optional_offset=None):
+    if optional_offset is not None and not (is_date_object(x) or is_date_string(x)):
+        raise TohuTimestampError(
+            "Nonzero optional_offset values are only allowed with inputs of type "
+            f"datetime.date or strings of the form 'YYYY-MM-DD'. Got: {x}")
+
+    error_msg = f"Cannot convert input to datetime object: {x} (type: {type(x)})"
+
+    if isinstance(x, dt.datetime):
+        return x
+    elif isinstance(x, dt.date):
+        optional_offset = optional_offset or dt.timedelta(seconds=0)
+        return dt.datetime(x.year, x.month, x.day) + optional_offset
+    elif isinstance(x, str):
+        return parse_datetime_string(x, optional_offset)
+    else:
+        raise TohuTimestampError(error_msg)
