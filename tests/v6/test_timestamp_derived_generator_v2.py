@@ -8,6 +8,25 @@ from tohu.v6.primitive_generators import Constant, DatePrimitive, TimestampPrimi
 from tohu.v6.derived_generators_v2 import TimestampDerived, TohuTimestampError
 
 
+def test_generated_timestamps_are_datetime_objects():
+    g = TimestampDerived(start="2018-01-01 11:22:33", end="2018-01-01 12:23:34")
+    timestamps = g.generate(100, seed=12345)
+
+    assert all([isinstance(x, dt.datetime) for x in timestamps])
+
+
+def test_initialising_with_string_and_timestamp_yields_same_results():
+    t_start = dt.datetime(2018, 1, 1, 11, 22, 33)
+    t_end = dt.datetime(2018, 1, 1, 12, 23, 34)
+
+    g1 = TimestampDerived(start="2018-01-01 11:22:33", end="2018-01-01 12:23:34")
+    g2 = TimestampDerived(start=t_start, end=t_end)
+    timestamps_1 = g1.generate(100, seed=12345)
+    timestamps_2 = g2.generate(100, seed=12345)
+
+    assert all([(x == y) for x, y in zip(timestamps_1, timestamps_2)])
+
+
 @pytest.mark.parametrize(
     "start, end, date, start_attr, end_attr, start_expected, end_expected",
     [
