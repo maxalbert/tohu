@@ -204,6 +204,25 @@ def test_expected_start_and_end_value_with_varying_inputs(start, end, date, star
 
 
 @pytest.mark.parametrize(
+    "start, end, date, start_gen_expected, end_gen_expected",
+    [
+        (
+            TimestampPrimitive(start="2018-01-01 11:22:33", end="2018-01-01 22:23:24", fmt="%-d %b %Y, %H:%M (%a)"),
+            TimestampPrimitive(start="2018-02-03 04:05:06", end="2018-02-05 20:00:00", fmt="%Y/%m/%d %H-%M-%S"),
+            None,
+            TimestampPrimitive(start="2018-01-01 11:22:33", end="2018-01-01 22:23:24"),
+            TimestampPrimitive(start="2018-02-03 04:05:06", end="2018-02-05 20:00:00"),
+        ),
+    ],
+)
+def test_expected_start_and_end_value_with_string_producing_inputs(start, end, date, start_gen_expected, end_gen_expected):
+    g = TimestampDerived(start=start, end=end, date=date)
+
+    assert generators_are_equivalent(start_gen_expected, g.start_gen)
+    assert generators_are_equivalent(end_gen_expected, g.end_gen)
+
+
+@pytest.mark.parametrize(
     "start, end, date, expected_msg",
     [
         (
