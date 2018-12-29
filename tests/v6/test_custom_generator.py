@@ -17,10 +17,10 @@ def test_constituent_generator_templates(quux_gen_1, quux_gen_2, quux_gen_3, quu
     constituent_generator_templates_expected_3 = {'xx': quux_gen_3.xx, 'yy': quux_gen_3.yy, 'zz': quux_gen_3.zz}
     constituent_generator_templates_expected_4 = {'aa': quux_gen_4.aa, 'bb': quux_gen_4.bb, 'cc': quux_gen_4.cc, 'dd': quux_gen_4.dd}
 
-    assert constituent_generator_templates_expected_1 == quux_gen_1.ns_gen_templates.named_generators
-    assert constituent_generator_templates_expected_2 == quux_gen_2.ns_gen_templates.named_generators
-    assert constituent_generator_templates_expected_3 == quux_gen_3.ns_gen_templates.named_generators
-    assert constituent_generator_templates_expected_4 == quux_gen_4.ns_gen_templates.named_generators
+    assert constituent_generator_templates_expected_1 == quux_gen_1.ns_gens.named_generators
+    assert constituent_generator_templates_expected_2 == quux_gen_2.ns_gens.named_generators
+    assert constituent_generator_templates_expected_3 == quux_gen_3.ns_gens.named_generators
+    assert constituent_generator_templates_expected_4 == quux_gen_4.ns_gens.named_generators
 
 
 def test_constituent_generators(quux_gen_1, quux_gen_2, quux_gen_3, quux_gen_4):
