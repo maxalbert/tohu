@@ -33,11 +33,12 @@ class Apply(DerivedGenerator):
     Generator which applies a callable to a elements produced by a set of input generators.
     """
 
-    def __init__(self, callable, *arg_gens, **kwarg_gens):
+    def __init__(self, callable, *arg_gens, max_value=None, **kwarg_gens):
         super().__init__()
         self.callable = callable
         self.arg_gens_orig = arg_gens
         self.kwarg_gens_orig = kwarg_gens
+        self.max_value = max_value
 
         self.arg_gens = [g.clone() for g in self.arg_gens_orig]
         self.kwarg_gens = {name: g.clone() for name, g in self.kwarg_gens_orig.items()}
@@ -58,7 +59,7 @@ class Apply(DerivedGenerator):
         spawn_mapping = spawn_mapping or SpawnMapping()
         new_arg_gens_orig = [spawn_mapping[g] for g in self.arg_gens_orig]
         new_kwarg_gens_orig = {name: spawn_mapping[g] for name, g in self.kwarg_gens_orig}
-        new_obj = Apply(self.callable, *new_arg_gens_orig, **new_kwarg_gens_orig)
+        new_obj = Apply(self.callable, *new_arg_gens_orig, max_value=self.max_value, **new_kwarg_gens_orig)
         new_obj._set_random_state_from(self)
         return new_obj
 
@@ -95,10 +96,7 @@ class IntegerDerived(Apply):
         self.high_gen = as_tohu_generator(high)
         self.randgen = Random()
         super().__init__(self.randgen.randint, self.low_gen, self.high_gen)
-
-    @property
-    def max_value(self):
-        return self.high_gen.max_value
+        self.max_value = self.high_gen.max_value
 
     def reset(self, seed):
         super().reset(seed)
@@ -172,7 +170,8 @@ class SelectMultiple(Apply):
     def size(self):
         def get_size(x):
             return len(x)
-        return Apply(get_size, self)
+        g = Apply(get_size, self, max_value=self.num_gen.max_value)
+        return g
 
 
 def as_tohu_timestamp_generator(x, optional_offset=None):

@@ -127,6 +127,7 @@ class TimestampDerived(Apply):
 
         super().__init__(func, self.start_gen, self.end_gen)
 
+        self.max_value = self.end_gen.max_value
 
     def reset(self, seed):
         super().reset(seed)

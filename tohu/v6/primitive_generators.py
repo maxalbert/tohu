@@ -266,6 +266,10 @@ class TimestampPrimitive(TohuBaseGenerator):
             else:
                 self._maybe_format_timestamp = lambda ts: ts.strftime(self.fmt)
 
+    @property
+    def max_value(self):
+        return self.end
+
     def _check_start_before_end(self):
         if self.start > self.end:
             raise TohuTimestampError(f"Start value must be before end value. Got: start={self.start}, end={self.end}")

@@ -60,6 +60,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         self.clones = []
         self.input_generators = []
         self.seed_generator = SeedGenerator()
+        self._max_value = None
 
     def __repr__(self):
         clsname = self.__class__.__name__
@@ -100,7 +101,19 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     @abstractmethod
     def __next__(self):
-        raise NotImplementedError("Class {} does not implement method '__next__'.".format(self.__class__.__name__))
+        raise NotImplementedError(f"Class {self.__class__.__name__} does not implement method '__next__'.")
+
+    @property
+    def max_value(self):
+        return self._max_value
+
+    @max_value.setter
+    def max_value(self, value):
+        if self._max_value is None:
+            self._max_value = value
+        else:
+            if value is not None:
+                raise ValueError(f"Trying to set attribute max_value={value} but it already has value {self._max_value}")
 
     @abstractmethod
     def reset(self, seed):
