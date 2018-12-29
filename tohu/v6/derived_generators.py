@@ -8,7 +8,7 @@ from .primitive_generators import as_tohu_generator, Constant
 from .spawn_mapping import SpawnMapping
 from .utils import parse_datetime_string, TohuTimestampError
 
-__all__ = ['Apply', 'Lookup', 'SelectMultiple', 'SelectOne', 'Timestamp']
+__all__ = ['Apply', 'IntegerDerived', 'Lookup', 'SelectMultiple', 'SelectOne', 'Timestamp']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -86,6 +86,29 @@ class Lookup(Apply):
         new_obj = Lookup(spawn_mapping[self.key], spawn_mapping[self.mapping])
         new_obj._set_random_state_from(self)
         return new_obj
+
+
+class IntegerDerived(Apply):
+
+    def __init__(self, low, high):
+        self.low_gen = as_tohu_generator(low)
+        self.high_gen = as_tohu_generator(high)
+        self.randgen = Random()
+        super().__init__(self.randgen.randint, self.low_gen, self.high_gen)
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(next(self.seed_generator))
+
+    def spawn(self, spawn_mapping=None):
+        spawn_mapping = spawn_mapping or SpawnMapping()
+        new_obj = IntegerDerived(spawn_mapping[self.low_gen], spawn_mapping[self.high_gen])
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.randgen.setstate(other.randgen.getstate())
 
 
 class SelectOne(Apply):
