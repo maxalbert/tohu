@@ -296,13 +296,3 @@ class Tee(Apply):
 
         value_gens = [g.spawn() for _ in range(self.num_gen.max_value)]
         super().__init__(make_tuple, self.num_gen, *value_gens)
-
-    def spawn(self, spawn_mapping=None):
-        spawn_mapping = spawn_mapping or SpawnMapping()
-        new_obj = Tee(self.g_orig, spawn_mapping[self.num_gen])
-        new_obj._set_random_state_from(self)
-        return new_obj
-
-    def _set_random_state_from(self, other):
-        super()._set_random_state_from(other)
-        #self.g._set_random_state_from(other.g)
