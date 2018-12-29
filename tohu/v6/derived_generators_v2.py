@@ -6,7 +6,7 @@ from .base import TohuBaseGenerator
 from .primitive_generators import Constant, DatePrimitive, TimestampPrimitive
 from .derived_generators import Apply
 from .spawn_mapping import SpawnMapping
-from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object
+from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object, make_timestamp_formatter
 
 
 def convert_to_date_object(date):
@@ -105,7 +105,7 @@ def check_valid_inputs(start_gen, end_gen, date):
 
 class TimestampDerived(Apply):
 
-    def __init__(self, *, start=None, end=None, date=None):
+    def __init__(self, *, start=None, end=None, date=None, fmt=None, uppercase=None):
         if start is None and end is None and date is None:
             raise TohuTimestampError("Not all input arguments can be None.")
         if start is not None and end is not None and date is not None:
@@ -129,6 +129,14 @@ class TimestampDerived(Apply):
 
         self.max_value = self.end_gen.max_value
 
+        self.fmt = fmt
+        self.uppercase = uppercase
+        self._maybe_format_timestamp = make_timestamp_formatter(self.fmt, self.uppercase)
+
+    def __next__(self):
+        ts = super().__next__()
+        return self._maybe_format_timestamp(ts)
+
     def reset(self, seed):
         super().reset(seed)
         self.offset_randgen.seed(next(self.seed_generator))
@@ -136,7 +144,7 @@ class TimestampDerived(Apply):
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
-        new_obj = TimestampDerived(start=spawn_mapping[self.start_gen], end=spawn_mapping[self.end_gen])
+        new_obj = TimestampDerived(start=spawn_mapping[self.start_gen], end=spawn_mapping[self.end_gen], fmt=self.fmt, uppercase=self.uppercase)
         new_obj._set_random_state_from(self)
         return new_obj
 
@@ -144,6 +152,8 @@ class TimestampDerived(Apply):
         super()._set_random_state_from(other)
         self.offset_randgen.setstate(other.offset_randgen.getstate())
 
-    def strftime(self, fmt):
-        func = lambda x: x.strftime(fmt)
-        return Apply(func, self)
+    def strftime(self, fmt='%Y-%m-%d %H:%M:%S', uppercase=False):
+        g = TimestampDerived(start=self.start_gen, end=self.end_gen, fmt=fmt, uppercase=uppercase)
+        self.register_clone(g)
+        g.register_parent(self)
+        return g
