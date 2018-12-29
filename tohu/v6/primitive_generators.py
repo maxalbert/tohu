@@ -301,17 +301,7 @@ class DatePrimitive(TohuBaseGenerator):
 
         self.fmt = fmt
         self.uppercase = uppercase
-
-        if self.fmt is None:
-            self._maybe_format_timestamp = identity
-        else:
-            if not isinstance(self.fmt, str):
-                raise ValueError(f"Argument 'fmt' must be of type string, got '{type(self.fmt)}'")
-
-            if uppercase:
-                self._maybe_format_timestamp = lambda ds: ds.strftime(self.fmt).upper()
-            else:
-                self._maybe_format_timestamp = lambda ds: ds.strftime(self.fmt)
+        self._maybe_format_timestamp = make_timestamp_formatter(self.fmt, self.uppercase)
 
     def _check_start_before_end(self):
         if self.start > self.end:
