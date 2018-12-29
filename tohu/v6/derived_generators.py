@@ -8,7 +8,7 @@ from .primitive_generators import as_tohu_generator, Constant
 from .spawn_mapping import SpawnMapping
 from .utils import parse_datetime_string, TohuTimestampError
 
-__all__ = ['Apply', 'IntegerDerived', 'Lookup', 'SelectMultiple', 'SelectOne', 'Timestamp']
+__all__ = ['Apply', 'IntegerDerived', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'Timestamp']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -277,3 +277,33 @@ class Timestamp(Apply):
     def strftime(self, fmt):
         func = lambda x: x.strftime(fmt)
         return Apply(func, self)
+
+
+class Tee(Apply):
+
+    def __init__(self, g, num):
+        self.g_orig = g
+        self.num_gen = as_tohu_generator(num)
+
+        if self.num_gen.max_value > 1000:
+            raise NotImplementedError(
+                "This Tee generator is intended to be used to produce small-ish output tuples. "
+                "The current implementation is not ideal for potentially large tuples, which"
+                "which is why we only allow sizes up to 1000 elements at the moment."
+            )
+
+        def make_tuple(num, *values):
+            return tuple(values[:num])
+
+        value_gens = [g.spawn() for _ in range(self.num_gen.max_value)]
+        super().__init__(make_tuple, self.num_gen, *value_gens)
+
+    def spawn(self, spawn_mapping=None):
+        spawn_mapping = spawn_mapping or SpawnMapping()
+        new_obj = Tee(self.g_orig, spawn_mapping[self.num_gen])
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        #self.g._set_random_state_from(other.g)
