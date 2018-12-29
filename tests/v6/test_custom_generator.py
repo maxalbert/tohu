@@ -227,3 +227,15 @@ def test_clones_without_explicit_parents_are_treated_correctly():
     ]
 
     assert items_expected == items
+
+
+def test_instance_has_different_generators_than_class():
+
+    class QuuxGenerator(CustomGenerator):
+        aa = Integer(100, 200)
+        bb = HashDigest(length=8)
+
+    g = QuuxGenerator()
+
+    assert g.aa is not QuuxGenerator.aa
+    assert g.bb is not QuuxGenerator.bb
