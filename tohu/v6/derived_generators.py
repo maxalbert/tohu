@@ -112,7 +112,7 @@ class SelectMultiple(Apply):
         self.values_gen = as_tohu_generator(values)
         self.num_gen = as_tohu_generator(num)
         self.randgen = Random()
-        func = self.randgen.choices
+        func = self.randgen.sample
         super().__init__(func, self.values_gen, k=self.num_gen)
 
     def reset(self, seed):
