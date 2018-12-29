@@ -5,6 +5,7 @@ from faker import Faker
 from random import Random
 
 from .base import TohuBaseGenerator
+from .logging import logger
 from .utils import ensure_is_date_object, identity, ensure_is_datetime_object, TohuDateError, TohuTimestampError
 
 __all__ = ['Constant', 'FakerGenerator', 'DatePrimitive', 'HashDigest', 'Integer', 'TimestampPrimitive']
@@ -30,6 +31,18 @@ class Constant(PrimitiveGenerator):
         """
         super().__init__()
         self.value = value
+
+    @property
+    def max_value(self):
+        try:
+            self.value < self.value
+        except TypeError:
+             logger.warning(
+                 f"The value '{self.value}' of this Constant generator does not support comparison but"
+                 "is being asked for its 'max_value'. There may be an error in the logic somewhere."
+            )
+
+        return self.value
 
     def reset(self, seed=None):
         super().reset(seed)
@@ -63,6 +76,10 @@ class Integer(PrimitiveGenerator):
         self.low = low
         self.high = high
         self.randgen = Random()
+
+    @property
+    def max_value(self):
+        return self.high
 
     def reset(self, seed):
         super().reset(seed)

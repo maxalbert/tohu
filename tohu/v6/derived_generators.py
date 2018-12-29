@@ -96,6 +96,10 @@ class IntegerDerived(Apply):
         self.randgen = Random()
         super().__init__(self.randgen.randint, self.low_gen, self.high_gen)
 
+    @property
+    def max_value(self):
+        return self.high_gen.max_value
+
     def reset(self, seed):
         super().reset(seed)
         self.randgen.seed(next(self.seed_generator))
