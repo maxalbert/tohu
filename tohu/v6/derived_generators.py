@@ -29,6 +29,9 @@ class DerivedGenerator(TohuBaseGenerator):
 
 
 class Apply(DerivedGenerator):
+    """
+    Generator which applies a callable to a elements produced by a set of input generators.
+    """
 
     def __init__(self, callable, *arg_gens, **kwarg_gens):
         super().__init__()
@@ -65,6 +68,9 @@ class Apply(DerivedGenerator):
 
 
 class Lookup(Apply):
+    """
+    Generator which performs a lookup of elements produced by another generator.
+    """
 
     def __init__(self, key, mapping):
         self.key = as_tohu_generator(key)
@@ -83,6 +89,9 @@ class Lookup(Apply):
 
 
 class SelectOne(Apply):
+    """
+    Generator which selects a single element from each sequence produced by another generator.
+    """
 
     def __init__(self, values):
         self.values_gen = as_tohu_generator(values)
@@ -107,6 +116,10 @@ class SelectOne(Apply):
 
 
 class SelectMultiple(Apply):
+    """
+    Generator which selects multiple elements (without replacement)
+    from each sequence produced by another generator.
+    """
 
     def __init__(self, values, num):
         self.values_gen = as_tohu_generator(values)
