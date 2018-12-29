@@ -2,7 +2,8 @@ import datetime as dt
 import pandas as pd
 from collections import namedtuple
 
-__all__ = ['ensure_is_date_object', 'ensure_is_datetime_object', 'identity', 'print_generated_sequence', 'parse_date_string', 'parse_datetime_string']
+__all__ = ['ensure_is_date_object', 'ensure_is_datetime_object', 'identity', 'make_timestamp_formatter',
+           'print_generated_sequence', 'parse_date_string', 'parse_datetime_string']
 
 
 def identity(x):
@@ -18,6 +19,21 @@ def is_clone(g):
     Return True if the generator `g` is a clone of another generator, otherwise return False.
     """
     return g.parent is not None
+
+
+def make_timestamp_formatter(fmt, uppercase=None):
+    if fmt is None:
+        formatter = identity
+    else:
+        if not isinstance(fmt, str):
+            raise ValueError(f"Argument 'fmt' must be of type string, got '{type(fmt)}'")
+
+        if uppercase:
+            formatter = lambda ts: ts.strftime(fmt).upper()
+        else:
+            formatter = lambda ts: ts.strftime(fmt)
+
+    return formatter
 
 
 def print_generated_sequence(gen, num, *, sep=", ", fmt='', seed=None):

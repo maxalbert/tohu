@@ -6,7 +6,7 @@ from random import Random
 
 from .base import TohuBaseGenerator
 from .logging import logger
-from .utils import ensure_is_date_object, identity, ensure_is_datetime_object, TohuDateError, TohuTimestampError
+from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
 __all__ = ['Constant', 'FakerGenerator', 'DatePrimitive', 'HashDigest', 'Integer', 'TimestampPrimitive']
 
@@ -254,17 +254,7 @@ class TimestampPrimitive(TohuBaseGenerator):
 
         self.fmt = fmt
         self.uppercase = uppercase
-
-        if self.fmt is None:
-            self._maybe_format_timestamp = identity
-        else:
-            if not isinstance(self.fmt, str):
-                raise ValueError(f"Argument 'fmt' must be of type string, got '{type(self.fmt)}'")
-
-            if uppercase:
-                self._maybe_format_timestamp = lambda ts: ts.strftime(self.fmt).upper()
-            else:
-                self._maybe_format_timestamp = lambda ts: ts.strftime(self.fmt)
+        self._maybe_format_timestamp = make_timestamp_formatter(self.fmt, self.uppercase)
 
     @property
     def max_value(self):
