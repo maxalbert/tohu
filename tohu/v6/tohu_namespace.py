@@ -135,6 +135,11 @@ class TohuNamespace:
             spawn_mapping[g] = g_new
             ns_spawned[name] = g_new
 
+            # Copy tohu names for easier debugging (so that
+            # a custom generator instance has the same tohu
+            # names for constituent generators as the class).
+            g_new.set_tohu_name(g.tohu_name)
+
     def spawn(self):
         spawn_mapping = SpawnMapping()
         ns_spawned = TohuNamespace()
