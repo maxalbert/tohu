@@ -53,9 +53,9 @@ class Apply(DerivedGenerator):
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
-        new_arg_gens = [spawn_mapping[g] for g in self.arg_gens]
-        new_kwarg_gens = {name: spawn_mapping[g] for name, g in self.kwarg_gens}
-        new_obj = Apply(self.callable, *new_arg_gens, **new_kwarg_gens)
+        new_arg_gens_orig = [spawn_mapping[g] for g in self.arg_gens_orig]
+        new_kwarg_gens_orig = {name: spawn_mapping[g] for name, g in self.kwarg_gens_orig}
+        new_obj = Apply(self.callable, *new_arg_gens_orig, **new_kwarg_gens_orig)
         new_obj._set_random_state_from(self)
         return new_obj
 

@@ -3,7 +3,7 @@ import pandas as pd
 
 from .context import tohu
 from tohu.v6.primitive_generators import Constant, Integer, HashDigest, FakerGenerator, TimestampPrimitive
-from tohu.v6.derived_generators import Lookup, SelectMultiple
+from tohu.v6.derived_generators import Apply, Lookup, SelectMultiple
 from tohu.v6.custom_generator import CustomGenerator
 from .exemplar_generators.exemplar_custom_generators import *
 
@@ -239,3 +239,19 @@ def test_instance_has_different_generators_than_class():
 
     assert g.aa is not QuuxGenerator.aa
     assert g.bb is not QuuxGenerator.bb
+
+
+def test_apply_generator_produces_correct_dependent_values_inside_custom_generator():
+    values = ['AA', 'BB', 'CC', 'DD', 'EE', 'FF', 'GG', 'HH', 'II', 'JJ']
+
+    def get_size(x):
+        return len(x)
+
+    class QuuxGenerator(CustomGenerator):
+        aa = SelectMultiple(values, num=Integer(1, 10))
+        bb = Apply(get_size, aa)
+
+    g = QuuxGenerator()
+    items = g.generate(num=100, seed=12345)
+
+    assert all([len(x.aa) == x.bb for x in items])
