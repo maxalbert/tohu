@@ -129,6 +129,11 @@ class SelectMultiple(Apply):
         super()._set_random_state_from(other)
         self.randgen.setstate(other.randgen.getstate())
 
+    def size(self):
+        def get_size(x):
+            return len(x)
+        return Apply(get_size, self)
+
 
 def as_tohu_timestamp_generator(x, optional_offset=None):
     """
