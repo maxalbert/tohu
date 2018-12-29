@@ -132,6 +132,7 @@ class TimestampDerived(Apply):
     def reset(self, seed):
         super().reset(seed)
         self.offset_randgen.seed(next(self.seed_generator))
+        return self
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
