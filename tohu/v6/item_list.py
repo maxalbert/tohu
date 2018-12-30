@@ -123,7 +123,12 @@ class ItemList:
         if isinstance(fields, (list, tuple)):
             fields = {name: name for name in fields}
 
-        if not set(explode_fields).issubset(fields.keys()):
+        if fields is None:
+            colnames_to_export = list(self.items[0].as_dict().keys())  # hack! the field names should perhaps be passed in during initialisation?
+        else:
+            colnames_to_export = list(fields.keys())
+
+        if explode_fields and not set(explode_fields).issubset(colnames_to_export):
             raise ValueError(
                 "All fields to explode must occur as column names. "
                 "Got field names: {explode_fields}. Column names: {list(fields.keys())}"
@@ -132,15 +137,13 @@ class ItemList:
         if fields is None:
             # New version (much faster!, but needs cleaning up)
             import attr
-            colnames = list(self.items[0].as_dict().keys())  # hack! the field names should perhaps be passed in during initialisation?
-            df = pd.DataFrame([attr.astuple(x) for x in self.items], columns=colnames)
+            df = pd.DataFrame([attr.astuple(x) for x in self.items], columns=colnames_to_export)
             # Old version:
             #return pd.DataFrame([x.to_series() for x in self.items])
         else:
             # New version (much faster!)
-            colnames = list(fields.keys())
             attr_getters = [attrgetter(attr_name) for attr_name in fields.values()]
-            df = pd.DataFrame([tuple(func(x) for func in attr_getters) for x in self.items], columns=colnames)
+            df = pd.DataFrame([tuple(func(x) for func in attr_getters) for x in self.items], columns=colnames_to_export)
 
         if explode_fields is not None:
             # TODO: add sanity checks to avoid unwanted behaviour (e.g. that all columns
