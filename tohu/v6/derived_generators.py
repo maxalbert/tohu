@@ -4,6 +4,7 @@ import pandas as pd
 from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
+from .logging import logger
 from .primitive_generators import as_tohu_generator, Constant
 from .spawn_mapping import SpawnMapping
 from .utils import parse_datetime_string, TohuTimestampError
@@ -54,6 +55,14 @@ class Apply(DerivedGenerator):
 
     def reset(self, seed):
         super().reset(seed)
+
+        try:
+            self.callable.reset(next(self.seed_generator))
+        except AttributeError:
+            logger.debug(
+                f"Failed to reset callable in generator {self}. Assuming that"
+                "it does not contain any random generators that need resetting."
+            )
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
