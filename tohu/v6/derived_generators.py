@@ -26,6 +26,12 @@ class DerivedGenerator(TohuBaseGenerator):
 
         for gen in self.input_generators:
             gen.reset(next(seed_generator))
+            try:
+                # In case `gen` is itself a derived generator,
+                # recursively reset its own input generators.
+                gen.reset_input_generators(next(seed_generator))
+            except AttributeError:
+                pass
 
 
 class Apply(DerivedGenerator):
