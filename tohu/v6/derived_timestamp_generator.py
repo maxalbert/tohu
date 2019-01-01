@@ -2,7 +2,6 @@ import datetime as dt
 
 from random import Random
 
-from .base import TohuBaseGenerator
 from .primitive_generators import Constant, DatePrimitive, TimestampPrimitive
 from .derived_generators import Apply
 from .spawn_mapping import SpawnMapping

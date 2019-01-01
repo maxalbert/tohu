@@ -3,9 +3,10 @@ from random import Random
 from .base import TohuBaseGenerator, SeedGenerator
 from .logging import logger
 from .primitive_generators import as_tohu_generator
+from .derived_timestamp_generator import TimestampDerived
 from .spawn_mapping import SpawnMapping
 
-__all__ = ['Apply', 'IntegerDerived', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee']
+__all__ = ['Apply', 'IntegerDerived', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'TimestampDerived']
 
 
 class DerivedGenerator(TohuBaseGenerator):
