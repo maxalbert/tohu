@@ -1,7 +1,7 @@
 from ..context import tohu
 from tohu.v6.primitive_generators import *
 from tohu.v6.derived_generators import *
-from tohu.v6.derived_generators_v2 import TimestampDerived
+from tohu.v6.derived_timestamp_generator import TimestampDerived
 
 
 def add(x, y):

@@ -1,7 +1,7 @@
 from .context import tohu
 from tohu.v6.primitive_generators import Integer, TimestampPrimitive
 from tohu.v6.derived_generators import IntegerDerived, Tee
-from tohu.v6.derived_generators_v2 import TimestampDerived
+from tohu.v6.derived_timestamp_generator import TimestampDerived
 from tohu.v6.custom_generator import CustomGenerator
 
 
