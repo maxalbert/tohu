@@ -2,7 +2,7 @@ import datetime as dt
 import pytest
 
 from .context import tohu
-from tohu.v6.primitive_generators import TimestampPrimitive, TohuTimestampError
+from tohu.v6.primitive_generators import Timestamp, TohuTimestampError
 
 
 @pytest.mark.parametrize(
@@ -53,7 +53,7 @@ from tohu.v6.primitive_generators import TimestampPrimitive, TohuTimestampError
     ],
 )
 def test_expected_start_and_end_value(start, end, date, start_expected, end_expected):
-    g = TimestampPrimitive(start=start, end=end, date=date)
+    g = Timestamp(start=start, end=end, date=date)
 
     assert start_expected == g.start
     assert end_expected == g.end
@@ -97,4 +97,4 @@ def test_expected_start_and_end_value(start, end, date, start_expected, end_expe
 )
 def test_invalid_input_combinations(start, end, date):
     with pytest.raises(TohuTimestampError):
-        TimestampPrimitive(start=start, end=end, date=date)
+        Timestamp(start=start, end=end, date=date)

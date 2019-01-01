@@ -1,5 +1,5 @@
 from ..context import tohu
-from tohu.v6.primitive_generators import Constant, Integer, TimestampPrimitive
+from tohu.v6.primitive_generators import Constant, Integer, Timestamp as TimestampPrimitive
 from tohu.v6.derived_generators import Apply, Lookup, SelectMultiple, TimestampDerived
 
 

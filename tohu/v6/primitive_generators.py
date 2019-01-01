@@ -8,7 +8,7 @@ from .base import TohuBaseGenerator, PrimitiveGenerator
 from .logging import logger
 from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
-__all__ = ['Constant', 'FakerGenerator', 'DatePrimitive', 'HashDigest', 'Integer']
+__all__ = ['Constant', 'FakerGenerator', 'DatePrimitive', 'HashDigest', 'Integer', 'Timestamp']
 
 
 class Constant(PrimitiveGenerator):
@@ -237,7 +237,7 @@ def get_start_and_end_values(start, end, date):
     return start, end
 
 
-class TimestampPrimitive(TohuBaseGenerator):
+class Timestamp(TohuBaseGenerator):
 
     def __init__(self, *, start=None, end=None, date=None, fmt=None, uppercase=None):
         super().__init__()
@@ -268,7 +268,7 @@ class TimestampPrimitive(TohuBaseGenerator):
         self.offset_randgen.seed(next(self.seed_generator))
 
     def spawn(self, spawn_mapping=None):
-        new_obj = TimestampPrimitive(start=self.start, end=self.end, fmt=self.fmt, uppercase=self.uppercase)
+        new_obj = Timestamp(start=self.start, end=self.end, fmt=self.fmt, uppercase=self.uppercase)
         new_obj._set_random_state_from(self)
         return new_obj
 
@@ -277,7 +277,7 @@ class TimestampPrimitive(TohuBaseGenerator):
         self.offset_randgen.setstate(other.offset_randgen.getstate())
 
     def strftime(self, fmt='%Y-%m-%d %H:%M:%S', uppercase=False):
-        g = TimestampPrimitive(start=self.start, end=self.end, fmt=fmt, uppercase=uppercase)
+        g = Timestamp(start=self.start, end=self.end, fmt=fmt, uppercase=uppercase)
         self.register_clone(g)
         g.register_parent(self)
         return g
@@ -320,7 +320,7 @@ class DatePrimitive(TohuBaseGenerator):
         self.offset_randgen.setstate(other.offset_randgen.getstate())
 
     def strftime(self, fmt='%Y-%m-%d', uppercase=False):
-        g = TimestampPrimitive(start=self.start, end=self.end, fmt=fmt, uppercase=uppercase)
+        g = Timestamp(start=self.start, end=self.end, fmt=fmt, uppercase=uppercase)
         self.register_clone(g)
         g.register_parent(self)
         return g

@@ -4,7 +4,7 @@ from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
 from .logging import logger
-from .primitive_generators import as_tohu_generator, Constant, DatePrimitive, TimestampPrimitive
+from .primitive_generators import as_tohu_generator, Constant, DatePrimitive, Timestamp as TimestampPrimitive
 from .spawn_mapping import SpawnMapping
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object, make_timestamp_formatter
 

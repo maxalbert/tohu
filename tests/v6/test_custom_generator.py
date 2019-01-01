@@ -2,7 +2,7 @@ import datetime as dt
 import pandas as pd
 
 from .context import tohu
-from tohu.v6.primitive_generators import Constant, Integer, HashDigest, FakerGenerator, TimestampPrimitive
+from tohu.v6.primitive_generators import Constant, Integer, HashDigest, FakerGenerator, Timestamp
 from tohu.v6.derived_generators import Apply, Lookup, SelectMultiple, SelectOne
 from tohu.v6.custom_generator import CustomGenerator
 from .exemplar_generators.exemplar_custom_generators import *
@@ -187,7 +187,7 @@ def test_clones_in_custom_generators():
     # Previously there was a bug which meant that the string formatting
     # for generator 'bb' was not honoured correctly.
     class QuuxGenerator(CustomGenerator):
-        aa = TimestampPrimitive(date="2018-01-01")
+        aa = Timestamp(date="2018-01-01")
         bb = aa.strftime("%Y-%m-%d %H:%M:%S")
 
     g = QuuxGenerator()
@@ -212,7 +212,7 @@ def test_clones_without_explicit_parents_are_treated_correctly():
     """
 
     class QuuxGenerator(CustomGenerator):
-        aa = TimestampPrimitive(date="2018-01-01").strftime("%Y-%m-%d %H:%M:%S")
+        aa = Timestamp(date="2018-01-01").strftime("%Y-%m-%d %H:%M:%S")
 
     g = QuuxGenerator()
     Quux = g.tohu_items_cls

@@ -7,7 +7,7 @@ the input types.
 __all__ = ['Timestamp']
 
 from .base import TohuBaseGenerator
-from .primitive_generators import TimestampPrimitive
+from .primitive_generators import Timestamp as TimestampPrimitive
 from .derived_generators import TimestampDerived
 
 
