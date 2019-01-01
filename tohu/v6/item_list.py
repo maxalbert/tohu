@@ -131,7 +131,7 @@ class ItemList:
         if explode_fields and not set(explode_fields).issubset(colnames_to_export):
             raise ValueError(
                 "All fields to explode must occur as column names. "
-                "Got field names: {explode_fields}. Column names: {list(fields.keys())}"
+                f"Got field names: {explode_fields}. Column names: {list(fields.keys())}"
             )
 
         if fields is None:
