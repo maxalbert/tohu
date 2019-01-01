@@ -266,6 +266,7 @@ class Timestamp(TohuBaseGenerator):
     def reset(self, seed):
         super().reset(seed)
         self.offset_randgen.seed(next(self.seed_generator))
+        return self
 
     def spawn(self, spawn_mapping=None):
         new_obj = Timestamp(start=self.start, end=self.end, fmt=self.fmt, uppercase=self.uppercase)
@@ -309,6 +310,7 @@ class Date(TohuBaseGenerator):
     def reset(self, seed):
         super().reset(seed)
         self.offset_randgen.seed(next(self.seed_generator))
+        return self
 
     def spawn(self, spawn_mapping=None):
         new_obj = Date(self.start, self.end, fmt=self.fmt, uppercase=self.uppercase)

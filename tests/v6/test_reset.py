@@ -15,3 +15,13 @@ def test_reset_automatically_resets_internal_seed_generator(g, monkeypatch):
 
     g.reset(seed=99999)
     g.seed_generator.reset.assert_called_with(99999)
+
+
+@pytest.mark.parametrize("g", EXEMPLAR_GENERATORS)
+def test_reset_returns_the_generator_itself(g):
+    """
+    Calling reset on a generator returns the generator itself.
+    """
+    h = g.reset(seed=12345)
+
+    assert h is g

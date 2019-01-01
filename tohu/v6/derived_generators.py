@@ -69,6 +69,8 @@ class Apply(DerivedGenerator):
                 "it does not contain any random generators that need resetting."
             )
 
+        return self
+
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
         new_arg_gens_orig = [spawn_mapping[g] for g in self.arg_gens_orig]
@@ -115,6 +117,7 @@ class Integer(Apply):
     def reset(self, seed):
         super().reset(seed)
         self.randgen.seed(next(self.seed_generator))
+        return self
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
@@ -141,6 +144,7 @@ class SelectOne(Apply):
     def reset(self, seed):
         super().reset(seed)
         self.randgen.seed(seed)
+        return self
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
@@ -170,6 +174,7 @@ class SelectMultiple(Apply):
     def reset(self, seed):
         super().reset(seed)
         self.randgen.seed(seed)
+        return self
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
@@ -216,6 +221,7 @@ class Tee(Apply):
         for g in self.value_gens:
             g.reset(next(self.seed_generator))
 
+        return self
 
 
 def convert_to_date_object(date):
