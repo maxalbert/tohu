@@ -4,7 +4,7 @@ from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
 from .logging import logger
-from .primitive_generators import as_tohu_generator, Constant, TimestampPrimitive
+from .primitive_generators import as_tohu_generator, Constant, DatePrimitive, TimestampPrimitive
 from .spawn_mapping import SpawnMapping
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object, make_timestamp_formatter
 
@@ -310,8 +310,10 @@ def check_valid_inputs(start_gen, end_gen, date):
 class TimestampDerived(Apply):
 
     def __init__(self, *, start=None, end=None, date=None, fmt=None, uppercase=None):
+
         if start is None and end is None and date is None:
             raise TohuTimestampError("Not all input arguments can be None.")
+
         if start is not None and end is not None and date is not None:
             raise TohuTimestampError("Arguments 'start', 'end', 'date' cannot all be provided.")
 
