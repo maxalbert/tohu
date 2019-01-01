@@ -276,6 +276,18 @@ def check_valid_inputs(start_gen, end_gen, date):
     if date is not None:
         date = convert_to_date_object(date)
 
+    if date is not None:
+        if isinstance(start_gen, TimestampPrimitive):
+            if not (start_gen.start.date() == date and start_gen.end.date() == date):
+                raise TohuTimestampError(
+                    "If the 'date' argument is given, all possible 'start' timestamp values must lie on that given date."
+                )
+        if isinstance(end_gen, TimestampPrimitive):
+            if not (end_gen.start.date() == date and end_gen.end.date() == date):
+                raise TohuTimestampError(
+                    "If the 'date' argument is given, all possible 'end' timestamp values must lie on that given date."
+                )
+
     start_end_error_msg = (
         "Latest possible value of 'start' generator must not be after "
         "earliest possible value of 'end' generator."
@@ -293,18 +305,6 @@ def check_valid_inputs(start_gen, end_gen, date):
     elif isinstance(start_gen, Constant) and isinstance(end_gen, Constant):
         if start_gen.value> end_gen.value:
             raise TohuTimestampError("Start value must be before end value. Got: start={self.start}, end={self.end}")
-
-    if date is not None:
-        if isinstance(start_gen, TimestampPrimitive):
-            if not (start_gen.start.date() == date and start_gen.end.date() == date):
-                raise TohuTimestampError(
-                    "If the 'date' argument is given, all possible 'start' timestamp values must lie on that given date."
-                )
-        if isinstance(end_gen, TimestampPrimitive):
-            if not (end_gen.start.date() == date and end_gen.end.date() == date):
-                raise TohuTimestampError(
-                    "If the 'date' argument is given, all possible 'end' timestamp values must lie on that given date."
-                )
 
 
 class TimestampDerived(Apply):
