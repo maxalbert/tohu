@@ -5,7 +5,7 @@ from operator import attrgetter
 
 from .context import tohu
 from tohu.v6.primitive_generators import Timestamp as TimestampPrimitive
-from tohu.v6.derived_generators import TohuTimestampError, TimestampDerived
+from tohu.v6.derived_generators import TohuTimestampError, Timestamp as TimestampDerived
 
 
 def test_initialising_with_string_and_timestamp_yields_same_results():

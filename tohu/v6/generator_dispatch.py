@@ -8,7 +8,7 @@ __all__ = ['Timestamp']
 
 from .base import TohuBaseGenerator
 from .primitive_generators import Timestamp as TimestampPrimitive
-from .derived_generators import TimestampDerived
+from .derived_generators import Timestamp as TimestampDerived
 
 
 def Timestamp(*, start=None, end=None, date=None, fmt=None, uppercase=False):

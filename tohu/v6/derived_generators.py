@@ -8,7 +8,7 @@ from .primitive_generators import as_tohu_generator, Constant, DatePrimitive, Ti
 from .spawn_mapping import SpawnMapping
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object, make_timestamp_formatter
 
-__all__ = ['Apply', 'IntegerDerived', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee']
+__all__ = ['Apply', 'IntegerDerived', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'Timestamp']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -307,7 +307,7 @@ def check_valid_inputs(start_gen, end_gen, date):
             raise TohuTimestampError("Start value must be before end value. Got: start={self.start}, end={self.end}")
 
 
-class TimestampDerived(Apply):
+class Timestamp(Apply):
 
     def __init__(self, *, start=None, end=None, date=None, fmt=None, uppercase=None):
 
@@ -350,7 +350,7 @@ class TimestampDerived(Apply):
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
-        new_obj = TimestampDerived(start=spawn_mapping[self.start_gen], end=spawn_mapping[self.end_gen], fmt=self.fmt, uppercase=self.uppercase)
+        new_obj = Timestamp(start=spawn_mapping[self.start_gen], end=spawn_mapping[self.end_gen], fmt=self.fmt, uppercase=self.uppercase)
         new_obj._set_random_state_from(self)
         return new_obj
 
@@ -359,7 +359,7 @@ class TimestampDerived(Apply):
         self.offset_randgen.setstate(other.offset_randgen.getstate())
 
     def strftime(self, fmt='%Y-%m-%d %H:%M:%S', uppercase=False):
-        g = TimestampDerived(start=self.start_gen, end=self.end_gen, fmt=fmt, uppercase=uppercase)
+        g = Timestamp(start=self.start_gen, end=self.end_gen, fmt=fmt, uppercase=uppercase)
         self.register_clone(g)
         g.register_parent(self)
         return g

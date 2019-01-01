@@ -5,7 +5,7 @@ from operator import attrgetter
 
 from .context import tohu
 from tohu.v6.primitive_generators import Constant, DatePrimitive, Timestamp as TimestampPrimitive
-from tohu.v6.derived_generators import TimestampDerived, TohuTimestampError
+from tohu.v6.derived_generators import Timestamp as TimestampDerived, TohuTimestampError
 
 
 def test_generated_timestamps_are_datetime_objects():

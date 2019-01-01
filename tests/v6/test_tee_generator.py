@@ -1,6 +1,6 @@
 from .context import tohu
 from tohu.v6.primitive_generators import Integer, Timestamp as TimestampPrimitive
-from tohu.v6.derived_generators import IntegerDerived, Tee, TimestampDerived
+from tohu.v6.derived_generators import IntegerDerived, Tee, Timestamp as TimestampDerived
 from tohu.v6.custom_generator import CustomGenerator
 
 
