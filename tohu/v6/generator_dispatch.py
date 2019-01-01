@@ -17,4 +17,4 @@ def Timestamp(*, start=None, end=None, date=None, fmt=None, uppercase=False):
         and not isinstance(date, TohuBaseGenerator)):
         return TimestampPrimitive(start=start, end=end, date=date, fmt=fmt, uppercase=uppercase)
     else:
-        TimestampDerived(start=start, end=end, date=date, fmt=fmt, uppercase=uppercase)
+        return TimestampDerived(start=start, end=end, date=date, fmt=fmt, uppercase=uppercase)
