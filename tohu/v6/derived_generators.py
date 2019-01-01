@@ -193,6 +193,7 @@ class Tee(Apply):
     def __init__(self, g, num):
         self.g_orig = g
         self.num_gen = as_tohu_generator(num)
+        self.value_gens = [g.spawn() for _ in range(self.num_gen.max_value)]
 
         if self.num_gen.max_value > 1000:
             raise NotImplementedError(
@@ -204,8 +205,17 @@ class Tee(Apply):
         def make_tuple(num, *values):
             return tuple(values[:num])
 
-        value_gens = [g.spawn() for _ in range(self.num_gen.max_value)]
-        super().__init__(make_tuple, self.num_gen, *value_gens)
+        super().__init__(make_tuple, self.num_gen, *self.value_gens)
+
+    def reset(self, seed):
+        super().reset(seed)
+
+        # We need to explicitly reset the value generators because they
+        # are not technically input generators to this derived generator
+        # so they can't be externally reset.
+        for g in self.value_gens:
+            g.reset(next(self.seed_generator))
+
 
 
 def convert_to_date_object(date):
