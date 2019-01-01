@@ -4,7 +4,7 @@ the creation of appropriate generators depending on
 the input types.
 """
 
-__all__ = ['Timestamp']
+__all__ = ['Integer', 'Timestamp']
 
 from .base import TohuBaseGenerator
 from .primitive_generators import Integer as IntegerPrimitive, Timestamp as TimestampPrimitive
