@@ -8,7 +8,7 @@ from .primitive_generators import as_tohu_generator, Constant, TimestampPrimitiv
 from .spawn_mapping import SpawnMapping
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object, make_timestamp_formatter
 
-__all__ = ['Apply', 'IntegerDerived', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'TimestampDerived']
+__all__ = ['Apply', 'IntegerDerived', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee']
 
 
 class DerivedGenerator(TohuBaseGenerator):

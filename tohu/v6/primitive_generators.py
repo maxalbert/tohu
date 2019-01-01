@@ -8,7 +8,7 @@ from .base import TohuBaseGenerator, PrimitiveGenerator
 from .logging import logger
 from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
-__all__ = ['Constant', 'FakerGenerator', 'DatePrimitive', 'HashDigest', 'Integer', 'TimestampPrimitive']
+__all__ = ['Constant', 'FakerGenerator', 'DatePrimitive', 'HashDigest', 'Integer']
 
 
 class Constant(PrimitiveGenerator):
