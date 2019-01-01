@@ -7,7 +7,6 @@ from tqdm import tqdm
 
 from .item_list import ItemList
 from .logging import logger
-from .spawn_mapping import SpawnMapping
 
 
 class SeedGenerator:
