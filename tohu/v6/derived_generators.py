@@ -276,12 +276,23 @@ def check_valid_inputs(start_gen, end_gen, date):
     if date is not None:
         date = convert_to_date_object(date)
 
+    start_end_error_msg = (
+        "Latest possible value of 'start' generator must not be after "
+        "earliest possible value of 'end' generator."
+    )
+
     if isinstance(start_gen, TimestampPrimitive) and isinstance(end_gen, TimestampPrimitive):
         if start_gen.end > end_gen.start:
-            raise TohuTimestampError(
-                "Latest possible value of 'start' generator must not be after "
-                "earliest possible value of 'end' generator."
-            )
+            raise TohuTimestampError(start_end_error_msg)
+    elif isinstance(start_gen, TimestampPrimitive) and isinstance(end_gen, Constant):
+        if start_gen.end > end_gen.value:
+            raise TohuTimestampError(start_end_error_msg)
+    elif isinstance(start_gen, Constant) and isinstance(end_gen, TimestampPrimitive):
+        if start_gen.value > end_gen.start:
+            raise TohuTimestampError(start_end_error_msg)
+    elif isinstance(start_gen, Constant) and isinstance(end_gen, Constant):
+        if start_gen.value> end_gen.value:
+            raise TohuTimestampError("Start value must be before end value. Got: start={self.start}, end={self.end}")
 
     if date is not None:
         if isinstance(start_gen, TimestampPrimitive):
