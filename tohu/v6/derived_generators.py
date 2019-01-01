@@ -59,7 +59,7 @@ class Apply(DerivedGenerator):
             self.callable.reset(next(self.seed_generator))
         except AttributeError:
             logger.debug(
-                f"Failed to reset callable in generator {self}. Assuming that"
+                f"Failed to reset callable in generator {self}. Assuming that "
                 "it does not contain any random generators that need resetting."
             )
 
