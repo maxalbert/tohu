@@ -7,8 +7,15 @@ the input types.
 __all__ = ['Timestamp']
 
 from .base import TohuBaseGenerator
-from .primitive_generators import Timestamp as TimestampPrimitive
-from .derived_generators import Timestamp as TimestampDerived
+from .primitive_generators import Integer as IntegerPrimitive, Timestamp as TimestampPrimitive
+from .derived_generators import Integer as IntegerDerived,Timestamp as TimestampDerived
+
+
+def Integer(low, high):
+    if (not isinstance(low, TohuBaseGenerator) and not isinstance(high, TohuBaseGenerator)):
+        return IntegerPrimitive(low, high)
+    else:
+        return IntegerDerived(low, high)
 
 
 def Timestamp(*, start=None, end=None, date=None, fmt=None, uppercase=False):

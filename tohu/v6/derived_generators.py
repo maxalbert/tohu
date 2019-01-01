@@ -8,7 +8,7 @@ from .primitive_generators import as_tohu_generator, Constant, Date, Timestamp a
 from .spawn_mapping import SpawnMapping
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object, make_timestamp_formatter
 
-__all__ = ['Apply', 'IntegerDerived', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'Timestamp']
+__all__ = ['Apply', 'Integer', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'Timestamp']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -97,7 +97,7 @@ class Lookup(Apply):
         return new_obj
 
 
-class IntegerDerived(Apply):
+class Integer(Apply):
 
     def __init__(self, low, high):
         self.low_gen = as_tohu_generator(low)
@@ -112,7 +112,7 @@ class IntegerDerived(Apply):
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
-        new_obj = IntegerDerived(spawn_mapping[self.low_gen], spawn_mapping[self.high_gen])
+        new_obj = Integer(spawn_mapping[self.low_gen], spawn_mapping[self.high_gen])
         new_obj._set_random_state_from(self)
         return new_obj
 
