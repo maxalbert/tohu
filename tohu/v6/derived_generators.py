@@ -4,7 +4,7 @@ from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
 from .logging import logger
-from .primitive_generators import as_tohu_generator, Constant, DatePrimitive, Timestamp as TimestampPrimitive
+from .primitive_generators import as_tohu_generator, Constant, Date, Timestamp as TimestampPrimitive
 from .spawn_mapping import SpawnMapping
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object, make_timestamp_formatter
 
@@ -205,7 +205,7 @@ class Tee(Apply):
 def convert_to_date_object(date):
     if isinstance(date, Constant):
         return convert_to_date_object(date.value)
-    elif isinstance(date, DatePrimitive) and date.start == date.end:
+    elif isinstance(date, Date) and date.start == date.end:
         return date.start
     else:
         try:
