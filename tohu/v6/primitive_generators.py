@@ -4,17 +4,11 @@ import numpy as np
 from faker import Faker
 from random import Random
 
-from .base import TohuBaseGenerator
+from .base import TohuBaseGenerator, PrimitiveGenerator
 from .logging import logger
 from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
 __all__ = ['Constant', 'FakerGenerator', 'DatePrimitive', 'HashDigest', 'Integer', 'TimestampPrimitive']
-
-
-class PrimitiveGenerator(TohuBaseGenerator):
-    """
-    Base class for all primitive generators
-    """
 
 
 class Constant(PrimitiveGenerator):

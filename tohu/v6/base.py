@@ -181,3 +181,9 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     def register_parent(self, parent):
         self.parent = parent
+
+
+class PrimitiveGenerator(TohuBaseGenerator):
+    """
+    Base class for all primitive generators
+    """
