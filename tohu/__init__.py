@@ -25,7 +25,7 @@ from .v6 import primitive_generators
 from .v6 import derived_generators
 from .v6 import generator_dispatch
 from .v6 import custom_generator
-#from .v6 import set_special_methods
+from .v6 import set_special_methods
 
 __all__ = base.__all__ \
           + primitive_generators.__all__ \
