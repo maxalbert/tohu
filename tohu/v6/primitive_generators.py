@@ -13,7 +13,7 @@ from .logging import logger
 from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
 __all__ = ['Boolean', 'CharString', 'Constant', 'Date', 'DigitString', 'FakerGenerator', 'Float',
-           'GeoJSONGeolocation', 'HashDigest', 'Integer', 'Sequential', 'Timestamp']
+           'GeoJSONGeolocation', 'HashDigest', 'Integer', 'NumpyRandomGenerator', 'Sequential', 'Timestamp']
 
 
 class Constant(PrimitiveGenerator):
@@ -359,6 +359,49 @@ class Sequential(PrimitiveGenerator):
     def __next__(self):
         self.cnt += 1
         return self.fmt_str.format(self.cnt)
+
+
+class NumpyRandomGenerator(TohuBaseGenerator):
+    """
+    Generator which produces random numbers using one of the methods supported by numpy. [1]
+
+    [1] https://docs.scipy.org/doc/numpy/reference/routines.random.html
+    """
+
+    def __init__(self, method, **numpy_args):
+        """
+        Parameters
+        ----------
+        method: string
+            Name of the numpy function to use (see [1] for details)
+        numpy_args:
+            Remaining arguments passed to the numpy function (see [1] for details)
+
+        References
+        ----------
+        [1] https://docs.scipy.org/doc/numpy/reference/routines.random.html
+        """
+        super().__init__()
+        self.method = method
+        self.random_state = np.random.RandomState()
+        self.randgen = getattr(self.random_state, method)
+        self.numpy_args = numpy_args
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.random_state.seed(seed)
+        return self
+
+    def __next__(self):
+        return self.randgen(**self.numpy_args)
+
+    def spawn(self, spawn_mapping=None):
+        new_obj = NumpyRandomGenerator(method=self.method, **self.numpy_args)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.random_state.set_state(other.random_state.get_state())
 
 
 class FakerGenerator(PrimitiveGenerator):
