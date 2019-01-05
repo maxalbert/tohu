@@ -18,7 +18,7 @@ from .v6.derived_generators import *
 from .v6.generator_dispatch import *
 from .v6.custom_generator import CustomGenerator
 from .v6.logging import logger
-from .v6.utils import print_generated_sequence
+from .v6.utils import print_generated_sequence, print_tohu_version
 
 from .v6 import base
 from .v6 import primitive_generators
@@ -32,7 +32,7 @@ __all__ = base.__all__ \
           + derived_generators.__all__ \
           + generator_dispatch.__all__ \
           + custom_generator.__all__ \
-          + ['tohu_logger', 'print_generated_sequence']
+          + ['tohu_logger', 'print_generated_sequence', 'print_tohu_version']
 
 from ._version import get_versions
 __version__ = get_versions()['version']

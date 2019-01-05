@@ -2,8 +2,17 @@ import datetime as dt
 import pandas as pd
 from collections import namedtuple
 
+from .._version import get_versions
+
 __all__ = ['ensure_is_date_object', 'ensure_is_datetime_object', 'identity', 'make_timestamp_formatter',
-           'print_generated_sequence', 'parse_date_string', 'parse_datetime_string']
+           'print_generated_sequence', 'parse_date_string', 'parse_datetime_string', 'print_tohu_version']
+
+
+def print_tohu_version():
+    """
+    Convenience helper function to print the current tohu version.
+    """
+    print(f"Tohu version: {get_versions()['version']}")
 
 
 def identity(x):
