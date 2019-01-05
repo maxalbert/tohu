@@ -12,8 +12,8 @@ from .base import TohuBaseGenerator, PrimitiveGenerator, SeedGenerator
 from .logging import logger
 from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
-__all__ = ['Boolean', 'CharString', 'Constant', 'Date', 'DigitString', 'FakerGenerator', 'Float',
-           'GeoJSONGeolocation', 'HashDigest', 'Integer', 'NumpyRandomGenerator', 'Sequential', 'Timestamp']
+__all__ = ['Boolean', 'CharString', 'Constant', 'Date', 'DigitString', 'FakerGenerator', 'Float', 'GeoJSONGeolocation',
+           'HashDigest', 'Integer', 'NumpyRandomGenerator', 'Sequential', 'Timestamp']
 
 
 class Constant(PrimitiveGenerator):
