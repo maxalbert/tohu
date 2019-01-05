@@ -420,6 +420,7 @@ class Cumsum(DerivedGenerator):
         super().__init__()
         self.g_orig = g
         self.g_internal = g.clone()
+        self.g_internal.owner = self
         self.start_with_zero = start_with_zero
         self.input_generators = [self.g_orig]
         self.constituent_generators = [self.g_internal]
