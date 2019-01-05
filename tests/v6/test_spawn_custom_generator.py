@@ -2,7 +2,6 @@ import pytest
 from .exemplar_generators import EXEMPLAR_CUSTOM_GENERATORS
 
 
-@pytest.mark.xfail(reason="Spawning doesn't currently transfer the random state correctly")
 @pytest.mark.parametrize("g", EXEMPLAR_CUSTOM_GENERATORS)
 def test_spawn_custom_generators(g):
     """
