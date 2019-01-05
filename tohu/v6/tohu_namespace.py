@@ -154,5 +154,6 @@ class TohuNamespace:
             g.reset(next(self.seed_generator))
 
     def _set_random_state_from(self, other):
-        #raise NotImplementedError("TODO: Traverse the dependencies in both namespaces and transfer the state!")
-        pass
+        # TODO: double-check that this traverses generators in both namespaces in the same order
+        for g_self, g_other in zip(self._ns, other._ns):
+            g_self._set_random_state_from(g_other)
