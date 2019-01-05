@@ -149,6 +149,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     @abstractmethod
     def _set_random_state_from(self, other):
+        logger.debug(f"Setting internal state of {self} (from {other})")
         self.seed_generator._set_random_state_from(other.seed_generator)
 
     @abstractmethod
