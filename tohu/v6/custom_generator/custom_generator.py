@@ -16,22 +16,22 @@ class CustomGenerator(TohuBaseGenerator):
         self.ns_gen_templates = TohuNamespace()
         self.ns_gen_templates.update_from_dict(self.__class__.__dict__)
         self.ns_gen_templates.update_from_dict(self.__dict__)
+        self._mark_field_generator_templates()
         # self.ns_gens = TohuNamespace.from_dict({name: gen.spawn() for name, gen in self.ns_gen_templates.items()})
         self.ns_gens = self.ns_gen_templates.spawn()
 
         self._update_namespace_with_field_generators()
-        self._add_TPL_suffix_to_field_generator_template_tohu_names()
         self._set_field_names()
         self._set_tohu_items_name()
         self._set_tohu_items_cls()
 
-    def _add_TPL_suffix_to_field_generator_template_tohu_names(self):
+    def _mark_field_generator_templates(self):
         """
-        Add the suffix ' (TPL)' to the tohu_names of field generator templates.
-        This is purely convenience for easier debugging.
+        Mark field generator templates as such so that an indication of this is
+        included in the tohu_name. This is purely convenience for easier debugging.
         """
         for g in self.ns_gen_templates.all_generators:
-            g.set_tohu_name(f"{g.tohu_name} (TPL)")
+            g.is_custom_generator_template = True
 
     def _update_namespace_with_field_generators(self):
         self.__dict__.update(self.ns_gens.named_generators)

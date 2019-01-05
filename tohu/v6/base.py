@@ -61,11 +61,12 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         self.clones = []
         self.input_generators = []
         self.seed_generator = SeedGenerator()
+        self.is_custom_generator_template = False
         self._max_value = None
 
     def __repr__(self):
         clsname = self.__class__.__name__
-        name = '' if self.tohu_name is None else f'{self.tohu_name}: '
+        name = '' if self.tohu_name is None else (f'{self.tohu_name}: ' if not self.is_custom_generator_template else f'{self.tohu_name} (TPL): ')
         owned_by = '' if self.owner is None else f' [owned by: {self.owner}] '
         return f'<{name}{clsname} (id={self.tohu_id}){owned_by}>'
 
