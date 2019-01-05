@@ -4,8 +4,8 @@ from .helpers import check_each_generator_class_has_at_least_one_exemplar_instan
 
 from ..context import tohu
 from tohu.v6.primitive_generators import Boolean, CharString, Constant, Date, DigitString, Float, \
-    GeoJSONGeolocation, Integer, HashDigest, FakerGenerator, NumpyRandomGenerator, Sequential, \
-    ShapelyGeolocation, Timestamp
+    GeoJSONGeolocation, Incremental, Integer, HashDigest, FakerGenerator, NumpyRandomGenerator, \
+    Sequential, ShapelyGeolocation, Timestamp
 
 here = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(here, "..", "..", "..", "tohu", "data")
@@ -15,6 +15,7 @@ geojson_sample_file = os.path.join(data_dir, "admin_0_countries.geojson")
 EXEMPLAR_PRIMITIVE_GENERATORS = [
     Constant("quux"),
     Boolean(p=0.8),
+    Incremental(start=200, step=4),
     Integer(100, 200),
     Float(low=12.3, high=45.6),
     CharString(length=12, charset="<alphanumeric_uppercase>"),

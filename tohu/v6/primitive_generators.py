@@ -13,7 +13,7 @@ from .logging import logger
 from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
 __all__ = ['Boolean', 'CharString', 'Constant', 'Date', 'DigitString', 'FakerGenerator', 'Float', 'GeoJSONGeolocation',
-           'HashDigest', 'Integer', 'NumpyRandomGenerator', 'Sequential', 'Timestamp']
+           'HashDigest', 'Incremental', 'Integer', 'NumpyRandomGenerator', 'Sequential', 'Timestamp']
 
 
 class Constant(PrimitiveGenerator):
@@ -92,6 +92,52 @@ class Boolean(PrimitiveGenerator):
 
     def _set_random_state_from(self, other):
         self.randgen.setstate(other.randgen.getstate())
+
+
+class Incremental(PrimitiveGenerator):
+    """
+    Generator which produces integers that increase in regular steps.
+    """
+
+    def __init__(self, *, start=0, step=1):
+        """
+        Parameters
+        ----------
+        start : int
+            Start value of the sequence.
+        step : int
+            Step size of the sequence.
+
+        Example
+        -------
+        >>> g = Incremental(start=200, step=4)
+        >>> list(g.generate(num=10))
+        [200, 204, 208, 212, 216, 220, 224, 228, 232, 236]
+        """
+        super().__init__()
+        self.start = start
+        self.step = step
+        self.cur_value = start
+
+    def __next__(self):
+        retval = self.cur_value
+        self.cur_value += self.step
+        return retval
+
+    def reset(self, seed=None):
+        super().reset(seed)
+        self.cur_value = self.start
+        return self
+
+    def spawn(self, spawn_mapping=None):
+        new_obj = Incremental(start=self.start, step=self.step)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.start = other.start
+        self.cur_value = other.cur_value
 
 
 class Integer(PrimitiveGenerator):
