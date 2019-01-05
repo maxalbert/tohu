@@ -44,6 +44,10 @@ class Constant(PrimitiveGenerator):
         return self.value
 
     def reset(self, seed=None):
+        """
+        Note that this method supports the `seed` argument (for consistency with other generators),
+        but its value is ignored because resetting a Constant generator has no effect.
+        """
         super().reset(seed)
         return self
 
