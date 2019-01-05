@@ -8,7 +8,7 @@ from .base import TohuBaseGenerator, PrimitiveGenerator
 from .logging import logger
 from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
-__all__ = ['Constant', 'FakerGenerator', 'Date', 'HashDigest', 'Integer', 'Timestamp']
+__all__ = ['Boolean', 'Constant', 'FakerGenerator', 'Date', 'HashDigest', 'Integer', 'Timestamp']
 
 
 class Constant(PrimitiveGenerator):
@@ -50,6 +50,39 @@ class Constant(PrimitiveGenerator):
 
     def _set_random_state_from(self, other):
         pass
+
+
+class Boolean(PrimitiveGenerator):
+    """
+    Generator which produces random boolean values (True or False) with a given probability.
+    """
+
+    def __init__(self, p=0.5):
+        """
+        Parameters
+        ----------
+        p: float
+            The probability that True is returned. Must be between 0.0 and 1.0.
+        """
+        super().__init__()
+        self.p = p
+        self.randgen = Random()
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(seed)
+        return self
+
+    def __next__(self):
+        return self.randgen.random() < self.p
+
+    def spawn(self, spawn_mapping=None):
+        new_obj = Boolean(self.p)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.randgen.setstate(other.randgen.getstate())
 
 
 class Integer(PrimitiveGenerator):
