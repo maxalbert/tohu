@@ -9,7 +9,7 @@ from .primitive_generators import as_tohu_generator, Constant, Date, Timestamp a
 from .spawn_mapping import SpawnMapping
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object, make_timestamp_formatter
 
-__all__ = ['Apply', 'GetAttribute', 'Integer', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'Timestamp']
+__all__ = ['Apply', 'Cumsum', 'GetAttribute', 'Integer', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'Timestamp']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -412,3 +412,42 @@ class Timestamp(Apply):
         self.register_clone(g)
         g.register_parent(self)
         return g
+
+
+class Cumsum(DerivedGenerator):
+
+    def __init__(self, g, *, start_with_zero=False):
+        super().__init__()
+        self.g_orig = g
+        self.g_internal = g.clone()
+        self.start_with_zero = start_with_zero
+        self.input_generators = [self.g_orig]
+        self.constituent_generators = [self.g_internal]
+        self.reset()
+
+    def __next__(self):
+        retval = self.value
+        self.value += next(self.g_internal)
+        return retval
+
+    def reset(self, seed=None):
+        super().reset(seed)
+
+        if self.start_with_zero:
+            self.value = 0
+        else:
+            # Note: for this to work correctly the input generator `g`
+            # needs to be reset _before_ this one.
+            self.value = next(self.g_internal)
+
+        return self
+
+    def spawn(self, spawn_mapping=None):
+        spawn_mapping = spawn_mapping or SpawnMapping()
+        new_obj = Cumsum(spawn_mapping[self.g_orig], start_with_zero=self.start_with_zero)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        super()._set_random_state_from(other)
+        self.value = other.value

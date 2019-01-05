@@ -12,6 +12,7 @@ from tohu.v6.derived_generators import (
     Apply,
     GetAttribute,
     Integer as IntegerDerived,
+    Cumsum,
     Lookup,
     SelectOne,
     SelectMultiple,
@@ -28,6 +29,7 @@ EXEMPLAR_DERIVED_GENERATORS = [
     Apply(add, Integer(10, 99).set_tohu_name("xx"), Integer(10, 99).set_tohu_name("yy")),
     GetAttribute(SelectOne(make_dummy_tuples('abcdefghijklmnopqrstuvwxyz')), name='x'),
     IntegerDerived(low=Constant(10), high=Integer(100, 200)),
+    Cumsum(Integer(100, 200), start_with_zero=True),
     Lookup(
         Integer(1, 5).set_tohu_name("xx"),
         mapping=Constant({1: "a", 2: "b", 3: "c", 4: "d", 5: "e"}).set_tohu_name("mm"),
