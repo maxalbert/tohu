@@ -157,3 +157,7 @@ class TohuNamespace:
         # TODO: double-check that this traverses generators in both namespaces in the same order
         for g_self, g_other in zip(self._ns, other._ns):
             g_self._set_random_state_from(g_other)
+
+    def set_owner(self, owner):
+        for g in self._ns:
+            g.owner = owner

@@ -16,9 +16,11 @@ class CustomGenerator(TohuBaseGenerator):
         self.ns_gen_templates = TohuNamespace()
         self.ns_gen_templates.update_from_dict(self.__class__.__dict__)
         self.ns_gen_templates.update_from_dict(self.__dict__)
+        self.ns_gen_templates.set_owner(self.__class__)
         self._mark_field_generator_templates()
         # self.ns_gens = TohuNamespace.from_dict({name: gen.spawn() for name, gen in self.ns_gen_templates.items()})
         self.ns_gens = self.ns_gen_templates.spawn()
+        self.ns_gens.set_owner(self)
 
         self._update_namespace_with_field_generators()
         self._set_field_names()
