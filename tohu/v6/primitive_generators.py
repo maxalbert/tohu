@@ -8,7 +8,7 @@ from .base import TohuBaseGenerator, PrimitiveGenerator, SeedGenerator
 from .logging import logger
 from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
-__all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Date', 'HashDigest', 'Integer', 'Timestamp']
+__all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'Date', 'HashDigest', 'Integer', 'Timestamp']
 
 
 class Constant(PrimitiveGenerator):
@@ -126,6 +126,43 @@ class Integer(PrimitiveGenerator):
         self.randgen.setstate(other.randgen.getstate())
 
 
+class Float(PrimitiveGenerator):
+    """
+    Generator which produces random floating point numbers x in the range low <= x <= high.
+    """
+
+    def __init__(self, low, high):
+        """
+        Parameters
+        ----------
+        low: integer
+            Lower bound (inclusive).
+        high: integer
+            Upper bound (inclusive).
+        """
+        super().__init__()
+        self.low = low
+        self.high = high
+        self.randgen = Random()
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(seed)
+        return self
+
+    def __next__(self):
+        return self.randgen.uniform(self.low, self.high)
+
+    def spawn(self, spawn_mapping=None):
+        new_obj = Float(self.low, self.high)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.randgen.setstate(other.randgen.getstate())
+
+
+
 CHARACTER_SETS = {
     '<alphanumeric>': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
     '<alphanumeric_lowercase>': 'abcdefghijklmnopqrstuvwxyz0123456789',
@@ -196,7 +233,7 @@ class DigitString(CharString):
         charset = "0123456789"
         super().__init__(length=length, charset=charset)
 
-    def spawn(self):
+    def spawn(self, spawn_mapping=None):
         new_obj = DigitString(length=self.length)
         new_obj._set_random_state_from(self)
         return new_obj
