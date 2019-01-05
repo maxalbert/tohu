@@ -12,24 +12,25 @@ if StrictVersion(python_version()) < StrictVersion(min_supported_python_version)
 
 from . import v6
 
-from .v4.base import *
-from .v4.primitive_generators import *
-from .v4.derived_generators import *
-from .v4.dispatch_generators import *
-from .v4.custom_generator import CustomGenerator
-from .v4.logging import logger
-from .v4.utils import print_generated_sequence
-from .v4 import base
-from .v4 import primitive_generators
-from .v4 import derived_generators
-from .v4 import dispatch_generators
-from .v4 import custom_generator
-from .v4 import set_special_methods
+from .v6.base import *
+from .v6.primitive_generators import *
+from .v6.derived_generators import *
+from .v6.generator_dispatch import *
+from .v6.custom_generator import CustomGenerator
+from .v6.logging import logger
+from .v6.utils import print_generated_sequence
+
+from .v6 import base
+from .v6 import primitive_generators
+from .v6 import derived_generators
+from .v6 import generator_dispatch
+from .v6 import custom_generator
+#from .v6 import set_special_methods
 
 __all__ = base.__all__ \
           + primitive_generators.__all__ \
           + derived_generators.__all__ \
-          + dispatch_generators.__all__ \
+          + generator_dispatch.__all__ \
           + custom_generator.__all__ \
           + ['tohu_logger', 'print_generated_sequence']
 
