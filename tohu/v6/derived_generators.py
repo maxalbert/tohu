@@ -1,5 +1,6 @@
 import datetime as dt
 
+from operator import attrgetter
 from random import Random
 
 from .base import TohuBaseGenerator, SeedGenerator
@@ -8,7 +9,7 @@ from .primitive_generators import as_tohu_generator, Constant, Date, Timestamp a
 from .spawn_mapping import SpawnMapping
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object, make_timestamp_formatter
 
-__all__ = ['Apply', 'Integer', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'Timestamp']
+__all__ = ['Apply', 'GetAttribute', 'Integer', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'Timestamp']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -82,6 +83,32 @@ class Apply(DerivedGenerator):
     def _set_random_state_from(self, other):
         for g_self, g_other in zip(self.constituent_generators, other.constituent_generators):
             g_self._set_random_state_from(g_other)
+
+
+class GetAttribute(Apply):
+
+    def __init__(self, g, name):
+        self.g = as_tohu_generator(g)  # no need to clone here because this happens in the superclass
+        self.name = as_tohu_generator(name)
+
+        def func(value, name):
+            # TODO: this is not very efficient if `name` is a constant
+            # string because we're re-creating the attrgetter every time.
+            # However, since `name` can in principle be a generator itself
+            # we need to keep the generality.
+            try:
+                return attrgetter(name)(value)
+            except:
+                breakpoint()
+                pass
+
+        super().__init__(func, self.g, self.name)
+
+    def spawn(self, spawn_mapping=None):
+        spawn_mapping = spawn_mapping or SpawnMapping()
+        new_obj = GetAttribute(spawn_mapping[self.g], spawn_mapping[self.name])
+        new_obj._set_random_state_from(self)
+        return new_obj
 
 
 class Lookup(Apply):

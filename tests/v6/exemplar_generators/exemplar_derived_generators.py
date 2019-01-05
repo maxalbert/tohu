@@ -1,6 +1,7 @@
 from .helpers import check_each_generator_class_has_at_least_one_exemplar_instance
 
 from ..context import tohu
+from tohu.v6.utils import make_dummy_tuples
 from tohu.v6.primitive_generators import (
     Constant,
     Integer,
@@ -9,6 +10,7 @@ from tohu.v6.primitive_generators import (
 from tohu.v6.derived_generators import (
     DerivedGenerator,
     Apply,
+    GetAttribute,
     Integer as IntegerDerived,
     Lookup,
     SelectOne,
@@ -24,6 +26,7 @@ def add(x, y):
 
 EXEMPLAR_DERIVED_GENERATORS = [
     Apply(add, Integer(10, 99).set_tohu_name("xx"), Integer(10, 99).set_tohu_name("yy")),
+    GetAttribute(SelectOne(make_dummy_tuples('abcdefghijklmnopqrstuvwxyz')), name='x'),
     IntegerDerived(low=Constant(10), high=Integer(100, 200)),
     Lookup(
         Integer(1, 5).set_tohu_name("xx"),
