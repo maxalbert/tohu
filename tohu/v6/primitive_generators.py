@@ -1,14 +1,19 @@
+import attr
 import datetime as dt
+import geojson
 import numpy as np
+import shapely
 
 from faker import Faker
 from random import Random
+from shapely.geometry import Point, Polygon, MultiPolygon
 
 from .base import TohuBaseGenerator, PrimitiveGenerator, SeedGenerator
 from .logging import logger
 from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
-__all__ = ['Boolean', 'CharString', 'Constant', 'DigitString', 'FakerGenerator', 'Float', 'Date', 'HashDigest', 'Integer', 'Timestamp']
+__all__ = ['Boolean', 'CharString', 'Constant', 'Date', 'DigitString', 'FakerGenerator', 'Float',
+           'GeoJSONGeolocation', 'HashDigest', 'Integer', 'Timestamp']
 
 
 class Constant(PrimitiveGenerator):
@@ -337,6 +342,144 @@ class FakerGenerator(PrimitiveGenerator):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.fake.random.setstate(other.fake.random.getstate())
+
+
+class ShapelyGeolocation(PrimitiveGenerator):
+    """
+    Generator which produces random locations inside a shapely polygon
+    or multipolygon. This is a helper class and most users will probably
+    find the GeoJSONGeolocation generator more useful.
+    """
+
+    def __init__(self, shp, properties=None, max_tries=100):
+        if not isinstance(shp, (Polygon, MultiPolygon)):
+            raise TypeError(f"Argument 'shp' must be of type Polygon or MultiPolygon. Got: {type(shp)}")
+
+        super().__init__()
+
+        self.shape = shapely.geometry.shape(shp)
+        self.properties = properties or dict()
+
+        self.geolocation_cls = self._make_geolocation_class()
+
+        lon_min, lat_min, lon_max, lat_max = self.shape.bounds
+        self.lon_gen = Float(lon_min, lon_max)
+        self.lat_gen = Float(lat_min, lat_max)
+        self.max_tries = max_tries
+        self.seed_generator = SeedGenerator()
+
+    def _make_geolocation_class(self):
+        fields = {'lon': attr.ib(), 'lat': attr.ib()}
+        fields.update({name: attr.ib(value) for name, value in self.properties.items()})
+        cls = attr.make_class('Geolocation', fields)
+        cls.as_dict = lambda self: attr.asdict(self)
+        def __new_eq__(self, other):
+            return self.lon == other.lon and self.lat == other.lat
+        cls.__eq__ = __new_eq__
+        return cls
+
+    def __repr__(self):
+        return f"<ShapelyShape, area={self.area:.3f}>"
+
+    def spawn(self, spawn_mapping=None):
+        new_obj = ShapelyGeolocation(self.shape, properties=self.properties, max_tries=self.max_tries)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.seed_generator._set_random_state_from(other.seed_generator)
+        self.lon_gen._set_random_state_from(other.lon_gen)
+        self.lat_gen._set_random_state_from(other.lat_gen)
+
+    @property
+    def area(self):
+        return self.shape.area
+
+    def __next__(self):
+        for cnt in range(1, self.max_tries + 1):
+            pt = Point(next(self.lon_gen), next(self.lat_gen))
+            if pt.within(self.shape):
+                return self.geolocation_cls(lon=pt.x, lat=pt.y)
+            else:
+                logger.debug(f"Generated point is not within shape. Trying again... [{cnt}/{self.max_tries}]")
+        raise RuntimeError(f"Could not generate point in shape after {self.max_tries} attempts")
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.lon_gen.reset(next(self.seed_generator))
+        self.lat_gen.reset(next(self.seed_generator))
+        return self
+
+
+class GeoJSONGeolocation(PrimitiveGenerator):
+    """
+    Generator which produces random locations inside a geographic area.
+    """
+
+    def __init__(self, filename_or_geojson_data, include_attributes=None, max_tries=100):
+        super().__init__()
+
+        if isinstance(filename_or_geojson_data, str):
+            try:
+                with open(filename_or_geojson_data, 'r') as f:
+                    geojson_data = geojson.load(f)
+            except AttributeError:
+                raise NotImplementedError()
+        else:
+            geojson_data = filename_or_geojson_data
+
+        self.geojson_data = geojson_data
+        self.include_attributes = include_attributes or []
+        self.max_tries = max_tries
+
+        self.shape_gens = self._make_shape_generators()
+
+        areas = np.array([s.area for s in self.shape_gens])
+        self.choice_probs = areas / areas.sum()  # TODO: allow weighin by an arbitrary attribute, not just by area
+
+        self.seed_generator = SeedGenerator()
+        self.shape_gen_chooser = np.random.RandomState()
+
+    def _make_shape_generators(self):
+        shape_gens = []
+
+        for feature in self.geojson_data['features']:
+
+            geom = shapely.geometry.shape(feature['geometry'])
+
+            cur_attributes = {}
+            for name in self.include_attributes:
+                try:
+                    cur_attributes[name] = feature['properties'][name]
+                except KeyError:
+                    valid_attributes = list(feature['properties'].keys())
+                    raise ValueError(f"Feature does not have attribute '{name}'. Valid attributes are: {valid_attributes}")
+
+            shape_gens.append(ShapelyGeolocation(geom, cur_attributes, max_tries=self.max_tries))
+
+        return shape_gens
+
+    def spawn(self, spawn_mapping=None):
+        new_obj = GeoJSONGeolocation(self.geojson_data, include_attributes=self.include_attributes, max_tries=self.max_tries)
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def __next__(self):
+        sg = self.shape_gen_chooser.choice(self.shape_gens, p=self.choice_probs)
+        return next(sg)
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.shape_gen_chooser.seed(next(self.seed_generator))
+        for g in self.shape_gens:
+            g.reset(next(self.seed_generator))
+        return self
+
+    def _set_random_state_from(self, other):
+        self.seed_generator._set_random_state_from(other.seed_generator)
+        self.shape_gen_chooser.set_state(other.shape_gen_chooser.get_state())
+        for gen_self, gen_other in zip(self.shape_gens, other.shape_gens):
+            gen_self._set_random_state_from(gen_other)
 
 
 def as_tohu_generator(g):
