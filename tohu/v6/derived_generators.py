@@ -452,3 +452,4 @@ class Cumsum(DerivedGenerator):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.value = other.value
+        self.g_internal._set_random_state_from(other.g_internal)
