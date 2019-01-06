@@ -54,7 +54,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
     Base class for all of tohu's generators.
     """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.tohu_name = None
         self.owner = None
         self.parent = None

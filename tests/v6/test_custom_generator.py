@@ -268,3 +268,20 @@ def test_lookup_inside_custom_generator():
     g = QuuxGenerator()
     items = list(g.generate(num=50, seed=12345))
     assert all([x.aa == x.bb.upper() for x in items])
+
+
+def test_custom_generator_with_its_own_init_method():
+
+    class QuuxGenerator(CustomGenerator):
+        aa = Integer(100, 200)
+
+        def __init__(self, length):
+            self.bb = HashDigest(length=length)
+
+    g = QuuxGenerator(length=8)
+    items = g.generate(num=10, seed=12345)b
+
+    assert items[0] == (118, 'C851F707')
+    assert items[1] == (192, '2553FCD0')
+    assert items[2] == (192, 'CFF9005D')
+    assert items[3] == (196, 'E9D2528C')

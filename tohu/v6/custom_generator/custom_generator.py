@@ -1,3 +1,4 @@
+from abc import ABCMeta
 from ..base import TohuBaseGenerator
 from ..tohu_namespace import TohuNamespace
 from .utils import make_tohu_items_class, get_tohu_items_name
@@ -5,10 +6,18 @@ from .utils import make_tohu_items_class, get_tohu_items_name
 __all__ = ['CustomGenerator']
 
 
-class CustomGenerator(TohuBaseGenerator):
+def augment_init_method(cls):
+    """
+    Replace the existing cls.__init__() method with a new one which
+    also initialises the field generators and similar bookkeeping.
+    """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__()
+    orig_init = cls.__init__
+
+    def new_init(self, *args, **kwargs):
+        super(CustomGenerator, self).__init__()  # TODO: does this behave correctly with longer inheritance chains?
+
+        orig_init(self, *args, **kwargs)
 
         self.orig_args = args
         self.orig_kwargs = kwargs
@@ -18,7 +27,7 @@ class CustomGenerator(TohuBaseGenerator):
         self.ns_gen_templates.update_from_dict(self.__dict__)
         self.ns_gen_templates.set_owner(self.__class__)
         self._mark_field_generator_templates()
-        # self.ns_gens = TohuNamespace.from_dict({name: gen.spawn() for name, gen in self.ns_gen_templates.items()})
+
         self.ns_gens = self.ns_gen_templates.spawn()
         self.ns_gens.set_owner(self)
 
@@ -26,6 +35,23 @@ class CustomGenerator(TohuBaseGenerator):
         self._set_field_names()
         self._set_tohu_items_name()
         self._set_tohu_items_cls()
+
+    cls.__init__ = new_init
+
+
+class CustomGeneratorMeta(ABCMeta):
+
+    def __new__(metacls, cg_name, bases, clsdict):
+        # Create new custom generator class
+        new_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
+
+        # Augment original init method with bookkeeping needed for custom generators
+        augment_init_method(new_cls)
+
+        return new_cls
+
+
+class CustomGenerator(TohuBaseGenerator, metaclass=CustomGeneratorMeta):
 
     def _mark_field_generator_templates(self):
         """
