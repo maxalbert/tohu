@@ -45,12 +45,12 @@ def make_timestamp_formatter(fmt, uppercase=None):
     return formatter
 
 
-def make_exploded_column(df, colname):
+def make_exploded_column(df, colname_new, colname_old):
     """
     Internal helper function used by `explode_columns()`.
     """
-    s = df[colname].apply(pd.Series).stack()
-    s.name = colname
+    s = df[colname_old].apply(pd.Series).stack()
+    s.name = colname_new
     return s
 
 
@@ -76,10 +76,22 @@ def explode_columns(df, colnames):
     3   bar   22  FFF   ff
     4  quux   33  EEE   ee
     5  quux   33  BBB   bb
+
+    >>> explode_columns(df, {'col3_exploded': 'col3'})
+       col1 col2 col3_exploded col4
+    0   foo   11           DDD   dd
+    1   foo   11           AAA   aa
+    2   foo   11           CCC   cc
+    3   bar   22           FFF   ff
+    4  quux   33           EEE   ee
+    5  quux   33           BBB   bb
     """
-    remaining_columns = list(df.columns.difference(colnames))
+    if isinstance(colnames, (list, tuple)):
+        colnames = {name: name for name in colnames}
+
+    remaining_columns = list(df.columns.difference(colnames.values()))
     df2 = df.set_index(remaining_columns)
-    df3 = pd.concat((make_exploded_column(df2, col) for col in colnames), axis=1)
+    df3 = pd.concat((make_exploded_column(df2, col_new, col_old) for col_new, col_old in colnames.items()), axis=1)
     levels_to_reset = list(range(len(remaining_columns)))
     df4 = df3.reset_index(level=levels_to_reset).reset_index(drop=True)
     return df4

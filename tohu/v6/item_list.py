@@ -100,7 +100,7 @@ class ItemList:
         else:
             raise ValueError("Arguments `num` and `p` are mutually exclusive - only one of them may be specified.")
 
-    def to_df(self, fields=None, explode_fields=None):
+    def to_df(self, fields=None, fields_to_explode=None):
         """
         Export items as rows in a pandas dataframe table.
 
@@ -115,7 +115,7 @@ class ItemList:
                fields=['field_name_1', 'field_name_2']
                fields={'COL1': 'field_name_1', 'COL2': 'field_name_2'}
 
-        explode_fields: list or None
+        fields_to_explode: list or None
             Optional list of field names where each entry (which must itself be a sequence)
             is to be "exploded" into separate rows.
 
@@ -123,15 +123,19 @@ class ItemList:
         if isinstance(fields, (list, tuple)):
             fields = {name: name for name in fields}
 
+        assert fields_to_explode is None or isinstance(fields_to_explode, (list, tuple))
+        if fields_to_explode is None:
+            fields_to_explode = []
+
         if fields is None:
             colnames_to_export = list(self.items[0].as_dict().keys())  # hack! the field names should perhaps be passed in during initialisation?
         else:
             colnames_to_export = list(fields.keys())
 
-        if explode_fields and not set(explode_fields).issubset(colnames_to_export):
+        if not set(fields_to_explode).issubset(colnames_to_export):
             raise ValueError(
                 "All fields to explode must occur as column names. "
-                f"Got field names: {explode_fields}. Column names: {list(fields.keys())}"
+                f"Got field names: {fields_to_explode}. Column names: {list(fields.keys())}"
             )
 
         if fields is None:
@@ -142,17 +146,39 @@ class ItemList:
             #return pd.DataFrame([x.to_series() for x in self.items])
         else:
             # New version (much faster!)
-            attr_getters = [attrgetter(attr_name) for attr_name in fields.values()]
-            df = pd.DataFrame([tuple(func(x) for func in attr_getters) for x in self.items], columns=colnames_to_export)
 
-        if explode_fields is not None:
+            def make_attrgetter(attr_name_new, attr_name, fields_to_explode):
+                # TODO: this needs cleaning up!
+                if attr_name_new in fields_to_explode and '.' in attr_name:
+                    attr_name_first_part, attr_name_rest = attr_name.split('.', maxsplit=1)
+
+                    def func(row):
+                        foo_items = attrgetter(attr_name_first_part)(row)
+                        return [attrgetter(attr_name_rest)(x) for x in foo_items]
+
+                    return func
+                else:
+                    return attrgetter(attr_name)
+
+            attr_getters = [make_attrgetter(attr_name_new, attr_name, fields_to_explode) for attr_name_new, attr_name in fields.items()]
+            try:
+                df = pd.DataFrame([tuple(func(x) for func in attr_getters) for x in self.items], columns=colnames_to_export)
+            except AttributeError as exc:
+                msg = (
+                    "Could not export to dataframe. Did you forget to pass any fields "
+                    "which contain sequences within the 'fields_to_explode' argument?. "
+                    f"The original error message was: \"{exc}\""
+                )
+                raise AttributeError(msg)
+
+        if fields_to_explode != []:
             # TODO: add sanity checks to avoid unwanted behaviour (e.g. that all columns
             # to be exploded must have the same number of elements in each entry?)
-            df = explode_columns(df, explode_fields)
+            df = explode_columns(df, fields_to_explode)
 
         return df
 
-    def to_csv(self, filename=None, *, fields=None, explode_fields=None, append=False, header=True, header_prefix='', sep=',', newline='\n'):
+    def to_csv(self, filename=None, *, fields=None, fields_to_explode=None, append=False, header=True, header_prefix='', sep=',', newline='\n'):
         """
         Parameters
         ----------
@@ -168,7 +194,7 @@ class ItemList:
             Examples:
                fields=['field_name_1', 'field_name_2']
                fields={'COL1': 'field_name_1', 'COL2': 'field_name_2'}
-        explode_fields: list
+        fields_to_explode: list
             Optional list of field names where each entry (which must itself be a sequence)
             is to be "exploded" into separate rows. (*Note:* this is not supported yet for CSV export.)
         append: bool
@@ -201,8 +227,8 @@ class ItemList:
         if fields is None:
             raise NotImplementedError("TODO: derive field names automatically from the generator which produced this item list")
 
-        if explode_fields is None:
-            raise NotImplementedError("TODO: the 'explode_fields' argument is not supported for CSV export yet.")
+        if fields_to_explode is None:
+            raise NotImplementedError("TODO: the 'fields_to_explode' argument is not supported for CSV export yet.")
 
         if isinstance(fields, (list, tuple)):
             fields = {name: name for name in fields}
@@ -234,7 +260,7 @@ class ItemList:
 
         return retval
 
-    def to_sql(self, url, table_name, *, schema=None, fields=None, explode_fields=None, if_exists="fail", dtype=None):
+    def to_sql(self, url, table_name, *, schema=None, fields=None, fields_to_explode=None, if_exists="fail", dtype=None):
         """
         Export items as rows in a PostgreSQL table.
 
@@ -262,7 +288,7 @@ class ItemList:
                fields=['field_name_1', 'field_name_2']
                fields={'COL1': 'field_name_1', 'COL2': 'field_name_2'}
 
-        explode_fields: list or None
+        fields_to_explode: list or None
             Optional list of field names where each entry (which must itself be a sequence)
             is to be "exploded" into separate rows.
 
@@ -296,5 +322,5 @@ class ItemList:
             if_exists = 'fail'
 
         with engine.begin() as conn:
-            self.to_df(fields=fields, explode_fields=explode_fields).to_sql(
+            self.to_df(fields=fields, fields_to_explode=fields_to_explode).to_sql(
                 table_name, conn, schema=schema, index=False, if_exists=if_exists, dtype=dtype)
