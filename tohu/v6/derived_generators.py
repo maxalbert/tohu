@@ -96,11 +96,17 @@ class GetAttribute(Apply):
             # string because we're re-creating the attrgetter every time.
             # However, since `name` can in principle be a generator itself
             # we need to keep the generality.
+            f = attrgetter(name)
+
             try:
-                return attrgetter(name)(value)
-            except:
-                breakpoint()
-                pass
+                return f(value)
+            except AttributeError:
+                try:
+                    return [f(x) for x in value]
+                except TypeError:
+                    raise AttributeError(f"Could not extract attribute '{name}' from {value}")
+                except AttributeError:
+                    raise AttributeError(f"Could not extract attribute '{name}' from items in sequence: {value}")
 
         super().__init__(func, self.g, self.name)
 
