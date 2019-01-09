@@ -279,7 +279,7 @@ def test_custom_generator_with_its_own_init_method():
             self.bb = HashDigest(length=length)
 
     g = QuuxGenerator(length=8)
-    items = g.generate(num=10, seed=12345)b
+    items = g.generate(num=10, seed=12345)
 
     assert items[0] == (118, 'C851F707')
     assert items[1] == (192, '2553FCD0')
