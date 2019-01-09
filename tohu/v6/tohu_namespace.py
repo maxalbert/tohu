@@ -98,7 +98,11 @@ class TohuNamespace:
                 logger.debug("Trying to add existing generator with a different name. Adding a clone instead.")
                 self._ns[g.clone()] = name
         else:
-            self._add(g, name)
+            if name in self._ns.values():
+                # TODO: is keeping the existing generator and ignoring the new one the right thing to do in all cases?
+                logger.debug(f"A different generator already exists with name '{name}'. Ignoring the new one.")
+            else:
+                self._add(g, name)
 
     def spawn_generator(self, g, spawn_mapping, ns_spawned):
         logger.debug(f"Spawning generator in {self}: {g}")
