@@ -1,7 +1,6 @@
 [![PyPI version](https://badge.fury.io/py/tohu.svg)](https://badge.fury.io/py/tohu) [![CircleCI](https://circleci.com/gh/maxalbert/tohu.svg?style=shield)](https://circleci.com/gh/maxalbert/tohu)
 
-
-<img src="./docs/img/logo.png" alt="Tohu Logo" width="80px">
+<img src="./docs/img/logo.png" alt="Tohu Logo" width="70px">
 
 tohu: Creating complex random data with ease
 ============================================
