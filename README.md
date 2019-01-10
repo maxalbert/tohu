@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/maxalbert/tohu.svg?style=shield)](https://circleci.com/gh/maxalbert/tohu)
+[![PyPI version](https://badge.fury.io/py/tohu.svg)](https://badge.fury.io/py/tohu) [![CircleCI](https://circleci.com/gh/maxalbert/tohu.svg?style=shield)](https://circleci.com/gh/maxalbert/tohu)
 
 tohu: Create random data in a controllable way
 ==============================================
