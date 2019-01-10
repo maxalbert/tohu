@@ -2,29 +2,39 @@
 
 <img src="./docs/img/logo.png" alt="Tohu Logo" width="70px">
 
-tohu: Creating complex random data with ease
+tohu: Your friendly synthetic data generator
 ============================================
 
-Prerequisites
+Overview
+--------
+
+TODO
+
+
+Get it now
+----------
+
+```bash
+$ pip install tohu
+```
+
+
+Documentation
 -------------
 
-- [pipenv](https://docs.pipenv.org/)
-- [PostgreSQL](https://www.postgresql.org/) (for running the tests)
+Full documentation is available at https://maxalbert.github.io/tohu/
 
 
-Quick start
------------
+Requirements
+------------
 
-To run the tests:
-```
-$ pipenv install --dev
-$ pipenv shell
-$ make test
-```
+- Python >= 3.6
+
+Tohu requires Python 3.6 or greater. There is no intention to support earlier versions.
 
 
-Copyright
----------
+License
+-------
 
 See [LICENSE](./LICENSE)
 
