@@ -20,13 +20,25 @@ def test_date_from_string_or_date_object(input, expected_value):
     assert d == expected_value
 
 
+@pytest.mark.parametrize("input, expected_value", [
+    (pd.Timestamp('2016-11-28 00:00:00', freq='D'), dt.date(2016, 11, 28)),
+])
+def test_date_from_pandas_timestamp(input, expected_value):
+    """
+    Pandas Timestamps that can be interpreted as dates are accepted as valid input.
+    """
+    d = ensure_is_date_object(input)
+    assert d == expected_value
+
+
 @pytest.mark.parametrize("input", [
     "2018-02-04 11:22:33",
     "2018-02-04 00:00:00",
     dt.datetime(2017, 10, 4, 18, 19, 20),
     dt.datetime(2017, 10, 4, 0, 0, 0),
     pd.Timestamp("2016-12-10 08:10:00"),
-    pd.Timestamp("2016-12-10 00:00:00"),
+    pd.Timestamp("2016-12-10 00:00:00"),  # missing freq='D' attribute
+    pd.Timestamp("2016-12-10 11:22:33", freq='D'),  # HH:MM:SS must be all zero
 ])
 def test_wrong_date_input_raises_error(input):
     """
