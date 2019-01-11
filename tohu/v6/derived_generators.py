@@ -168,11 +168,15 @@ class SelectOne(Apply):
     Generator which selects a single element from each sequence produced by another generator.
     """
 
-    def __init__(self, values):
+    def __init__(self, values, p=None):
         self.values_gen = as_tohu_generator(values)
+        self.p_gen = as_tohu_generator(p)
         self.randgen = Random()
-        func = self.randgen.choice
-        super().__init__(func, self.values_gen)
+
+        def func(values, p):
+            return self.randgen.choices(values, weights=p)[0]
+
+        super().__init__(func, self.values_gen, self.p_gen)
 
     def reset(self, seed):
         super().reset(seed)
@@ -181,7 +185,7 @@ class SelectOne(Apply):
 
     def spawn(self, spawn_mapping=None):
         spawn_mapping = spawn_mapping or SpawnMapping()
-        new_obj = SelectOne(spawn_mapping[self.values_gen])
+        new_obj = SelectOne(spawn_mapping[self.values_gen], p=spawn_mapping[self.p_gen])
         new_obj._set_random_state_from(self)
         return new_obj
 
