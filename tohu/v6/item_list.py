@@ -227,7 +227,7 @@ class ItemList:
         if fields is None:
             raise NotImplementedError("TODO: derive field names automatically from the generator which produced this item list")
 
-        if fields_to_explode is None:
+        if fields_to_explode is not None:
             raise NotImplementedError("TODO: the 'fields_to_explode' argument is not supported for CSV export yet.")
 
         if isinstance(fields, (list, tuple)):
