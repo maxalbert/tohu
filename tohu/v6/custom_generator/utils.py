@@ -19,7 +19,7 @@ def make_tohu_items_class(clsname, attr_names):
         Names of the attributes of the class to be created
     """
 
-    item_cls = attr.make_class(clsname, {name: attr.ib() for name in attr_names}, repr=False, cmp=True)
+    item_cls = attr.make_class(clsname, {name: attr.ib() for name in attr_names}, repr=False, cmp=True, frozen=True)
 
     def new_repr(self):
         all_fields = ', '.join([f'{name}={repr(value)}' for name, value in attr.asdict(self).items()])
