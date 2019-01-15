@@ -116,6 +116,11 @@ class GetAttribute(Apply):
         new_obj._set_random_state_from(self)
         return new_obj
 
+    def reset(self, seed):
+        super().reset(seed)
+        self.g.reset(seed)
+        return self
+
 
 class Lookup(Apply):
     """
@@ -192,6 +197,21 @@ class SelectOne(Apply):
     def _set_random_state_from(self, other):
         super()._set_random_state_from(other)
         self.randgen.setstate(other.randgen.getstate())
+
+    def _spot_check_that_elements_produced_by_this_generator_have_attribute(self, name):
+        """
+        Helper function to spot-check that the items produces by this generator have the attribute `name`.
+        """
+        g_tmp = self.values_gen.spawn()
+        sample_element = next(g_tmp)[0]
+        try:
+            getattr(sample_element, name)
+        except AttributeError:
+            raise AttributeError(f"Items produced by {self} do not have the attribute '{name}'")
+
+    def __getattr__(self, name):
+        self._spot_check_that_elements_produced_by_this_generator_have_attribute(name)
+        return GetAttribute(self, name)
 
 
 
