@@ -14,15 +14,21 @@ from tohu.v6.derived_generators import (
     Integer as IntegerDerived,
     Cumsum,
     Lookup,
+    MultiCumsum,
     SelectOne,
     SelectMultiple,
     Tee,
     Timestamp as TimestampDerived,
 )
+from tohu.v6.custom_generator import CustomGenerator
 
 
 def add(x, y):
     return x + y
+
+
+class QuuxGenerator(CustomGenerator):
+    aa = Integer(100, 200)
 
 
 EXEMPLAR_DERIVED_GENERATORS = [
@@ -30,6 +36,7 @@ EXEMPLAR_DERIVED_GENERATORS = [
     GetAttribute(SelectOne(make_dummy_tuples('abcdefghijklmnopqrstuvwxyz')), name='x'),
     IntegerDerived(low=Constant(10), high=Integer(100, 200)),
     Cumsum(Integer(100, 200), start_with_zero=True),
+    MultiCumsum(QuuxGenerator(), "aa", g_amount=Integer(300,400)),
     Lookup(
         Integer(1, 5).set_tohu_name("xx"),
         mapping=Constant({1: "a", 2: "b", 3: "c", 4: "d", 5: "e"}).set_tohu_name("mm"),

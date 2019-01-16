@@ -9,7 +9,7 @@ from .primitive_generators import as_tohu_generator, Constant, Date, Timestamp a
 from .spawn_mapping import SpawnMapping
 from .utils import TohuDateError, TohuTimestampError, ensure_is_date_object, make_timestamp_formatter
 
-__all__ = ['Apply', 'Cumsum', 'GetAttribute', 'Integer', 'Lookup', 'SelectMultiple', 'SelectOne', 'Tee', 'Timestamp']
+__all__ = ['Apply', 'Cumsum', 'GetAttribute', 'Integer', 'Lookup', 'MultiCumsum', 'SelectMultiple', 'SelectOne', 'Tee', 'Timestamp']
 
 
 class DerivedGenerator(TohuBaseGenerator):
@@ -483,3 +483,57 @@ class Cumsum(DerivedGenerator):
         super()._set_random_state_from(other)
         self.value = other.value
         self.g_internal._set_random_state_from(other.g_internal)
+
+
+class MultiCumsum(DerivedGenerator):
+    """
+    TODO: document me!
+    """
+
+    def __init__(self, g, attr_name, g_amount):
+        """
+        TODO: document me!
+        """
+        super().__init__()
+        self.g_amount_orig = as_tohu_generator(g_amount)
+        self.g_amount_internal = g_amount.clone()
+        self.g_amount_internal.owner = self
+
+        self.g_orig = g
+        self.g_internal = g.clone()
+        self.g_internal.owner = self
+
+        self.attr_name = attr_name
+
+        self.input_generators = [self.g_amount_orig, self.g_orig]
+        self.constituent_generators = [self.g_amount_internal, self.g_internal]
+
+        self.cur_values = {}
+
+    def __next__(self):
+        # TODO: more meaningful variable names!
+        x = next(self.g_internal)
+        try:
+            cur_val = self.cur_values[x]
+        except KeyError:
+            cur_val = getattr(x, self.attr_name)
+            self.cur_values[x] = cur_val
+
+        self.cur_values[x] += next(self.g_amount_internal)
+        return cur_val
+
+    def reset(self, seed=None):
+        super().reset(seed)
+        self.cur_values = {}
+        return self
+
+    def spawn(self, spawn_mapping=None):
+        spawn_mapping = spawn_mapping or SpawnMapping()
+        new_obj = MultiCumsum(spawn_mapping[self.g_orig], self.attr_name, spawn_mapping[self.g_amount_orig])
+        new_obj._set_random_state_from(self)
+        return new_obj
+
+    def _set_random_state_from(self, other):
+        self.g_amount_internal._set_random_state_from(other.g_amount_internal)
+        self.g_internal._set_random_state_from(other.g_internal)
+        self.cur_values = other.cur_values.copy()  ### XXX TODO: can we simply copy these over in all cases?!
