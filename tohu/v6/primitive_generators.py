@@ -13,7 +13,7 @@ from .logging import logger
 from .utils import ensure_is_date_object, ensure_is_datetime_object, identity, make_timestamp_formatter, TohuDateError, TohuTimestampError
 
 __all__ = ['Boolean', 'CharString', 'Constant', 'Date', 'DigitString', 'FakerGenerator', 'Float', 'GeoJSONGeolocation',
-           'HashDigest', 'Incremental', 'Integer', 'NumpyRandomGenerator', 'Sequential', 'Timestamp']
+           'HashDigest', 'Incremental', 'Integer', 'NumpyRandomGenerator', 'Sequential', 'Timestamp', 'as_tohu_generator']
 
 
 class Constant(PrimitiveGenerator):
