@@ -1,9 +1,9 @@
-from distutils.version import StrictVersion
+from distutils.version import LooseVersion
 from platform import python_version
 
 min_supported_python_version = '3.6'
 
-if StrictVersion(python_version()) < StrictVersion(min_supported_python_version):
+if LooseVersion(python_version()) < LooseVersion(min_supported_python_version):
     error_msg = (
         "Tohu requires Python {min_supported_python_version} or greater to run "
         "(currently running under Python {python_version()})"
