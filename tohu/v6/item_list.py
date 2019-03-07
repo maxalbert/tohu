@@ -178,15 +178,15 @@ class ItemList:
 
         return df
 
-    def to_csv(self, filename=None, *, fields=None, fields_to_explode=None, append=False, header=True, header_prefix='', sep=',', newline='\n'):
+    def to_csv(self, output_file=None, *, fields=None, fields_to_explode=None, append=False, header=True, header_prefix='', sep=',', newline='\n'):
         """
         Parameters
         ----------
-        filename: str or None
+        output_file: str or file object or None
             The file to which output will be written. By default, any existing content is
             overwritten. Use `append=True` to open the file in append mode instead.
-            If filename is None, the generated CSV output is returned instead of written
-            to a file.
+            If `output_file` is None, the generated CSV output is returned as a string
+            instead of written to a file.
         fields: list or dict
             List of field names to export, or dictionary mapping output column names
             to attribute names of the generators.
@@ -200,7 +200,7 @@ class ItemList:
         append: bool
             If `True`, open the file in 'append' mode to avoid overwriting existing content.
             Default is `False`, i.e. any existing content will be overwritten.
-            This argument only has an effect if `filename` is given (i.e. if output happens
+            This argument only has an effect if `output_file` is given (i.e. if output happens
             to a file instead of returning a CSV string).
         header: bool or str or None
             If `header=False` or `header=None` then no header line will be written.
@@ -218,9 +218,9 @@ class ItemList:
 
         Returns
         -------
-        The return value depends on the value of `filename`.
-        If `filename` is given, writes the output to the file and returns `None`.
-        If `filename` is `None`, returns a string containing the CSV output.
+        The return value depends on the value of `output_file`.
+        If `output_file` is given, writes the output to the file and returns `None`.
+        If `output_file` is `None`, returns a string containing the CSV output.
         """
         assert isinstance(append, bool)
 
@@ -235,12 +235,22 @@ class ItemList:
 
         header_line = _generate_csv_header_line(header=header, header_prefix=header_prefix, header_names=fields.keys(), sep=sep, newline=newline)
 
-        if filename is not None:
+        if output_file is None:
+            file_or_string = io.StringIO()
+        elif isinstance(output_file, str):
+            mode = 'a' if append else 'w'
+            file_or_string = open(output_file, mode)
+
             # ensure parent directory of output file exits
-            dirname = os.path.dirname(os.path.abspath(filename))
+            dirname = os.path.dirname(os.path.abspath(output_file))
             if not os.path.exists(dirname):
+                logger.debug(f"Creating parent directory of output file '{output_file}'")
                 os.makedirs(dirname)
-        file_or_string = open(filename, 'a' if append else 'w') if (filename is not None) else io.StringIO()
+
+        elif isinstance(output_file, io.IOBase):
+            file_or_string = output_file
+        else:
+            raise TypeError(f"Invalid output file: {output_file} (type: {type(output_file)})")
 
         retval = None
         attr_getters = [attrgetter(attr_name) for attr_name in fields.values()]
@@ -252,7 +262,7 @@ class ItemList:
                 line = sep.join([format(func(x)) for func in attr_getters]) + newline
                 file_or_string.write(line)
 
-            if filename is None:
+            if output_file is None:
                 retval = file_or_string.getvalue()
 
         finally:
