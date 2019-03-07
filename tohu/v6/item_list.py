@@ -1,3 +1,4 @@
+import gzip
 import io
 import logging
 import numpy as np
@@ -255,12 +256,20 @@ class ItemList:
         retval = None
         attr_getters = [attrgetter(attr_name) for attr_name in fields.values()]
         try:
+            # TODO: quick-and-dirty solution to enable writing to gzip files; tidy this up!
+            # (Note that for regular file output we don't want to encode each line to a bytes
+            # object because this seems to be ca. 2x slower).
+            if isinstance(file_or_string, gzip.GzipFile):
+                file_or_string.write(header_line.encode())
+                for x in self.items:
+                    line = sep.join([format(func(x)) for func in attr_getters]) + newline
+                    file_or_string.write(line.encode())
 
-            file_or_string.write(header_line)
-
-            for x in self.items:
-                line = sep.join([format(func(x)) for func in attr_getters]) + newline
-                file_or_string.write(line)
+            else:
+                file_or_string.write(header_line)
+                for x in self.items:
+                    line = sep.join([format(func(x)) for func in attr_getters]) + newline
+                    file_or_string.write(line)
 
             if output_file is None:
                 retval = file_or_string.getvalue()
