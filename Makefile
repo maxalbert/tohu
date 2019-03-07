@@ -12,4 +12,9 @@ unit-tests:
 notebook-tests:
 	pytest --nbval --sanitize-with nbval_sanitize_file.cfg $(PATH_TO_NOTEBOOKS)
 
-.PHONY: all test notebook-tests unit-tests
+# Build distribution tarball and wheel
+dist:
+	mkdir -p dist/
+	python setup.py sdist bdist_wheel
+
+.PHONY: all test notebook-tests unit-tests dist
