@@ -11,17 +11,20 @@ def test_make_custom_generator():
     aa = Integer(1, 7)
     g.add_field_generator("aa", aa)
     assert g.fields == ["aa"]
-    assert g.field_generators == {"aa": aa}
+    assert g.field_generators["aa"].is_clone_of(aa)
 
     bb = HashDigest(length=8)
     g.add_field_generator("bb", bb)
     assert g.fields == ["aa", "bb"]
-    assert g.field_generators == {"aa": aa, "bb": bb}
+    assert g.field_generators["aa"].is_clone_of(aa)
+    assert g.field_generators["bb"].is_clone_of(bb)
 
     cc = FakerGenerator(method="name")
     g.add_field_generator("cc", cc)
     assert g.fields == ["aa", "bb", "cc"]
-    assert g.field_generators == {"aa": aa, "bb": bb, "cc": cc}
+    assert g.field_generators["aa"].is_clone_of(aa)
+    assert g.field_generators["bb"].is_clone_of(bb)
+    assert g.field_generators["cc"].is_clone_of(cc)
 
 
 # def test_custom_generator():

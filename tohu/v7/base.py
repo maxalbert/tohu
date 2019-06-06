@@ -46,8 +46,9 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     def __init__(self):
         self.tohu_name = None
-        self.seed_generator = SeedGenerator()
+        self.parent = None
         self.clones = []
+        self.seed_generator = SeedGenerator()
 
     def __repr__(self):
         clsname = self.__class__.__name__
@@ -83,7 +84,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         return myhash[:12]
 
     @abstractmethod
-    def spawn(self, spawn_mapping=None):  # pragma: no cover
+    def spawn(self):  # pragma: no cover
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
 
     @abstractmethod

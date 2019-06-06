@@ -16,7 +16,7 @@ class CustomGenerator:
         generator : TohuBaseGenerator
             The generator to be added.
         """
-        self.field_generators[name] = generator
+        self.field_generators[name] = generator.clone()
 
     @property
     def fields(self):

@@ -1,7 +1,22 @@
 import pytest
 from unittest.mock import Mock
 
+from .context import tohu
+from tohu.v7.primitive_generators import Integer
+
 from .exemplar_generators import EXEMPLAR_GENERATORS
+
+
+def test_is_clone_of():
+    g = Integer(low=100, high=200)
+    g_spawned = g.spawn()
+    g_cloned = g.clone()
+    h = Integer(low=100, high=200)
+
+    assert not g_spawned.is_clone_of(g)
+    assert not h.is_clone_of(g)
+    assert not g_cloned.is_clone_of(g_spawned)
+    assert g_cloned.is_clone_of(g)
 
 
 @pytest.mark.parametrize("g", EXEMPLAR_GENERATORS)
