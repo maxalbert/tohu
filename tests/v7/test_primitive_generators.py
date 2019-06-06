@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from .context import tohu
 
-from tohu.v7.primitive_generators import Constant, Boolean, Incremental, Integer, HashDigest
+from tohu.v7.primitive_generators import Constant, Boolean, FakerGenerator, HashDigest, Incremental, Integer
 
 
 def test_constant():
@@ -62,6 +62,12 @@ def test_hashdigest():
     # Test that `length` must be even if the return value is a hex string (as opposed to raw bytes)
     with pytest.raises(ValueError, match="Length must be an even number if as_bytes=False"):
         HashDigest(length=5, as_bytes=False)
+
+
+def test_faker_generator():
+    g = FakerGenerator(method="name")
+    expected_values = ["Eric Benton", "Heather Harris", "Thomas Obrien", "Amy Cook", "Kenneth Robles"]
+    assert expected_values == g.generate(num=5, seed=99999)
 
 
 def test_calling_generate_with_and_without_seed():
