@@ -32,9 +32,9 @@ class SeedGenerator:
         self.randgen.seed(seed)
         return self
 
-    # def __next__(self):
-    #     return self.randgen.randint(self.minval, self.maxval)
-    #
+    def __next__(self):
+        return self.randgen.randint(self.minval, self.maxval)
+
     # def _set_state_from(self, other):
     #     self.randgen.setstate(other.randgen.getstate())
 

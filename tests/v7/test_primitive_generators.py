@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 from .context import tohu
 
-from tohu.v7.primitive_generators import Constant, Boolean, Incremental
+from tohu.v7.primitive_generators import Constant, Boolean, Incremental, Integer
 
 
 def test_constant():
@@ -28,6 +28,13 @@ def test_incremental():
     g = Incremental(start=200, step=4)
     expected_values = [200, 204, 208, 212, 216, 220, 224, 228, 232, 236]
     assert expected_values == g.generate(num=10, seed=99999)
+
+
+def test_integer():
+    g = Integer(low=100, high=200)
+    expected_values = [102, 164, 118, 185, 182, 124, 149, 158, 100, 160]
+    assert expected_values == g.generate(num=10, seed=12345)
+
 
 def test_calling_generate_with_and_without_seed():
     g = Constant("quux")

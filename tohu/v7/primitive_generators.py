@@ -99,3 +99,35 @@ class Incremental(PrimitiveGenerator):
     #     super()._set_state_from(other)
     #     self.start = other.start
     #     self.cur_value = other.cur_value
+
+
+class Integer(PrimitiveGenerator):
+    """
+    Generator which produces random integers k in the range low <= k <= high.
+    """
+
+    def __init__(self, low, high):
+        """
+        Parameters
+        ----------
+        low: integer
+            Lower bound (inclusive).
+        high: integer
+            Upper bound (inclusive).
+        """
+        super().__init__()
+        self.low = low
+        self.high = high
+        self.randgen = Random()
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(next(self.seed_generator))
+        return self
+
+    def __next__(self):
+        return self.randgen.randint(self.low, self.high)
+
+    # def _set_state_from(self, other):
+    #     super()._set_state_from(other)
+    #     self.randgen.setstate(other.randgen.getstate())
