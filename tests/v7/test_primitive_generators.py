@@ -69,6 +69,10 @@ def test_faker_generator():
     expected_values = ["Eric Benton", "Heather Harris", "Thomas Obrien", "Amy Cook", "Kenneth Robles"]
     assert expected_values == g.generate(num=5, seed=99999)
 
+    g = FakerGenerator(method="safe_color_name")
+    expected_values = ['maroon', 'olive', 'white', 'yellow', 'purple']
+    assert expected_values == g.generate(num=5, seed=99999)
+
 
 def test_calling_generate_with_and_without_seed():
     g = Constant("quux")
