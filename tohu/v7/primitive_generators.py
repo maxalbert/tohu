@@ -164,7 +164,8 @@ class HashDigest(PrimitiveGenerator):
         if not as_bytes and (length % 2) != 0:
             raise ValueError(
                 f"Length must be an even number if as_bytes=False because it "
-                f"represents length = 2 * num_random_bytes. Got: length={length})")
+                f"represents length = 2 * num_random_bytes. Got: length={length})"
+            )
         self.as_bytes = as_bytes
         self.lowercase = lowercase
         self.randgen = np.random.RandomState()

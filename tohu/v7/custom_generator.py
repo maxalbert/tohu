@@ -7,7 +7,7 @@ class CustomGenerator:
     def __init__(self):
         self.field_generators = {}
 
-    def add_field_generator(self, name : str, generator : TohuBaseGenerator):
+    def add_field_generator(self, name: str, generator: TohuBaseGenerator):
         """
         Parameters
         ----------
