@@ -58,3 +58,44 @@ class Boolean(PrimitiveGenerator):
 
     # def _set_state_from(self, other):
     #     self.randgen.setstate(other.randgen.getstate())
+
+
+class Incremental(PrimitiveGenerator):
+    """
+    Generator which produces integers that increase in regular steps.
+    """
+
+    def __init__(self, *, start=1, step=1):
+        """
+        Parameters
+        ----------
+        start : int, optional
+            Start value of the sequence (default: 1).
+        step : int, optional
+            Step size of the sequence (default: 1).
+
+        Example
+        -------
+        >>> g = Incremental(start=200, step=4)
+        >>> list(g.generate(num=10))
+        [200, 204, 208, 212, 216, 220, 224, 228, 232, 236]
+        """
+        super().__init__()
+        self.start = start
+        self.step = step
+        self.cur_value = start
+
+    def __next__(self):
+        retval = self.cur_value
+        self.cur_value += self.step
+        return retval
+
+    def reset(self, seed=None):
+        super().reset(seed)
+        self.cur_value = self.start
+        return self
+
+    # def _set_state_from(self, other):
+    #     super()._set_state_from(other)
+    #     self.start = other.start
+    #     self.cur_value = other.cur_value
