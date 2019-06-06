@@ -11,12 +11,12 @@ geojson_sample_file = os.path.join(data_dir, "admin_0_countries.geojson")
 
 
 EXEMPLAR_PRIMITIVE_GENERATORS = [
-    Constant("quux"),
-    Boolean(p=0.8),
-    Incremental(start=200, step=4),
-    Integer(100, 200),
-    HashDigest(length=8),
-    FakerGenerator(method="name"),
+    Constant("quux").set_tohu_name("g_constant"),
+    Boolean(p=0.8).set_tohu_name("g_boolean"),
+    Incremental(start=200, step=4).set_tohu_name("g_incremental"),
+    Integer(100, 200).set_tohu_name("g_integer"),
+    HashDigest(length=8).set_tohu_name("g_hashdigest"),
+    FakerGenerator(method="name").set_tohu_name(("g_fakergenerator")),
 ]
 
 

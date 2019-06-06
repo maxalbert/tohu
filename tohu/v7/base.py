@@ -47,6 +47,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
     def __init__(self):
         self.tohu_name = None
         self.seed_generator = SeedGenerator()
+        self.clones = []
 
     def __repr__(self):
         clsname = self.__class__.__name__
@@ -54,6 +55,20 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         return f"<{name}{clsname} (id={self.tohu_id})>"
 
     def __iter__(self):
+        return self
+
+    def set_tohu_name(self, tohu_name):
+        """
+        Set this generator's `tohu_name` attribute.
+
+        This is mainly useful for debugging where one can temporarily
+        use this at the end of generator definitions to set a name
+        that will be displayed in debugging messages. For example:
+
+            g1 = SomeGeneratorClass().set_tohu_name('g1')
+            g2 = SomeGeneratorClass().set_tohu_name('g2')
+        """
+        self.tohu_name = tohu_name
         return self
 
     @property
@@ -68,13 +83,40 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         return myhash[:12]
 
     @abstractmethod
-    def spawn(self, spawn_mapping=None):
+    def spawn(self, spawn_mapping=None):  # pragma: no cover
         raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
 
     @abstractmethod
     def _set_state_from(self, other):
         logger.debug(f"Setting internal state of {self} (from {other})")
         self.seed_generator._set_state_from(other.seed_generator)
+
+    def clone(self):
+        """
+        Return an exact copy of this generator which behaves the same way
+        (i.e., produces the same elements in the same order) and which is
+        automatically reset whenever the original generator is reset.
+        """
+        c = self.spawn()
+        self.register_clone(c)
+        c.register_parent(self)
+        return c
+
+    def register_clone(self, clone):
+        self.clones.append(clone)
+
+        # If possible, set the clone's tohu_name for easier debugging
+        if self.tohu_name is not None:
+            clone.set_tohu_name(f"{self.tohu_name} (clone #{len(self.clones)})")
+
+        if len(self.clones) != len(set(self.clones)):
+            raise RuntimeError(f"Duplicate clone added: {self}  -->  {clone}")
+
+    def register_parent(self, parent):
+        self.parent = parent
+
+    def is_clone_of(self, parent):
+        return self.parent == parent
 
     @abstractmethod
     def reset(self, seed):
@@ -83,9 +125,9 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         """
         logger.debug(f"Resetting {self} (seed={seed})")
         self.seed_generator.reset(seed)
-        #
-        # for c in self.clones:
-        #     c.reset(seed)
+
+        for c in self.clones:
+            c.reset(seed)
 
     def generate(self, num, *, seed=None, progressbar=False):
         """
