@@ -26,7 +26,7 @@ class SeedGenerator:
     def __init__(self):
         self.randgen = Random()
         self.minval = 0
-        self.maxval = 2**32 - 1
+        self.maxval = 2 ** 32 - 1
 
     def reset(self, seed):
         self.randgen.seed(seed)
@@ -50,8 +50,8 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     def __repr__(self):
         clsname = self.__class__.__name__
-        name = '' if self.tohu_name is None else f'{self.tohu_name}: '
-        return f'<{name}{clsname} (id={self.tohu_id})>'
+        name = "" if self.tohu_name is None else f"{self.tohu_name}: "
+        return f"<{name}{clsname} (id={self.tohu_id})>"
 
     def __iter__(self):
         return self
@@ -72,7 +72,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         """
         Reset this generator's seed generator and any clones.
         """
-        logger.debug(f'Resetting {self} (seed={seed})')
+        logger.debug(f"Resetting {self} (seed={seed})")
         self.seed_generator.reset(seed)
         #
         # for c in self.clones:
