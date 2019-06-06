@@ -1,9 +1,6 @@
 [run]
 branch = True
 
-[tool:pytest]
-addopts = --cov-report=term-missing
-
 [report]
 omit =
     */python?.?/*
