@@ -1,5 +1,7 @@
+import numpy as np
 from random import Random
 from .base import PrimitiveGenerator
+from .utils import identity
 
 
 class Constant(PrimitiveGenerator):
@@ -131,3 +133,50 @@ class Integer(PrimitiveGenerator):
     # def _set_state_from(self, other):
     #     super()._set_state_from(other)
     #     self.randgen.setstate(other.randgen.getstate())
+
+
+class HashDigest(PrimitiveGenerator):
+    """
+    Generator which produces a sequence of hex strings representing hash digest values.
+    """
+
+    def __init__(self, *, length, as_bytes=False, lowercase=False):
+        """
+        Parameters
+        ----------
+        length: integer
+            Length of the character strings produced by this generator.
+        as_bytes: bool, optional
+            If True, return `length` random bytes. If False, return a string
+            containing `length` characters (which represents the hex values of
+            a sequence of  `length/2` random bytes). Note that in the second
+            case `length` must be an even number.
+        lowercase: bool, optional
+            If True, return the hex string using lowercase letters. The default
+            uses uppercase letters. This only has an effect if `as_bytes=False`.
+        """
+        super().__init__()
+        self.length = length
+        self._internal_length = length if as_bytes else length / 2
+        if not as_bytes and (length % 2) != 0:
+            raise ValueError(
+                f"Length must be an even number if as_bytes=False because it "
+                f"represents length = 2 * num_random_bytes. Got: length={length})")
+        self.as_bytes = as_bytes
+        self.lowercase = lowercase
+        self.randgen = np.random.RandomState()
+        self._maybe_convert_to_hex = identity if self.as_bytes else bytes.hex
+        self._maybe_convert_to_uppercase = identity if (self.as_bytes or lowercase) else str.upper
+
+    def reset(self, seed):
+        super().reset(seed)
+        self.randgen.seed(seed)
+        return self
+
+    def __next__(self):
+        val = self.randgen.bytes(self._internal_length)
+        return self._maybe_convert_to_uppercase(self._maybe_convert_to_hex(val))
+
+    # def _set_random_state_from(self, other):
+    #     super()._set_state_from(other)
+    #     self.randgen.set_state(other.randgen.get_state())
