@@ -10,3 +10,9 @@ def test_item_list():
     assert len(item_list) == 5
     assert item_list[3] == 66
     assert [x for x in item_list] == values
+
+    item_list_2 = ItemList(values)
+    assert item_list == item_list_2
+
+    item_list_3 = ItemList([1, 5, 8, 3])
+    assert item_list != item_list_3
