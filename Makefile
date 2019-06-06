@@ -7,10 +7,10 @@ all: test
 test: unit-tests notebook-tests
 
 unit-tests:
-	pytest -svx $(PATH_TO_TESTS)
+	pytest -svx --cov=tohu/$(VERSION) $(PATH_TO_TESTS)
 
 notebook-tests:
-	pytest --nbval --sanitize-with nbval_sanitize_file.cfg $(PATH_TO_NOTEBOOKS)
+	pytest --nbval --sanitize-with nbval_sanitize_file.cfg --cov=tohu/$(VERSION) $(PATH_TO_NOTEBOOKS)
 
 # Build distribution tarball and wheel
 dist:
