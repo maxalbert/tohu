@@ -35,8 +35,8 @@ class SeedGenerator:
     def __next__(self):
         return self.randgen.randint(self.minval, self.maxval)
 
-    # def _set_state_from(self, other):
-    #     self.randgen.setstate(other.randgen.getstate())
+    def _set_state_from(self, other):
+        self.randgen.setstate(other.randgen.getstate())
 
 
 class TohuBaseGenerator(metaclass=ABCMeta):
@@ -66,6 +66,15 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         """
         myhash = hashlib.md5(str(id(self)).encode()).hexdigest()
         return myhash[:12]
+
+    @abstractmethod
+    def spawn(self, spawn_mapping=None):
+        raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
+
+    @abstractmethod
+    def _set_state_from(self, other):
+        logger.debug(f"Setting internal state of {self} (from {other})")
+        self.seed_generator._set_state_from(other.seed_generator)
 
     @abstractmethod
     def reset(self, seed):

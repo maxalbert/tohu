@@ -33,8 +33,13 @@ class Constant(PrimitiveGenerator):
     def __next__(self):
         return self.value
 
-    # def _set_state_from(self, other):
-    #     pass
+    def spawn(self, spawn_mapping=None):
+        new_obj = Constant(self.value)
+        new_obj._set_state_from(self)
+        return new_obj
+
+    def _set_state_from(self, other):
+        pass
 
 
 class Boolean(PrimitiveGenerator):
@@ -61,8 +66,13 @@ class Boolean(PrimitiveGenerator):
     def __next__(self):
         return self.randgen.random() < self.p
 
-    # def _set_state_from(self, other):
-    #     self.randgen.setstate(other.randgen.getstate())
+    def spawn(self):
+        new_obj = Boolean(self.p)
+        new_obj._set_state_from(self)
+        return new_obj
+
+    def _set_state_from(self, other):
+        self.randgen.setstate(other.randgen.getstate())
 
 
 class Incremental(PrimitiveGenerator):
@@ -100,10 +110,15 @@ class Incremental(PrimitiveGenerator):
         self.cur_value = self.start
         return self
 
-    # def _set_state_from(self, other):
-    #     super()._set_state_from(other)
-    #     self.start = other.start
-    #     self.cur_value = other.cur_value
+    def spawn(self, spawn_mapping=None):
+        new_obj = Incremental(start=self.start, step=self.step)
+        new_obj._set_state_from(self)
+        return new_obj
+
+    def _set_state_from(self, other):
+        super()._set_state_from(other)
+        self.start = other.start
+        self.cur_value = other.cur_value
 
 
 class Integer(PrimitiveGenerator):
@@ -133,9 +148,14 @@ class Integer(PrimitiveGenerator):
     def __next__(self):
         return self.randgen.randint(self.low, self.high)
 
-    # def _set_state_from(self, other):
-    #     super()._set_state_from(other)
-    #     self.randgen.setstate(other.randgen.getstate())
+    def spawn(self, spawn_mapping=None):
+        new_obj = Integer(self.low, self.high)
+        new_obj._set_state_from(self)
+        return new_obj
+
+    def _set_state_from(self, other):
+        super()._set_state_from(other)
+        self.randgen.setstate(other.randgen.getstate())
 
 
 class HashDigest(PrimitiveGenerator):
@@ -181,9 +201,14 @@ class HashDigest(PrimitiveGenerator):
         val = self.randgen.bytes(self._internal_length)
         return self._maybe_convert_to_uppercase(self._maybe_convert_to_hex(val))
 
-    # def _set_random_state_from(self, other):
-    #     super()._set_state_from(other)
-    #     self.randgen.set_state(other.randgen.get_state())
+    def spawn(self, spawn_mapping=None):
+        new_obj = HashDigest(length=self.length, as_bytes=self.as_bytes, lowercase=self.lowercase)
+        new_obj._set_state_from(self)
+        return new_obj
+
+    def _set_state_from(self, other):
+        super()._set_state_from(other)
+        self.randgen.set_state(other.randgen.get_state())
 
 
 class FakerGenerator(PrimitiveGenerator):
@@ -225,6 +250,11 @@ class FakerGenerator(PrimitiveGenerator):
     def __next__(self):
         return self.randgen(**self.faker_args)
 
-    # def _set_state_from(self, other):
-    #     super()._set_state_from(other)
-    #     self.fake.random.setstate(other.fake.random.getstate())
+    def spawn(self, spawn_mapping=None):
+        new_obj = FakerGenerator(self.method, locale=self.locale, **self.faker_args)
+        new_obj._set_state_from(self)
+        return new_obj
+
+    def _set_state_from(self, other):
+        super()._set_state_from(other)
+        self.fake.random.setstate(other.fake.random.getstate())
