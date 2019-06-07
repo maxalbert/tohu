@@ -25,6 +25,13 @@ def test_make_custom_generator():
     assert g.field_generators["bb"].is_clone_of(bb)
     assert g.field_generators["cc"].is_clone_of(cc)
 
+    assert g.tohu_items_cls is None
+    g.make_tohu_items_class("Quux")
+    assert g.tohu_items_cls is not None
+    assert g.tohu_items_cls.__name__ == "Quux"
+    assert g.tohu_items_cls.field_names == ["aa", "bb", "cc"]
+    assert repr(g.tohu_items_cls(aa=42, bb=True, cc="hello")) == "Quux(aa=42, bb=True, cc='hello')"
+
 
 # def test_custom_generator():
 #
