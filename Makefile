@@ -1,4 +1,4 @@
-VERSION ?= v6
+VERSION ?= v7
 PATH_TO_NOTEBOOKS ?= notebooks/$(VERSION)
 PATH_TO_TESTS ?= tests/$(VERSION)
 
