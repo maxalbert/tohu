@@ -39,6 +39,14 @@ class SeedGenerator:
         self.randgen.setstate(other.randgen.getstate())
 
 
+class MissingTohuItemsCls:
+    def __init__(self):
+        self.is_unset = True
+
+    def __call__(self, *args, **kwargs):
+        raise RuntimeError("You must call `make_tohu_items_class` on the custom generator before generating items.")
+
+
 class TohuBaseGenerator(metaclass=ABCMeta):
     """
     Base class for all of tohu's generators.
@@ -49,6 +57,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         self.parent = None
         self.clones = []
         self.seed_generator = SeedGenerator()
+        self.tohu_items_cls = MissingTohuItemsCls()
 
     def __repr__(self):
         clsname = self.__class__.__name__
@@ -145,7 +154,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
             items = tqdm(items, total=num)
 
         item_list = [x for x in items]
-        return ItemList(item_list)
+        return ItemList(item_list, tohu_items_cls=self.tohu_items_cls)
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
