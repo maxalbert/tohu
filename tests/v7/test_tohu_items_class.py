@@ -15,6 +15,8 @@ def test_make_tohu_items_class():
     assert "Quux(foo=42, bar=True, baz='hello')" == repr(item2)
     assert "Quux(foo=23, bar=False, baz='hi')" == repr(item3)
 
+    assert {"foo": 42, "bar": True, "baz": "hello"} == item1.as_dict() == item2.as_dict()
+
     assert item1 == item2
     assert item1 == (42, True, "hello")
     assert item1 == {"baz": "hello", "bar": True, "foo": 42}
