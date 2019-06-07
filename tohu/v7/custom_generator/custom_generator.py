@@ -29,8 +29,13 @@ class CustomGenerator(TohuBaseGenerator):
 
     def spawn(self):
         new_obj = CustomGenerator()
+
         for field_name, field_gen in self.field_generators.items():
             new_obj.add_field_generator(field_name, field_gen.parent)
+
+        # re-use existing tohu_items_cls to ensure items produced by the spawned generator are comparable with those produced by the original one
+        new_obj.tohu_items_cls = self.tohu_items_cls
+
         new_obj._set_state_from(self)
         return new_obj
 
