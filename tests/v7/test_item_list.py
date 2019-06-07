@@ -1,5 +1,10 @@
+import pandas as pd
+from pandas.util.testing import assert_frame_equal
+
 from .context import tohu
 from tohu.v7.item_list import ItemList
+from tohu.v7.custom_generator import make_tohu_items_class
+
 
 
 def test_item_list():
@@ -16,3 +21,14 @@ def test_item_list():
 
     item_list_3 = ItemList([1, 5, 8, 3])
     assert item_list != item_list_3
+
+
+def test_to_df():
+    Quux = make_tohu_items_class("Quux", field_names=["foo", "bar", "baz"])
+    item1 = Quux(42, True, "hello")
+    item2 = Quux(23, False, "world")
+    item_list = ItemList([item1, item2], tohu_items_cls=Quux)
+
+    df = item_list.to_df()
+    df_expected = pd.DataFrame({"foo": [42, 23], "bar": [True, False], "baz": ["hello", "world"]})
+    assert_frame_equal(df, df_expected)
