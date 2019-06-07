@@ -1,4 +1,4 @@
-from .base import TohuBaseGenerator
+from ..base import TohuBaseGenerator
 
 __all__ = ["make_new_custom_generator"]
 
