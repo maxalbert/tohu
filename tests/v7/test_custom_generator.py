@@ -1,3 +1,4 @@
+import pytest
 from tohu.v7.primitive_generators import Integer, FakerGenerator, HashDigest
 from tohu.v7.custom_generator import make_new_custom_generator
 
@@ -49,9 +50,22 @@ def test_make_custom_generator():
         Quux(aa=104, bb="672EF2A4", cc="Calvin Peters"),
         Quux(aa=114, bb="2502048A", cc="Amanda Taylor"),
         Quux(aa=148, bb="679DAED2", cc="Amanda Barrett"),
-        Quux(aa=126, bb='91554CC8', cc='Jesse Williams')
+        Quux(aa=126, bb="91554CC8", cc="Jesse Williams"),
     ]
     assert items_expected == items_generated
+
+
+def test_must_create_items_class_before_generating_items():
+    g = make_new_custom_generator()
+    g.add_field_generator("aa", Integer(100, 200))
+
+    with pytest.raises(
+        RuntimeError, match="You must call `make_tohu_items_class` on the custom generator before generating items."
+    ):
+        g.generate(num=4, seed=99999)
+
+    g.make_tohu_items_class("Quux")
+    assert len(g.generate(num=6, seed=99999)) == 6
 
 
 # def test_custom_generator():
