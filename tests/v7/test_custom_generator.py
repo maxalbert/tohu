@@ -1,5 +1,5 @@
 from tohu.v7.primitive_generators import Integer, FakerGenerator, HashDigest
-from tohu.v7.custom_generator.custom_generator import make_new_custom_generator
+from tohu.v7.custom_generator import make_new_custom_generator
 
 
 def test_make_custom_generator():
