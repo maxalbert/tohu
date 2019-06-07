@@ -3,11 +3,17 @@ from tohu.v7.custom_generator import make_new_custom_generator
 
 
 def test_make_custom_generator():
+    #
+    # Create empty custom generator.
+    #
     g = make_new_custom_generator()
     assert g.fields == []
     assert g.field_generators == {}
 
-    aa = Integer(1, 7)
+    #
+    # Add field generators of different types.
+    #
+    aa = Integer(100, 200)
     g.add_field_generator("aa", aa)
     assert g.fields == ["aa"]
     assert g.field_generators["aa"].is_clone_of(aa)
@@ -25,12 +31,27 @@ def test_make_custom_generator():
     assert g.field_generators["bb"].is_clone_of(bb)
     assert g.field_generators["cc"].is_clone_of(cc)
 
-    assert g.tohu_items_cls is None
+    #
+    # Create tohu items classs and check that it can be
+    # used to generate items with the correct fields.
+    #
+    assert g.tohu_items_cls.is_unset
     g.make_tohu_items_class("Quux")
-    assert g.tohu_items_cls is not None
-    assert g.tohu_items_cls.__name__ == "Quux"
-    assert g.tohu_items_cls.field_names == ["aa", "bb", "cc"]
-    assert repr(g.tohu_items_cls(aa=42, bb=True, cc="hello")) == "Quux(aa=42, bb=True, cc='hello')"
+    Quux = g.tohu_items_cls
+    assert Quux.__name__ == "Quux"
+    assert Quux.field_names == ["aa", "bb", "cc"]
+
+    #
+    # Check that the custom generator produces the expected items.
+    #
+    items_generated = g.generate(num=4, seed=99999)
+    items_expected = [
+        Quux(aa=104, bb="672EF2A4", cc="Calvin Peters"),
+        Quux(aa=114, bb="2502048A", cc="Amanda Taylor"),
+        Quux(aa=148, bb="679DAED2", cc="Amanda Barrett"),
+        Quux(aa=126, bb='91554CC8', cc='Jesse Williams')
+    ]
+    assert items_expected == items_generated
 
 
 # def test_custom_generator():
