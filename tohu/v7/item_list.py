@@ -1,6 +1,7 @@
-import attr
 import collections
 import pandas as pd
+
+from .field_selector import FieldSelector
 
 
 class ItemList(collections.Iterable):
@@ -29,10 +30,10 @@ class ItemList(collections.Iterable):
     def __iter__(self):
         return iter(self.items)
 
-    def to_df(self):
+    def to_df(self, fields=None):
         if self.tohu_items_cls is None:  # pragma: no cover
             raise RuntimeError()
 
-        colnames_to_export = self.tohu_items_cls.field_names
-        df = pd.DataFrame([x.as_dict() for x in self.items], columns=colnames_to_export)
+        fs = FieldSelector(self.tohu_items_cls, fields=fields)
+        df = pd.DataFrame(fs(self.items), columns=fs.fields)
         return df
