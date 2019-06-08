@@ -3,7 +3,7 @@ from pandas.util.testing import assert_frame_equal
 
 from .context import tohu
 from tohu.v7.item_list import ItemList
-from tohu.v7.custom_generator import make_tohu_items_class
+from tohu.v7.custom_generator.tohu_items_class import make_tohu_items_class
 
 
 def test_item_list():

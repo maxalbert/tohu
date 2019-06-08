@@ -1,6 +1,6 @@
 import pytest
 from tohu.v7.field_selector import FieldSelector
-from tohu.v7.custom_generator import make_tohu_items_class
+from tohu.v7.custom_generator.tohu_items_class import make_tohu_items_class
 
 
 def test_field_selector():
