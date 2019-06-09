@@ -6,7 +6,7 @@ from .apply import Apply
 
 class fstr(Apply):
     """
-    Helper function for easy formatting of generators.
+    Helper function for easy formatting of tohu generators.
 
     Usage example:
 

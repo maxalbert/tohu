@@ -1,3 +1,5 @@
+from operator import add
+
 from .context import tohu
 from tohu.v7.primitive_generators import Integer, Incremental
 from tohu.v7.derived_generators import Apply, fstr
@@ -32,17 +34,20 @@ def test_apply_generator():
 
 
 def test_fstr():
-    g1 = Incremental(start=1)
-    g2 = Integer(1, 20)
-    h = fstr("#{g1}: {g2:.1f}")
+    g1 = Integer(100, 200)
+    g2 = Integer(300, 400)
+    g3 = Apply(add, g1, g2)
+    h = fstr("{g1} + {g2} = {g3}")
 
     g1.reset(seed=11111)
     g2.reset(seed=22222)
 
-    items_g1_expected = [1, 2, 3, 4, 5, 6, 7, 8]
-    items_g2_expected = [3, 17, 17, 16, 15, 12, 18, 4]
-    items_h_expected = ["#1: 3.0", "#2: 17.0", "#3: 17.0", "#4: 16.0", "#5: 15.0", "#6: 12.0", "#7: 18.0", "#8: 4.0"]
+    items_g1_expected = [163, 171, 142, 140, 121]
+    items_g2_expected = [308, 366, 364, 363, 356]
+    items_g3_expected = [471, 537, 506, 503, 477]
+    items_h_expected = ["163 + 308 = 471", "171 + 366 = 537", "142 + 364 = 506", "140 + 363 = 503", "121 + 356 = 477"]
 
-    assert items_g1_expected == g1.generate(num=8)
-    assert items_g2_expected == g2.generate(num=8)
-    assert items_h_expected == h.generate(num=8)
+    assert items_g1_expected == g1.generate(num=5)
+    assert items_g2_expected == g2.generate(num=5)
+    assert items_g3_expected == g3.generate(num=5)
+    assert items_h_expected == h.generate(num=5)
