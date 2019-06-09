@@ -1,6 +1,4 @@
-import inspect
-import re
-from .base import DerivedGenerator, SeedGenerator
+from ..base import DerivedGenerator, SeedGenerator
 
 
 class Apply(DerivedGenerator):
@@ -41,41 +39,3 @@ class Apply(DerivedGenerator):
         super()._set_state_from(other)
         for g1, g2 in zip(self.arg_gens, other.arg_gens):
             g1._set_state_from(g2)
-
-
-class fstr(Apply):
-    """
-    Helper function for easy formatting of generators.
-
-    Usage example:
-
-        >>> g1 = Integer(100, 200)
-        >>> g2 = Integer(300, 400)
-        >>> g3 = g1 + g2
-        >>> h = fstr('{g1} + {g2} = {g3}')
-        >>> print(next(h))
-        122 + 338 = 460
-        >>> print(next(h))
-        165 + 325 = 490
-    """
-
-    def __init__(self, spec):
-
-        # FIXME: this pattern is not yet compatible with the full f-string spec.
-        # For example, it doesn't recognise double '{{' and '}}' (for escaping).
-        # Also it would be awesome if we could parse arbitrary expressions inside
-        # the curly braces.
-        pattern = '{([^}:]+)(:.*)?}'
-
-        gen_names = [gen_name for (gen_name, _) in re.findall(pattern, spec)]
-
-        # TODO: do we ever need to store and pass in the original namespace when spawning generators?
-        namespace = inspect.currentframe().f_back.f_globals
-        namespace.update(inspect.currentframe().f_back.f_locals)
-
-        gens = {name: namespace[name] for name in gen_names}
-
-        def format_items(**kwargs):
-            return spec.format(**kwargs)
-
-        super().__init__(format_items, **gens)
