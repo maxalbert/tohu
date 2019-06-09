@@ -7,7 +7,7 @@ from tqdm import tqdm
 from .item_list import ItemList
 from .logging import logger
 
-__all__ = ["TohuBaseGenerator", "PrimitiveGenerator"]
+__all__ = ["TohuBaseGenerator", "PrimitiveGenerator", "DerivedGenerator"]
 
 
 class SeedGenerator:
@@ -159,5 +159,13 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
 class PrimitiveGenerator(TohuBaseGenerator):
     """
-    Base class for all primitive generators
+    Base class for all primitive generators.
     """
+
+
+class DerivedGenerator(TohuBaseGenerator):
+    """
+    Base class for all derived generators.
+    """
+
+    has_internal_random_state = False
