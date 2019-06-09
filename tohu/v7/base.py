@@ -90,7 +90,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         any collisions will be negligible.
         """
         myhash = hashlib.md5(str(id(self)).encode()).hexdigest()
-        return myhash[:12]
+        return myhash[:6]
 
     @abstractmethod
     def spawn(self):  # pragma: no cover
