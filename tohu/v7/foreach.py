@@ -2,6 +2,7 @@ import ast
 import inspect
 import textwrap
 from .base import TohuBaseGenerator
+from .ipython_support import __tohu_ipython_source_code_storer__
 
 __all__ = ["Placeholder", "placeholder", "foreach"]
 
@@ -13,9 +14,45 @@ class Placeholder:
 placeholder = Placeholder("<generic>")
 
 
+def has_placeholder_kwargs(node):
+    assert isinstance(node, ast.Call)
+
+    def is_placeholder_node(nnn):
+        is_generic_placeholder = isinstance(nnn.value, ast.Name) and nnn.value.id == "placeholder"
+        is_custom_placeholder = isinstance(nnn.value, ast.Call) and nnn.value.func.id == "Placeholder"
+        return is_generic_placeholder or is_custom_placeholder
+
+    return any([is_placeholder_node(n) for n in node.keywords])
+
+
+def is_tohu_foreach_decorator_node(node):
+    return isinstance(node, ast.Call) and node.func.id == "foreach" and has_placeholder_kwargs(node)
+
+
 def get_cls_compiled_ast_node(cls):
-    orig_cls_source = textwrap.dedent(inspect.getsource(cls))
-    orig_cls_ast_node = ast.parse(orig_cls_source)
+    try:
+        orig_cls_source = textwrap.dedent(inspect.getsource(cls))
+        orig_cls_ast_node = ast.parse(orig_cls_source)
+    except TypeError as exc:
+        if exc.args[0] == "<module '__main__'> is a built-in class":
+            # The tohu generator class is being defined interactively in IPython
+            assert __tohu_ipython_source_code_storer__.is_executing_cell
+            _, orig_cls_ast_node = __tohu_ipython_source_code_storer__.cur_class_def_info[cls.__name__]
+
+            # FIXME: the following will remove *all* foreach decorators, but if we're wrapping the class
+            # in multiple ones then we should only remove the single one that's currently being applied!
+            filtered_decorator_list = [
+                x for x in orig_cls_ast_node.decorator_list if not is_tohu_foreach_decorator_node(x)
+            ]
+
+            orig_cls_ast_node.decorator_list = filtered_decorator_list
+            orig_cls_ast_node = ast.Module(
+                body=[orig_cls_ast_node]
+            )  # wrap ClassDef node in Module so that it can be compiled
+        else:
+            # unexpected error; re-raise the exception
+            raise
+
     orig_cls_compiled = compile(orig_cls_ast_node, "<string>", "exec")
     return orig_cls_compiled
 
@@ -76,12 +113,12 @@ def foreach(**var_defs):
             def foreach(self, **custom_var_defs):
                 custom_var_names = list(custom_var_defs.keys())
 
-                missing_params = set(new_names).difference(custom_var_names)
-                extra_params = set(custom_var_names).difference(new_names)
+                missing_params = list(set(new_names).difference(custom_var_names))
+                extra_params = list(set(custom_var_names).difference(new_names))
                 if missing_params:
-                    raise ValueError(f"Missing parameters: {missing_params}")
+                    raise ValueError(f"Missing parameter(s): {', '.join(missing_params)!r}")
                 if extra_params:
-                    raise ValueError(f"Extra parameters provided: {extra_params}")
+                    raise ValueError(f"Extra parameter(s) provided: {', '.join(extra_params)!r}")
 
                 # Re-evaluate the class definition, including the previously missing
                 # variable values to replace the placeholders.
