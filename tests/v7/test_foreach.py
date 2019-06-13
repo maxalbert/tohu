@@ -4,7 +4,7 @@ from tohu.v7.primitive_generators import Integer
 from tohu.v7.foreach import foreach, Placeholder, placeholder
 
 
-def test_class_rewriting():
+def test_foreach():
     cc_outside = "<cc_is_defined_outside_the_class>"
 
     @foreach(upper_bound=Placeholder("upper_bound"), foobar=placeholder)
