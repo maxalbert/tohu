@@ -94,7 +94,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
     @abstractmethod
     def spawn(self):  # pragma: no cover
-        raise NotImplementedError("Class {} does not implement method 'spawn'.".format(self.__class__.__name__))
+        raise NotImplementedError(f"Class {self.__class__.__name__} does not implement method '__next__'.")
 
     @abstractmethod
     def _set_state_from(self, other):
@@ -138,6 +138,10 @@ class TohuBaseGenerator(metaclass=ABCMeta):
 
         for c in self.clones:
             c.reset(seed)
+
+    @abstractmethod
+    def __next__(self):  # pragma: no cover
+        raise NotImplementedError(f"Class {self.__class__.__name__} does not implement method '__next__'.")
 
     def generate(self, num, *, seed=None, progressbar=False):
         """
