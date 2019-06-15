@@ -26,6 +26,8 @@ class CustomGenerator(TohuBaseGenerator):
         new_obj.tohu_items_cls = self.tohu_items_cls
         new_obj.tohu_items_cls_name = self.tohu_items_cls_name
 
+        new_obj.ns = self.ns.spawn()
+
         for field_name, field_gen in self.field_generators.items():
             new_obj.add_field_generator(field_name, field_gen.parent)
 

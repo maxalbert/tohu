@@ -64,3 +64,24 @@ def test_next_item():
     assert next(ns) == {"bb": "foo", "aa": 11, "cc": "z"}
     assert next(ns) == {"bb": "bar", "aa": 22, "cc": "y"}
     assert next(ns) == {"bb": "baz", "aa": 33, "cc": "x"}
+
+
+def test_spawn():
+    ns = TohuNamespace()
+    aa_first_clone = Mock()
+    bb_first_clone = Mock()
+    aa_second_clone = Mock()
+    bb_second_clone = Mock()
+    aa = Mock(clone=Mock(side_effect=[aa_first_clone, aa_second_clone]))
+    bb = Mock(clone=Mock(side_effect=[bb_first_clone, bb_second_clone]))
+    aa_first_clone.parent = aa_second_clone.parent = aa
+    bb_first_clone.parent = bb_second_clone.parent = bb
+
+    ns.add_field_generator("aa", aa)
+    ns.add_field_generator("bb", bb)
+    assert ns["aa"] is aa_first_clone
+    assert ns["bb"] is bb_first_clone
+
+    ns_spawned = ns.spawn()
+    assert ns_spawned["aa"] is aa_second_clone
+    assert ns_spawned["bb"] is bb_second_clone

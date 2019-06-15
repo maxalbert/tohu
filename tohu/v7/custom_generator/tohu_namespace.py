@@ -24,3 +24,9 @@ class TohuNamespace:
 
     def __next__(self):
         return {name: next(g) for name, g in self._ns.items()}
+
+    def spawn(self):
+        ns_new = TohuNamespace()
+        for name, g in self._ns.items():
+            ns_new.add_field_generator(name, g.parent)
+        return ns_new
