@@ -40,4 +40,5 @@ def make_tohu_items_class(clsname, field_names):
     item_cls.field_names = field_names
     item_cls.as_dict = lambda self: attr.asdict(self)
     item_cls.as_tuple = lambda self: attr.astuple(self)
+    item_cls.is_unset = False
     return item_cls
