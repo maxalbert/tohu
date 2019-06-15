@@ -39,4 +39,5 @@ def make_tohu_items_class(clsname, field_names):
     item_cls.__eq__ = func_eq_new
     item_cls.field_names = field_names
     item_cls.as_dict = lambda self: attr.asdict(self)
+    item_cls.as_tuple = lambda self: attr.astuple(self)
     return item_cls
