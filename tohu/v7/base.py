@@ -150,6 +150,16 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         If `seed` is not None, the generator is reset
         using this seed before generating the elements.
         """
+        item_list = list(self.generate_as_stream(num, seed=seed, progressbar=progressbar))
+        return ItemList(item_list, tohu_items_cls=self.tohu_items_cls)
+
+    def generate_as_stream(self, num, *, seed=None, progressbar=False):
+        """
+        Return sequence of `num` elements.
+
+        If `seed` is not None, the generator is reset
+        using this seed before generating the elements.
+        """
         if seed is not None:
             self.reset(seed)
 
@@ -157,8 +167,7 @@ class TohuBaseGenerator(metaclass=ABCMeta):
         if progressbar:  # pragma: no cover
             items = tqdm(items, total=num)
 
-        item_list = [x for x in items]
-        return ItemList(item_list, tohu_items_cls=self.tohu_items_cls)
+        yield from items
 
 
 class PrimitiveGenerator(TohuBaseGenerator):
