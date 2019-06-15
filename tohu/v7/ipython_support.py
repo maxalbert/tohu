@@ -33,7 +33,7 @@ class StoresClassSourceCodeAndAST(ast.NodeTransformer):
         return node
 
 
-def load_tohu_ipython_extension():
+def load_tohu_ipython_extension_if_available():
     try:
         from IPython import get_ipython
     except ImportError:
