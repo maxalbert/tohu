@@ -1,13 +1,13 @@
 import pytest
 from tohu.v7.primitive_generators import Integer, FakerGenerator, HashDigest
-from tohu.v7.custom_generator import make_new_custom_generator
+from tohu.v7.custom_generator import CustomGenerator
 
 
 def test_make_custom_generator():
     #
     # Create empty custom generator.
     #
-    g = make_new_custom_generator()
+    g = CustomGenerator()
     assert g.fields == []
     assert g.field_generators == {}
 
@@ -56,7 +56,7 @@ def test_make_custom_generator():
 
 
 def test_must_create_items_class_before_generating_items():
-    g = make_new_custom_generator()
+    g = CustomGenerator()
     g.add_field_generator("aa", Integer(100, 200))
 
     with pytest.raises(

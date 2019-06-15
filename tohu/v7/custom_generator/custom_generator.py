@@ -1,7 +1,7 @@
 from ..base import TohuBaseGenerator
 from .tohu_items_class import make_tohu_items_class
 
-__all__ = ["make_new_custom_generator"]
+__all__ = ["CustomGenerator"]
 
 
 class CustomGenerator(TohuBaseGenerator):
@@ -53,7 +53,3 @@ class CustomGenerator(TohuBaseGenerator):
         Return
         """
         return list(self.field_generators.keys())
-
-
-def make_new_custom_generator():
-    return CustomGenerator()
