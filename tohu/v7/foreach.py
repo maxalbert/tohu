@@ -2,7 +2,7 @@ import ast
 import inspect
 import textwrap
 from .base import TohuBaseGenerator
-from .ipython_support import __tohu_ipython_source_code_storer__
+from .ipython_support import get_ast_node_for_classes_defined_interactively_in_ipython
 
 __all__ = ["Placeholder", "placeholder", "foreach"]
 
@@ -14,42 +14,9 @@ class Placeholder:
 placeholder = Placeholder("<generic>")
 
 
-def has_placeholder_kwargs(node):
-    assert isinstance(node, ast.Call)
-
-    def is_placeholder_node(nnn):
-        is_generic_placeholder = isinstance(nnn.value, ast.Name) and nnn.value.id == "placeholder"
-        is_custom_placeholder = isinstance(nnn.value, ast.Call) and nnn.value.func.id == "Placeholder"
-        return is_generic_placeholder or is_custom_placeholder
-
-    return any([is_placeholder_node(n) for n in node.keywords])
-
-
-def is_tohu_foreach_decorator_node(node):
-    return isinstance(node, ast.Call) and node.func.id == "foreach" and has_placeholder_kwargs(node)
-
-
 def get_ast_node_for_classes_defined_in_source_files(cls):
     orig_cls_source = textwrap.dedent(inspect.getsource(cls))
     orig_cls_ast_node = ast.parse(orig_cls_source)
-    return orig_cls_ast_node
-
-
-def get_ast_node_for_classes_defined_interactively_in_ipython(cls):
-    # The tohu generator class is being defined interactively in IPython
-    assert __tohu_ipython_source_code_storer__.is_executing_cell
-    _, orig_cls_ast_node = __tohu_ipython_source_code_storer__.cur_class_def_info[cls.__name__]
-
-    # FIXME: the following will remove *all* foreach decorators, but if we're wrapping the class
-    # in multiple ones then we should only remove the single one that's currently being applied!
-    filtered_decorator_list = [
-        x for x in orig_cls_ast_node.decorator_list if not is_tohu_foreach_decorator_node(x)
-    ]
-
-    orig_cls_ast_node.decorator_list = filtered_decorator_list
-    orig_cls_ast_node = ast.Module(
-        body=[orig_cls_ast_node]
-    )  # wrap ClassDef node in Module so that it can be compiled
     return orig_cls_ast_node
 
 
