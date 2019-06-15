@@ -9,6 +9,7 @@ class CustomGenerator(TohuBaseGenerator):
     def __init__(self):
         super().__init__()
         self.ns = TohuNamespace()
+        self.tohu_items_cls = None
         self.tohu_items_cls_name = None
 
     def __next__(self):
@@ -59,7 +60,6 @@ class CustomGenerator(TohuBaseGenerator):
         Return
         """
         return self.ns.field_names
-
 
     @property
     def field_generators(self):
