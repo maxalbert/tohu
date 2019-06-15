@@ -1,5 +1,6 @@
 from ..base import TohuBaseGenerator
 from .tohu_items_class import make_tohu_items_class
+from .tohu_namespace import TohuNamespace
 
 __all__ = ["CustomGenerator"]
 
@@ -7,6 +8,7 @@ __all__ = ["CustomGenerator"]
 class CustomGenerator(TohuBaseGenerator):
     def __init__(self):
         super().__init__()
+        self.ns = TohuNamespace()
         self.field_generators = {}
         self.tohu_items_cls_name = None
 
