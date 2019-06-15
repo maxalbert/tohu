@@ -44,7 +44,7 @@ class MissingTohuItemsCls:
         self.is_unset = True
         self.__name__ = "<MissingTohuItemsCls>"
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs):  # pragma: no cover
         raise RuntimeError("Cannot call MissingTohuItemsCls. Did you forget to add field generators?")
 
 
