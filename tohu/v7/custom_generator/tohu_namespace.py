@@ -21,3 +21,6 @@ class TohuNamespace:
         self.seed_generator.reset(seed)
         for g in self._ns.values():
             g.reset(next(self.seed_generator))
+
+    def __next__(self):
+        return {name: next(g) for name, g in self._ns.items()}
