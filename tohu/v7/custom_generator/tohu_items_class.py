@@ -30,11 +30,7 @@ def make_tohu_items_class(clsname, field_names):
                 return attr.astuple(self) == other
             elif isinstance(other, dict):
                 return attr.asdict(self) == other
-            elif (
-                hasattr(other, "__attrs_attrs__")
-                and self.__class__.__name__ == other.__class__.__name__
-                and self.field_names == other.field_names
-            ):
+            elif hasattr(other, "__attrs_attrs__") and self.__class__.__name__ == other.__class__.__name__:
                 return attr.asdict(self) == attr.asdict(other)
             else:
                 raise TypeError(

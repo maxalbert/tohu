@@ -42,9 +42,10 @@ class SeedGenerator:
 class MissingTohuItemsCls:
     def __init__(self):
         self.is_unset = True
+        self.__name__ = "<MissingTohuItemsCls>"
 
     def __call__(self, *args, **kwargs):
-        raise RuntimeError("You must call `make_tohu_items_class` on the custom generator before generating items.")
+        raise RuntimeError("Cannot call MissingTohuItemsCls. Did you forget to add field generators?")
 
 
 class TohuBaseGenerator(metaclass=ABCMeta):

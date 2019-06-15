@@ -8,6 +8,7 @@ def test_make_custom_generator():
     # Create empty custom generator.
     #
     g = CustomGenerator()
+    g.set_tohu_items_class_name("Quux")
     assert g.fields == []
     assert g.field_generators == {}
 
@@ -18,12 +19,16 @@ def test_make_custom_generator():
     g.add_field_generator("aa", aa)
     assert g.fields == ["aa"]
     assert g.field_generators["aa"].is_clone_of(aa)
+    assert g.tohu_items_cls.__name__ == "Quux"
+    assert g.tohu_items_cls.field_names == ["aa"]
 
     bb = HashDigest(length=8)
     g.add_field_generator("bb", bb)
     assert g.fields == ["aa", "bb"]
     assert g.field_generators["aa"].is_clone_of(aa)
     assert g.field_generators["bb"].is_clone_of(bb)
+    assert g.tohu_items_cls.__name__ == "Quux"
+    assert g.tohu_items_cls.field_names == ["aa", "bb"]
 
     cc = FakerGenerator(method="name")
     g.add_field_generator("cc", cc)
@@ -31,20 +36,13 @@ def test_make_custom_generator():
     assert g.field_generators["aa"].is_clone_of(aa)
     assert g.field_generators["bb"].is_clone_of(bb)
     assert g.field_generators["cc"].is_clone_of(cc)
-
-    #
-    # Create tohu items classs and check that it can be
-    # used to generate items with the correct fields.
-    #
-    assert g.tohu_items_cls.is_unset
-    g.make_tohu_items_class("Quux")
-    Quux = g.tohu_items_cls
-    assert Quux.__name__ == "Quux"
-    assert Quux.field_names == ["aa", "bb", "cc"]
+    assert g.tohu_items_cls.__name__ == "Quux"
+    assert g.tohu_items_cls.field_names == ["aa", "bb", "cc"]
 
     #
     # Check that the custom generator produces the expected items.
     #
+    Quux = g.tohu_items_cls
     items_generated = g.generate(num=4, seed=99999)
     items_expected = [
         Quux(aa=104, bb="672EF2A4", cc="Calvin Peters"),
@@ -55,18 +53,12 @@ def test_make_custom_generator():
     assert items_expected == items_generated
 
 
-def test_must_create_items_class_before_generating_items():
+def test_must_set_items_class_name_before_adding_field_generators():
     g = CustomGenerator()
-    g.add_field_generator("aa", Integer(100, 200))
 
-    with pytest.raises(
-        RuntimeError, match="You must call `make_tohu_items_class` on the custom generator before generating items."
-    ):
-        g.generate(num=4, seed=99999)
-
-    g.make_tohu_items_class("Quux")
-    assert len(g.generate(num=6, seed=99999)) == 6
-
+    msg_expected = "You must call `set_tohu_items_class_name` on the custom generator before adding field generators."
+    with pytest.raises(RuntimeError, match=msg_expected):
+        g.add_field_generator("aa", Integer(100, 200))
 
 # def test_custom_generator():
 #
