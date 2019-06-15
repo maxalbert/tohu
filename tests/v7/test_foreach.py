@@ -1,3 +1,5 @@
+import pytest
+
 from .context import tohu
 from tohu.v7.base import TohuBaseGenerator
 from tohu.v7.primitive_generators import Integer
@@ -59,3 +61,15 @@ def test_foreach():
 
     items_expected = [(104, 112233), (114, 112233), (148, 112233), (126, 112233), (177, 112233)]
     assert items_expected == list(h.generate(num=5, seed=99999))
+
+
+def test_error_if_not_applied_to_tohu_generator_class():
+    with pytest.raises(TypeError, match="Foreach decorator must be applied to a tohu generator class"):
+        @foreach(foo=[1, 2, 3])
+        def some_function():
+            pass
+
+    with pytest.raises(TypeError, match="Decorated class must be a subclass of TohuBaseGenerator."):
+        @foreach(foo=[1, 2, 3])
+        class SomeClass:
+            pass

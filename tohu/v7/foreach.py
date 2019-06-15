@@ -6,6 +6,7 @@ from .ipython_support import get_ast_node_for_classes_defined_interactively_in_i
 
 __all__ = ["Placeholder", "placeholder", "foreach"]
 
+
 class Placeholder:
     def __init__(self, name):
         self.name = name
@@ -74,7 +75,9 @@ def foreach(**var_defs):
     def make_foreach_closure(cls):
 
         if not inspect.isclass(cls):
-            raise TypeError("Foreach decorator can only be applied to a tohu generator class.")
+            raise TypeError(
+                f"Foreach decorator must be applied to a tohu generator class, not an object of type {type(cls)}."
+            )
 
         if not issubclass(cls, TohuBaseGenerator):
             raise TypeError("Decorated class must be a subclass of TohuBaseGenerator.")
@@ -104,7 +107,7 @@ def foreach(**var_defs):
                     orig_cls_name=orig_cls_name,
                     global_vars=global_vars,
                     local_vars=local_vars,
-                    **custom_var_defs
+                    **custom_var_defs,
                 )
                 return rewritten_cls(*self.init_args, **self.init_kwargs)
 
