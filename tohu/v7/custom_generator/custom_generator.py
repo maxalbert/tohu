@@ -52,13 +52,10 @@ class CustomGenerator(TohuBaseGenerator):
         if self.tohu_items_cls_name is None:
             msg = "You must call `set_tohu_items_class_name` on the custom generator before adding field generators."
             raise RuntimeError(msg)
-        self.tohu_items_cls = make_tohu_items_class(self.tohu_items_cls_name, self.fields)
+        self.tohu_items_cls = make_tohu_items_class(self.tohu_items_cls_name, self.field_names)
 
     @property
-    def fields(self):
-        """
-        Return
-        """
+    def field_names(self):
         return self.ns.field_names
 
     @property

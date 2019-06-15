@@ -9,7 +9,7 @@ def test_make_custom_generator():
     #
     g = CustomGenerator()
     g.set_tohu_items_class_name("Quux")
-    assert g.fields == []
+    assert g.field_names == []
     assert g.field_generators == {}
 
     #
@@ -17,14 +17,14 @@ def test_make_custom_generator():
     #
     aa = Integer(100, 200)
     g.add_field_generator("aa", aa)
-    assert g.fields == ["aa"]
+    assert g.field_names == ["aa"]
     assert g.field_generators["aa"].is_clone_of(aa)
     assert g.tohu_items_cls.__name__ == "Quux"
     assert g.tohu_items_cls.field_names == ["aa"]
 
     bb = HashDigest(length=8)
     g.add_field_generator("bb", bb)
-    assert g.fields == ["aa", "bb"]
+    assert g.field_names == ["aa", "bb"]
     assert g.field_generators["aa"].is_clone_of(aa)
     assert g.field_generators["bb"].is_clone_of(bb)
     assert g.tohu_items_cls.__name__ == "Quux"
@@ -32,7 +32,7 @@ def test_make_custom_generator():
 
     cc = FakerGenerator(method="name")
     g.add_field_generator("cc", cc)
-    assert g.fields == ["aa", "bb", "cc"]
+    assert g.field_names == ["aa", "bb", "cc"]
     assert g.field_generators["aa"].is_clone_of(aa)
     assert g.field_generators["bb"].is_clone_of(bb)
     assert g.field_generators["cc"].is_clone_of(cc)
