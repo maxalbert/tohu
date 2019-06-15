@@ -30,10 +30,16 @@ def make_tohu_items_class(clsname, field_names):
                 return attr.astuple(self) == other
             elif isinstance(other, dict):
                 return attr.asdict(self) == other
+            elif (
+                hasattr(other, "__attrs_attrs__")
+                and self.__class__.__name__ == other.__class__.__name__
+                and self.field_names == other.field_names
+            ):
+                return attr.asdict(self) == attr.asdict(other)
             else:
                 raise TypeError(
-                    f"Tohu items have types that cannot be compared: "
-                    "{self.__class__.__name__}, {other.__class__.__name__}"
+                    "Tohu items have types that cannot be compared: "
+                    f"{self.__class__.__name__}, {other.__class__.__name__}"
                 )
 
     item_cls.__eq__ = func_eq_new

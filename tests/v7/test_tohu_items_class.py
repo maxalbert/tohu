@@ -33,8 +33,7 @@ def test_comparison_between_incompatible_tohu_item_classes():
     item2 = quux_cls_newly_defined(foo=42, bar=True, baz="hello")
     item3 = quux2_cls(aa=12, bb=14)
 
-    with pytest.raises(TypeError, match="Tohu items have types that cannot be compared"):
-        item1 == item2
+    assert item1 == item2
 
     with pytest.raises(TypeError, match="Tohu items have types that cannot be compared"):
         item1 == item3
