@@ -9,7 +9,6 @@ class CustomGenerator(TohuBaseGenerator):
     def __init__(self):
         super().__init__()
         self.ns = TohuNamespace()
-        self.field_generators = {}
         self.tohu_items_cls_name = None
 
     def __next__(self):
@@ -27,10 +26,6 @@ class CustomGenerator(TohuBaseGenerator):
         new_obj.tohu_items_cls_name = self.tohu_items_cls_name
 
         new_obj.ns = self.ns.spawn()
-
-        for field_name, field_gen in self.field_generators.items():
-            new_obj.add_field_generator(field_name, field_gen.parent)
-
         new_obj._set_state_from(self)
         return new_obj
 
@@ -47,7 +42,6 @@ class CustomGenerator(TohuBaseGenerator):
             The generator to be added.
         """
         self.ns.add_field_generator(name, generator)
-        self.field_generators[name] = generator.clone()
         self.update_tohu_items_class()
 
     def set_tohu_items_class_name(self, cls_name):
@@ -65,3 +59,8 @@ class CustomGenerator(TohuBaseGenerator):
         Return
         """
         return self.ns.field_names
+
+
+    @property
+    def field_generators(self):
+        return self.ns.field_generators

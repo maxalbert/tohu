@@ -14,6 +14,10 @@ class TohuNamespace:
     def field_names(self):
         return list(self._ns.keys())
 
+    @property
+    def field_generators(self):
+        return self._ns.copy()
+
     def add_field_generator(self, name, gen):
         self._ns[name] = gen.clone()
 
