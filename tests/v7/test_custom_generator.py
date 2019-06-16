@@ -116,3 +116,21 @@ def test_custom_generator_with_field_generator_defined_outside():
         Quux(my_aa=121, my_bb='8EA713', my_cc='Robert'),
     ]
     assert items_expected == g.generate(num=5)
+
+
+def test_custom_generator_with_alias_for_existing_field_generator():
+    class QuuxGenerator(CustomGenerator):
+        aa = Integer(100, 200).set_tohu_name("aa")
+        bb = aa
+
+    g = QuuxGenerator()
+    Quux = g.tohu_items_cls
+
+    items_expected = [
+        Quux(aa=120, bb=120),
+        Quux(aa=122, bb=122),
+        Quux(aa=197, bb=197),
+        Quux(aa=140, bb=140),
+        Quux(aa=184, bb=184),
+    ]
+    assert items_expected == g.generate(num=5, seed=66666)
