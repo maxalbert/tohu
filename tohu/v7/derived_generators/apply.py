@@ -39,3 +39,5 @@ class Apply(DerivedGenerator):
         super()._set_state_from(other)
         for g1, g2 in zip(self.arg_gens, other.arg_gens):
             g1._set_state_from(g2)
+        for g1, g2 in zip(self.kwarg_gens.values(), other.kwarg_gens.values()):
+            g1._set_state_from(g2)
