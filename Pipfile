@@ -14,13 +14,14 @@ shapely = "*"
 bidict = "*"
 geojson = "*"
 mako = "*"
+astunparse = "*"
 
 [dev-packages]
 pytest = "*"
 pytest-cov = "*"
 yapf = "*"
 "testing.postgresql" = "*"
-"tohu" = {editable = true, path = "."}
+tohu = {editable = true,path = "."}
 nbval = "*"
 jupyterlab = "*"
 ipython = "*"
