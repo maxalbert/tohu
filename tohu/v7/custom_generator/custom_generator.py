@@ -8,7 +8,7 @@ __all__ = ["CustomGenerator"]
 class CustomGenerator(TohuBaseGenerator):
     def __init__(self):
         super().__init__()
-        self.ns = TohuNamespace()
+        self.ns = TohuNamespace("Quux")  # FIXME: derive this from the generator name or the __tohu_name__ attribute
         self.tohu_items_cls = None
         self.tohu_items_cls_name = None
 

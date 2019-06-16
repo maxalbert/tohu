@@ -1,11 +1,14 @@
 from ..base import SeedGenerator
+from .tohu_items_class import make_tohu_items_class
 
 
 class TohuNamespace:
 
-    def __init__(self):
+    def __init__(self, tohu_items_cls_name):
         self._ns = {}
         self.seed_generator = SeedGenerator()
+        self.tohu_items_cls_name = tohu_items_cls_name
+        self._update_tohu_items_class()
 
     def __getitem__(self, name):
         return self._ns[name]
@@ -20,6 +23,10 @@ class TohuNamespace:
 
     def add_field_generator(self, name, gen):
         self._ns[name] = gen.clone()
+        self._update_tohu_items_class()
+
+    def _update_tohu_items_class(self):
+        self.tohu_items_cls = make_tohu_items_class(self.tohu_items_cls_name, self.field_names)
 
     def reset(self, seed):
         self.seed_generator.reset(seed)
@@ -30,7 +37,7 @@ class TohuNamespace:
         return {name: next(g) for name, g in self._ns.items()}
 
     def spawn(self):
-        ns_new = TohuNamespace()
+        ns_new = TohuNamespace(self.tohu_items_cls_name)
         for name, g in self._ns.items():
             ns_new.add_field_generator(name, g.parent)
         return ns_new

@@ -6,18 +6,22 @@ from tohu.v7.custom_generator.tohu_namespace import TohuNamespace
 
 
 def test_add_field_generators():
-    ns = TohuNamespace()
+    ns = TohuNamespace("Quux")
+    assert ns.tohu_items_cls.__name__ == "Quux"
+    assert ns.tohu_items_cls.field_names == []
 
     aa = Integer(100, 200)
     ns.add_field_generator("aa", aa)
     assert ns.field_names == ["aa"]
     assert ns["aa"].is_clone_of(aa)
+    assert ns.tohu_items_cls.field_names == ["aa"]
 
     bb = HashDigest(length=8)
     ns.add_field_generator("bb", bb)
     assert ns.field_names == ["aa", "bb"]
     assert ns["aa"].is_clone_of(aa)
     assert ns["bb"].is_clone_of(bb)
+    assert ns.tohu_items_cls.field_names == ["aa", "bb"]
 
     cc = FakerGenerator(method="first_name")
     ns.add_field_generator("cc", cc)
@@ -25,10 +29,11 @@ def test_add_field_generators():
     assert ns["aa"].is_clone_of(aa)
     assert ns["bb"].is_clone_of(bb)
     assert ns["cc"].is_clone_of(cc)
+    assert ns.tohu_items_cls.field_names == ["aa", "bb", "cc"]
 
 
 def test_reset():
-    ns = TohuNamespace()
+    ns = TohuNamespace("Quux")
     aa = Mock()
     bb = Mock()
     cc = Mock()
@@ -49,7 +54,7 @@ def test_reset():
 
 
 def test_next_item():
-    ns = TohuNamespace()
+    ns = TohuNamespace("Quux")
     aa = Mock(__next__=Mock(side_effect=[11, 22, 33]))
     bb = Mock(__next__=Mock(side_effect=["foo", "bar", "baz"]))
     cc = Mock(__next__=Mock(side_effect=["z", "y", "x"]))
@@ -67,7 +72,7 @@ def test_next_item():
 
 
 def test_spawn():
-    ns = TohuNamespace()
+    ns = TohuNamespace("Quux")
     aa_first_clone = Mock()
     bb_first_clone = Mock()
     aa_second_clone = Mock()
