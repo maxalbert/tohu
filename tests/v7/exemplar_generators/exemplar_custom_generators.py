@@ -14,8 +14,7 @@ __all__ = ["EXEMPLAR_CUSTOM_GENERATORS", "quux1_generator"]
 #     bb = HashDigest(length=8)
 #     cc = FakerGenerator(method="name")
 
-quux1_generator = CustomGenerator()
-quux1_generator.set_tohu_items_class_name("Quux1")
+quux1_generator = CustomGenerator(tohu_items_name="Quux1")
 quux1_generator.add_field_generator("aa", Integer(1, 7))
 quux1_generator.add_field_generator("bb", HashDigest(length=6))
 quux1_generator.add_field_generator("cc", FakerGenerator(method="name"))

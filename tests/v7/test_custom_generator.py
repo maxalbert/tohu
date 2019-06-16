@@ -7,8 +7,7 @@ def test_make_custom_generator():
     #
     # Create empty custom generator.
     #
-    g = CustomGenerator()
-    g.set_tohu_items_class_name("Quux")
+    g = CustomGenerator(tohu_items_name="Quux")
     assert g.field_names == []
     assert g.field_generators == {}
 
@@ -52,13 +51,6 @@ def test_make_custom_generator():
     ]
     assert items_expected == items_generated
 
-
-def test_must_set_items_class_name_before_adding_field_generators():
-    g = CustomGenerator()
-
-    msg_expected = "You must call `set_tohu_items_class_name` on the custom generator before adding field generators."
-    with pytest.raises(RuntimeError, match=msg_expected):
-        g.add_field_generator("aa", Integer(100, 200))
 
 # def test_custom_generator():
 #
