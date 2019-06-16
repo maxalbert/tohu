@@ -90,3 +90,10 @@ def test_spawn():
     ns_spawned = ns.spawn()
     assert ns_spawned["aa"] is aa_second_clone
     assert ns_spawned["bb"] is bb_second_clone
+
+
+def test_update_from_dict():
+    ns = TohuNamespace("Quux")
+    the_dict = {"aa": Integer(100, 200), "bb": "<this_is_not_a_tohu_generator", "cc": HashDigest(length=6)}
+    ns.update_from_dict(the_dict)
+    assert ns.field_names == ["aa", "cc"]

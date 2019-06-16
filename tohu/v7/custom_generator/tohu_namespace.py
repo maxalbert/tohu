@@ -1,4 +1,4 @@
-from ..base import SeedGenerator
+from ..base import SeedGenerator, TohuBaseGenerator
 from .tohu_items_class import make_tohu_items_class
 
 
@@ -27,6 +27,11 @@ class TohuNamespace:
     def add_field_generator(self, name, gen):
         self._ns[name] = gen.clone()
         self.tohu_items_cls = self._get_updated_tohu_items_class()
+
+    def update_from_dict(self, the_dict):
+        for name, gen in the_dict.items():
+            if isinstance(gen, TohuBaseGenerator):
+                self.add_field_generator(name, gen)
 
     def _get_updated_tohu_items_class(self):
         return make_tohu_items_class(self.tohu_items_cls_name, self.field_names)
