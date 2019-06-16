@@ -111,3 +111,13 @@ def test_find_existing_name():
     assert ns.find_existing_name(g1) == "aa"
     assert ns.find_existing_name(g2) == "bb"
     assert ns.find_existing_name(g3) is None
+
+
+def test_add_alias_for_another_field_generator():
+    ns = TohuNamespace("Quux")
+    g = Integer(100, 200)
+    ns.add_field_generator("aa", g)
+    ns.add_field_generator("bb", g)
+    field_gen_aa = ns.field_generators["aa"]
+    field_gen_bb = ns.field_generators["bb"]
+    assert field_gen_bb.is_clone_of(field_gen_aa)

@@ -5,6 +5,7 @@ from .tohu_items_class import make_tohu_items_class
 class TohuNamespace:
     def __init__(self, tohu_items_cls_name):
         self._ns = {}
+        self.gens_to_reset = {}
         self.seed_generator = SeedGenerator()
         self.tohu_items_cls_name = tohu_items_cls_name
         self.tohu_items_cls = self._get_updated_tohu_items_class()
@@ -37,7 +38,13 @@ class TohuNamespace:
         return None
 
     def add_field_generator(self, name, gen):
-        self._ns[name] = gen.clone()
+        existing_name = self.find_existing_name(gen)
+        if existing_name is None:
+            self._ns[name] = gen.clone()
+            self.gens_to_reset[name] = True
+        else:
+            self._ns[name] = self._ns[existing_name].clone()
+            self.gens_to_reset[name] = False
         self.tohu_items_cls = self._get_updated_tohu_items_class()
 
     def update_from_dict(self, the_dict):
@@ -50,8 +57,9 @@ class TohuNamespace:
 
     def reset(self, seed):
         self.seed_generator.reset(seed)
-        for g in self._ns.values():
-            g.reset(next(self.seed_generator))
+        for name, g in self._ns.items():
+            if self.gens_to_reset[name]:
+                g.reset(next(self.seed_generator))
 
     def spawn(self):
         ns_new = TohuNamespace(self.tohu_items_cls_name)
