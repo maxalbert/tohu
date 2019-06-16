@@ -52,14 +52,20 @@ def test_make_custom_generator():
     assert items_expected == items_generated
 
 
-# def test_custom_generator():
-#
-#     class QuuxGenerator(CustomGenerator):
-#         aa = Integer(1, 7)
-#         bb = HashDigest(length=8)
-#         cc = FakerGenerator(method="name")
-#         dd = Integer(100, 200)
-#
-#     g = QuuxGenerator()
-#     expected_values = []
-#     assert expected_values == g.generate(num=5, seed=99999)
+def test_custom_generator():
+    class QuuxGenerator(CustomGenerator):
+        aa = Integer(1, 7)
+        bb = HashDigest(length=8)
+        cc = FakerGenerator(method="name")
+        dd = Integer(100, 200)
+
+    g = QuuxGenerator()
+    Quux = g.tohu_items_cls
+    expected_values = [
+        Quux(aa=1, bb="672EF2A4", cc="Calvin Peters", dd=181),
+        Quux(aa=1, bb="2502048A", cc="Amanda Taylor", dd=139),
+        Quux(aa=4, bb="679DAED2", cc="Amanda Barrett", dd=127),
+        Quux(aa=2, bb="91554CC8", cc="Jesse Williams", dd=162),
+        Quux(aa=5, bb="8EA713EA", cc="Rebecca Butler", dd=145),
+    ]
+    assert expected_values == g.generate(num=5, seed=99999)
