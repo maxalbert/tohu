@@ -35,7 +35,7 @@ class CustomGeneratorMeta(ABCMeta):
         return new_cls
 
 
-class CustomGenerator(TohuBaseGenerator, metaclass=CustomGeneratorMeta):
+class CustomGeneratorImpl(TohuBaseGenerator):
     def __init__(self, tohu_items_name=None):
         super().__init__()
         tohu_items_name = tohu_items_name or self._get_tohu_items_name()
@@ -49,7 +49,7 @@ class CustomGenerator(TohuBaseGenerator, metaclass=CustomGeneratorMeta):
         self.ns_gens.reset(seed)
 
     def spawn(self):
-        new_obj = CustomGenerator()
+        new_obj = CustomGeneratorImpl()
         new_obj.ns_gens = self.ns_gens.spawn()
         new_obj._set_state_from(self)
         return new_obj
@@ -95,3 +95,7 @@ class CustomGenerator(TohuBaseGenerator, metaclass=CustomGeneratorMeta):
         # cause a bug. Might be good to find a better way of dealing
         # with this (maybe via a property on TohuBaseGenerator?
         pass
+
+
+class CustomGenerator(CustomGeneratorImpl, metaclass=CustomGeneratorMeta):
+    pass
