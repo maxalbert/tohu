@@ -88,4 +88,11 @@ class CustomGenerator(TohuBaseGenerator, metaclass=CustomGeneratorMeta):
 
     @tohu_items_cls.setter
     def tohu_items_cls(self, value):
+        # TODO: this silently ignores setting the tohu_items_cls.
+        # The reason is that TohuBaseGenerator will try to set this
+        # to MissingTohuItemsCls, but here in CustomGenerator we
+        # of course set it ourselves. However, if there is ever a
+        # legitimate reason to set this from the outside this will
+        # cause a bug. Might be good to find a better way of dealing
+        # with this (maybe via a property on TohuBaseGenerator?
         pass
