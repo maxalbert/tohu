@@ -30,7 +30,8 @@ class CustomGeneratorMeta(ABCMeta):
         new_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)
 
         # Augment original init method with bookkeeping needed for custom generators
-        augment_init_method(new_cls)
+        if new_cls._is_proper_custom_generator_subclass():
+            augment_init_method(new_cls)
 
         return new_cls
 
@@ -98,4 +99,13 @@ class CustomGeneratorImpl(TohuBaseGenerator):
 
 
 class CustomGenerator(CustomGeneratorImpl, metaclass=CustomGeneratorMeta):
-    pass
+
+    @classmethod
+    def _is_proper_custom_generator_subclass(cls):
+        try:
+            return cls is not CustomGenerator
+        except NameError:
+            # This can happen inside CustomGeneratorMeta above while
+            # the CustomGenerator class itself is being created, so
+            # that the `CustomGenerator` symbol doesn't exist yet.
+            return False
