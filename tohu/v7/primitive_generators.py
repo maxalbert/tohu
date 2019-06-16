@@ -72,6 +72,7 @@ class Boolean(PrimitiveGenerator):
         return new_obj
 
     def _set_state_from(self, other):
+        super()._set_state_from(other)
         self.randgen.setstate(other.randgen.getstate())
 
 
