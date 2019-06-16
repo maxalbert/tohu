@@ -3,7 +3,6 @@ from .tohu_items_class import make_tohu_items_class
 
 
 class TohuNamespace:
-
     def __init__(self, tohu_items_cls_name):
         self._ns = {}
         self.seed_generator = SeedGenerator()

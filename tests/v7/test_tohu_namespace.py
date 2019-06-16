@@ -37,7 +37,7 @@ def test_reset():
     aa = Mock()
     bb = Mock()
     cc = Mock()
-    seed_generator= Mock()
+    seed_generator = Mock()
     seed_generator.__next__ = Mock(side_effect=["<seed_1>", "<seed_2>", "<seed_3>"])
 
     ns.add_field_generator("bb", bb)

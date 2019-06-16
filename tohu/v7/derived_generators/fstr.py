@@ -27,7 +27,7 @@ class fstr(Apply):
         # Also it would be awesome if we could parse arbitrary expressions inside
         # the curly braces.
         # TODO: re-implement this using the `string.Formatter` class from the standard library.
-        pattern = '{([^}:]+)(:.*)?}'
+        pattern = "{([^}:]+)(:.*)?}"
 
         gen_names = [gen_name for (gen_name, _) in re.findall(pattern, spec)]
 

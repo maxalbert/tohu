@@ -23,7 +23,6 @@ def test_make_tohu_items_class():
     assert item1 != item3
 
 
-
 def test_comparison_between_incompatible_tohu_item_classes():
     quux_cls = make_tohu_items_class("Quux", field_names=["foo", "bar", "baz"])
     quux_cls_newly_defined = make_tohu_items_class("Quux", field_names=["foo", "bar", "baz"])

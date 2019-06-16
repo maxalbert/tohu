@@ -20,9 +20,7 @@ def check_each_generator_class_has_at_least_one_exemplar_instance(
     generator_classes = [
         cls
         for cls in m.__dict__.values()
-        if isclass(cls)
-        and issubclass(cls, TohuBaseGenerator)
-        and cls.__module__.startswith(module_name)
+        if isclass(cls) and issubclass(cls, TohuBaseGenerator) and cls.__module__.startswith(module_name)
     ]
 
     exclude_classes = exclude_classes or []

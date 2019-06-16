@@ -25,7 +25,6 @@ def augment_init_method(cls):
 
 
 class CustomGeneratorMeta(ABCMeta):
-
     def __new__(metacls, cg_name, bases, clsdict):
         # Create new custom generator class
         new_cls = super(CustomGeneratorMeta, metacls).__new__(metacls, cg_name, bases, clsdict)

@@ -50,7 +50,6 @@ def test_foreach():
     items_expected = [(16640, 232323), (59838, 232323), (199249, 232323), (108034, 232323), (318445, 232323)]
     assert items_expected == list(h.generate(num=5, seed=99999))
 
-
     g = AA(bb=112233)
     h = g.foreach(upper_bound=200, foobar="this works too!")
 
@@ -65,11 +64,13 @@ def test_foreach():
 
 def test_error_if_not_applied_to_tohu_generator_class():
     with pytest.raises(TypeError, match="Foreach decorator must be applied to a tohu generator class"):
+
         @foreach(foo=[1, 2, 3])
         def some_function():
             pass
 
     with pytest.raises(TypeError, match="Decorated class must be a subclass of TohuBaseGenerator."):
+
         @foreach(foo=[1, 2, 3])
         class SomeClass:
             pass

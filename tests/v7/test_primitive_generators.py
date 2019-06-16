@@ -51,11 +51,11 @@ def test_hashdigest():
     # Raw bytes
     g = HashDigest(length=10, as_bytes=True)
     expected_values = [
-        b'\xe2Q\xfb\xed\xe5-\xe1\xe3\x1d\xfd',
-        b'\x81\x08v!\xa4M\x15/\xa9\xad',
-        b'\xfe\x0f^4~Q\x91\xd3em',
+        b"\xe2Q\xfb\xed\xe5-\xe1\xe3\x1d\xfd",
+        b"\x81\x08v!\xa4M\x15/\xa9\xad",
+        b"\xfe\x0f^4~Q\x91\xd3em",
         b'"B6\x88\x1d\x9eu\x98\x01\xbb',
-        b'vl\xea\xf6q\xcd@v;\x9d',
+        b"vl\xea\xf6q\xcd@v;\x9d",
     ]
     assert expected_values == g.generate(num=5, seed=12345)
 
@@ -70,7 +70,7 @@ def test_faker_generator():
     assert expected_values == g.generate(num=5, seed=99999)
 
     g = FakerGenerator(method="safe_color_name")
-    expected_values = ['maroon', 'olive', 'white', 'yellow', 'purple']
+    expected_values = ["maroon", "olive", "white", "yellow", "purple"]
     assert expected_values == g.generate(num=5, seed=99999)
 
 

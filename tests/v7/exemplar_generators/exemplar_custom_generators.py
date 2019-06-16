@@ -20,6 +20,4 @@ quux1_generator.add_field_generator("bb", HashDigest(length=6))
 quux1_generator.add_field_generator("cc", FakerGenerator(method="name"))
 
 
-EXEMPLAR_CUSTOM_GENERATORS = [
-    quux1_generator,
-]
+EXEMPLAR_CUSTOM_GENERATORS = [quux1_generator]

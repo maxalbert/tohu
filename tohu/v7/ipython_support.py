@@ -25,19 +25,14 @@ def get_ast_node_for_classes_defined_interactively_in_ipython(cls):
 
     # FIXME: the following will remove *all* foreach decorators, but if we're wrapping the class
     # in multiple ones then we should only remove the single one that's currently being applied!
-    filtered_decorator_list = [
-        x for x in orig_cls_ast_node.decorator_list if not is_tohu_foreach_decorator_node(x)
-    ]
+    filtered_decorator_list = [x for x in orig_cls_ast_node.decorator_list if not is_tohu_foreach_decorator_node(x)]
 
     orig_cls_ast_node.decorator_list = filtered_decorator_list
-    orig_cls_ast_node = ast.Module(
-        body=[orig_cls_ast_node]
-    )  # wrap ClassDef node in Module so that it can be compiled
+    orig_cls_ast_node = ast.Module(body=[orig_cls_ast_node])  # wrap ClassDef node in Module so that it can be compiled
     return orig_cls_ast_node
 
 
 class TohuIPythonSourceCodeStorer:
-
     def __init__(self):
         self.is_executing_cell = False
         self.cur_cell_source = None
@@ -58,7 +53,6 @@ __tohu_ipython_source_code_storer__ = TohuIPythonSourceCodeStorer()
 
 
 class StoresClassSourceCodeAndAST(ast.NodeTransformer):
-
     def visit_ClassDef(self, node):
         node_source = astunparse.unparse(node)
         __tohu_ipython_source_code_storer__.cur_class_def_info[node.name] = (node_source, node)
