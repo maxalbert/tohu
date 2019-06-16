@@ -61,11 +61,58 @@ def test_custom_generator():
 
     g = QuuxGenerator()
     Quux = g.tohu_items_cls
-    expected_values = [
+    items_expected = [
         Quux(aa=1, bb="672EF2A4", cc="Calvin Peters", dd=181),
         Quux(aa=1, bb="2502048A", cc="Amanda Taylor", dd=139),
         Quux(aa=4, bb="679DAED2", cc="Amanda Barrett", dd=127),
         Quux(aa=2, bb="91554CC8", cc="Jesse Williams", dd=162),
         Quux(aa=5, bb="8EA713EA", cc="Rebecca Butler", dd=145),
     ]
-    assert expected_values == g.generate(num=5, seed=99999)
+    assert items_expected == g.generate(num=5, seed=99999)
+
+
+def test_custom_generator_with_field_generator_defined_outside():
+    aa = Integer(100, 200)
+    cc = FakerGenerator(method="first_name")
+    aa.reset(seed=11111)
+    cc.reset(seed=22222)
+    assert [163, 171, 142, 140, 121] == aa.generate(num=5)
+    assert ['Joseph', 'Kevin', 'Carol', 'Jack', 'Robert'] == cc.generate(num=5)
+
+    class QuuxGenerator(CustomGenerator):
+        my_aa = aa
+        my_bb = HashDigest(length=6)
+        my_cc = cc
+
+    g = QuuxGenerator()
+    Quux = g.tohu_items_cls
+
+    assert g.my_aa is aa
+    assert g.my_bb is QuuxGenerator.my_bb
+    assert g.my_cc is cc
+
+    assert g.field_generators["my_aa"].is_clone_of(aa)
+    assert g.field_generators["my_bb"].is_clone_of(QuuxGenerator.my_bb)
+    assert g.field_generators["my_cc"].is_clone_of(cc)
+
+    g.reset(seed=99999)
+    items_expected = [
+        Quux(my_aa=104, my_bb="672EF2", my_cc="Johnny"),
+        Quux(my_aa=114, my_bb="250204", my_cc="David"),
+        Quux(my_aa=148, my_bb="679DAE", my_cc="Angela"),
+        Quux(my_aa=126, my_bb="91554C", my_cc="Pamela"),
+        Quux(my_aa=177, my_bb="8EA713", my_cc="Blake"),
+    ]
+    assert items_expected == g.generate(num=5)
+
+    g.reset(seed=99999)
+    aa.reset(seed=11111)
+    cc.reset(seed=22222)
+    items_expected = [
+        Quux(my_aa=163, my_bb='672EF2', my_cc='Joseph'),
+        Quux(my_aa=171, my_bb='250204', my_cc='Kevin'),
+        Quux(my_aa=142, my_bb='679DAE', my_cc='Carol'),
+        Quux(my_aa=140, my_bb='91554C', my_cc='Jack'),
+        Quux(my_aa=121, my_bb='8EA713', my_cc='Robert'),
+    ]
+    assert items_expected == g.generate(num=5)
