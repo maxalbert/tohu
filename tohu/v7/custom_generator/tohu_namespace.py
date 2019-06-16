@@ -30,6 +30,12 @@ class TohuNamespace:
     def field_generators(self):
         return self._ns.copy()
 
+    def find_existing_name(self, generator):
+        for name, g in self._ns.items():
+            if generator is g.parent:
+                return name
+        return None
+
     def add_field_generator(self, name, gen):
         self._ns[name] = gen.clone()
         self.tohu_items_cls = self._get_updated_tohu_items_class()

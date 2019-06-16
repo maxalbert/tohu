@@ -99,3 +99,15 @@ def test_update_from_dict():
     the_dict = {"aa": Integer(100, 200), "bb": "<this_is_not_a_tohu_generator", "cc": HashDigest(length=6)}
     ns.update_from_dict(the_dict)
     assert ns.field_names == ["aa", "cc"]
+
+
+def test_find_existing_name():
+    g1 = Integer(100, 200)
+    g2 = HashDigest(length=6)
+    g3 = FakerGenerator(method="first_name")
+    ns = TohuNamespace("Quux")
+    ns.add_field_generator("aa", g1)
+    ns.add_field_generator("bb", g2)
+    assert ns.find_existing_name(g1) == "aa"
+    assert ns.find_existing_name(g2) == "bb"
+    assert ns.find_existing_name(g3) is None
