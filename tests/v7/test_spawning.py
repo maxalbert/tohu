@@ -8,12 +8,23 @@ from .exemplar_generators import EXEMPLAR_PRIMITIVE_GENERATORS, EXEMPLAR_DERIVED
 
 @pytest.mark.parametrize("g", EXEMPLAR_PRIMITIVE_GENERATORS + EXEMPLAR_CUSTOM_GENERATORS)
 def test_spawn_primitive_and_custom_generators(g):
+    # Reset g and generate a few items before spawning it
+    # (to verify that the internal state of g is transferred
+    # correctly when spawning).
+    g.reset(seed=99999)
+    items_g_pre_spawn = g.generate(num=5)
+
+    # Spawn g, have both generators produce some elements
+    # and check that these result in the same output.
     g_spawned = g.spawn()
+    items_g = g.generate(num=10)
+    items_g_spawned = g_spawned.generate(num=10)
+    assert items_g == items_g_spawned
 
     # Reset both generators with the same seed and check
     # that they produce the same elements.
-    g.reset(seed=99999)
-    g_spawned.reset(seed=99999)
+    g.reset(seed=77777)
+    g_spawned.reset(seed=77777)
     items_g = g.generate(num=10)
     items_g_spawned = g_spawned.generate(num=10)
     assert items_g == items_g_spawned
@@ -39,7 +50,18 @@ def test_spawn_primitive_and_custom_generators(g):
 
 @pytest.mark.parametrize("g", EXEMPLAR_DERIVED_GENERATORS)
 def test_spawn_derived_generators(g):
+    # Reset g and generate a few items before spawning it
+    # (to verify that the internal state of g is transferred
+    # correctly when spawning).
+    g.reset(seed=99999)
+    items_g_pre_spawn = g.generate(num=5)
+
+    # Spawn g, have both generators produce some elements
+    # and check that these result in the same output.
     g_spawned = g.spawn()
+    items_g = g.generate(num=10)
+    items_g_spawned = g_spawned.generate(num=10)
+    assert items_g == items_g_spawned
 
     # Reset the original and spawned generator (as well as
     # all their argument generators) with the same seed and

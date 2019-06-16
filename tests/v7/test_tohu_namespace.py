@@ -71,6 +71,8 @@ def test_next_item():
     assert next(ns) == {"bb": "baz", "aa": 33, "cc": "x"}
 
 
+# TODO: we should probably also check that the state of generators
+# transferred correctly when spawning a TohuNamespace instance.
 def test_spawn():
     ns = TohuNamespace("Quux")
     aa_first_clone = Mock()
