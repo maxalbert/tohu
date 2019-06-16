@@ -58,7 +58,7 @@ class CustomGenerator(TohuBaseGenerator, metaclass=CustomGeneratorMeta):
 
     def _set_state_from(self, other):
         super()._set_state_from(other)
-        # TODO: set state of generators in namespace!
+        self.ns._set_state_from(other.ns)  # TODO: this duplicates functionality that's already in self.ns.spawn()
 
     def _get_tohu_items_name(self):
         return "Quux"  # FIXME: derive this from the generator name or the __tohu_name__ attribute

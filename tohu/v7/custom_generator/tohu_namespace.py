@@ -16,6 +16,13 @@ class TohuNamespace:
     def __next__(self):
         return self.tohu_items_cls(**{name: next(g) for name, g in self._ns.items()})
 
+    def _set_state_from(self, other):
+        assert self._ns.keys() == other._ns.keys()
+        for name in self._ns.keys():
+            g_self = self._ns[name]
+            g_other = other._ns[name]
+            g_self._set_state_from(g_other)
+
     @property
     def field_names(self):
         return list(self._ns.keys())
@@ -45,4 +52,5 @@ class TohuNamespace:
         ns_new = TohuNamespace(self.tohu_items_cls_name)
         for name, g in self._ns.items():
             ns_new.add_field_generator(name, g.parent)
+        ns_new._set_state_from(self)
         return ns_new
