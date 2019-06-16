@@ -18,11 +18,10 @@ def augment_init_method(cls):
         super(cls, self).__init__()  # TODO: does this behave correctly with longer inheritance chains? I think so...(?)
 
         orig_init(self, *args, **kwargs)
-        self.ns.update_from_dict(self.__class__.__dict__)
-        self.ns.update_from_dict(self.__dict__)
+        self.ns_gens.update_from_dict(self.__class__.__dict__)
+        self.ns_gens.update_from_dict(self.__dict__)
 
     cls.__init__ = new_init
-
 
 
 class CustomGeneratorMeta(ABCMeta):
@@ -41,24 +40,25 @@ class CustomGenerator(TohuBaseGenerator, metaclass=CustomGeneratorMeta):
     def __init__(self, tohu_items_name=None):
         super().__init__()
         tohu_items_name = tohu_items_name or self._get_tohu_items_name()
-        self.ns = TohuNamespace(tohu_items_name)
+        self.ns_gens = TohuNamespace(tohu_items_name)
 
     def __next__(self):
-        return next(self.ns)
+        return next(self.ns_gens)
 
     def reset(self, seed):
         super().reset(seed)
-        self.ns.reset(seed)
+        self.ns_gens.reset(seed)
 
     def spawn(self):
         new_obj = CustomGenerator()
-        new_obj.ns = self.ns.spawn()
+        new_obj.ns_gens = self.ns_gens.spawn()
         new_obj._set_state_from(self)
         return new_obj
 
     def _set_state_from(self, other):
         super()._set_state_from(other)
-        self.ns._set_state_from(other.ns)  # TODO: this duplicates functionality that's already in self.ns.spawn()
+        # TODO: the following line duplicates functionality in self.ns.spawn()! Can we avoid this?
+        self.ns_gens._set_state_from(other.ns_gens)
 
     def _get_tohu_items_name(self):
         return "Quux"  # FIXME: derive this from the generator name or the __tohu_name__ attribute
@@ -72,19 +72,19 @@ class CustomGenerator(TohuBaseGenerator, metaclass=CustomGeneratorMeta):
         generator : TohuBaseGenerator
             The generator to be added.
         """
-        self.ns.add_field_generator(name, generator)
+        self.ns_gens.add_field_generator(name, generator)
 
     @property
     def field_names(self):
-        return self.ns.field_names
+        return self.ns_gens.field_names
 
     @property
     def field_generators(self):
-        return self.ns.field_generators
+        return self.ns_gens.field_generators
 
     @property
     def tohu_items_cls(self):
-        return self.ns.tohu_items_cls
+        return self.ns_gens.tohu_items_cls
 
     @tohu_items_cls.setter
     def tohu_items_cls(self, value):
