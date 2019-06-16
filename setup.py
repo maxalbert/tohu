@@ -29,7 +29,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
     ],
-    packages=['tohu', 'tohu/v4', 'tohu/v6', 'tohu/v6/custom_generator/'],
+    packages=['tohu', 'tohu/v4', 'tohu/v6', 'tohu/v6/custom_generator/', 'tohu/v7'],
     install_requires=['attrs', 'bidict', 'faker', 'geojson', 'pandas', 'psycopg2-binary', 'shapely', 'sqlalchemy', 'tqdm'],
     extras_require={
         'dev': ['ipython', 'jupyter'],
